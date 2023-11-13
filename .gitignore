@@ -1,0 +1,10 @@
+# ignoring the output root files
+rootFiles/*
+
+# ignoring the plots
+plots/*
+
+# ignoring some files
+remote_executable/Mo_TTOFSort_EAR1.C
+remote_executable/TTOFSort_nTOF.cxx
+remote_executable/TTOFSort_nTOF.h

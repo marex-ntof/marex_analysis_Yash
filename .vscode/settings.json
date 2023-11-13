@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "crossSectionPlots.C": "cpp",
+        "cutoffFitter.C": "cpp",
+        "plotsFromRootFile.C": "cpp",
+        "cutoffSelector.C": "cpp",
+        "detectorAna.C": "cpp",
+        "fimg.C": "cpp",
+        "pkup.C": "cpp",
+        "ptbc_ts.C": "cpp",
+        "ptbc.C": "cpp",
+        "transmissionAna.C": "cpp",
+        "MArEXStyle.C": "cpp"
+    }
+}
