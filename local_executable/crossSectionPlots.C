@@ -16,8 +16,8 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
     std::ifstream inputFile(Form("../evalData/%s", eval_file_name_map[filter_name].c_str())); // endf_file_name.c_str()
 
     if (fillENDFSmeared == true){
-        TFile rfFile("../inputFiles/RF.root");
-        rf_hist = (TH2D*)rfFile.Get("histfluka");
+        TFile *rfFile = TFile::Open("../inputFiles/RF.root", "READ");
+        rf_hist = (TH2D*)rfFile->Get("histfluka");
     }
 
     if (!inputFile.is_open()) {
@@ -324,7 +324,7 @@ void crossSectionPlots(){
 
     bool fillENDF = true;
     bool fillENDFSmeared = false;
-    bool fillJENDL = false;
+    bool fillJENDL = true;
 
     //Getting energy bin edges
     Int_t num_bins_e = transmission_hist_e_PTB->GetNbinsX();
@@ -428,8 +428,8 @@ void crossSectionPlots(){
 
     if (fillENDFSmeared){
         l[i]->AddEntry(endf_rf_trans_hist,"ENDF smeared","l");
-        endf_rf_trans_hist->SetLineColor(8);
-        // endf_rf_trans_hist->SetLineWidth(2);
+        endf_rf_trans_hist->SetLineColor(7);
+        endf_rf_trans_hist->SetLineWidth(2);
         endf_rf_trans_hist->Draw("SAME");
     }
 
@@ -482,8 +482,8 @@ void crossSectionPlots(){
     
     if (fillENDFSmeared){
         l[i]->AddEntry(endf_rf_xsec_hist,"ENDF smeared","l");
-        endf_rf_xsec_hist->SetLineColor(8);
-        // endf_rf_xsec_hist->SetLineWidth(2);
+        endf_rf_xsec_hist->SetLineColor(7);
+        endf_rf_xsec_hist->SetLineWidth(2);
         endf_rf_xsec_hist->Draw("SAME");
     }
 

@@ -27,8 +27,9 @@
 
 #include "MArEXStyle.C"
 
-TH1D* h[2];
-TH1D* h_old[2];
+const static Int_t num_hist = 2
+TH1D* h[num_hist];
+TH1D* h_old[num_hist];
 Int_t histCounter = 0;
 
 void retriveHistograms(const char *fname){

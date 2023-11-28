@@ -1,9 +1,9 @@
 /**
- * @file detectorAna.h
+ * @file cutoffAnalysis_FIMG.C
  * @author Yashwanth Bezawada [ysbezawada@ucdavis.edu]
  * @brief 
  * @version 0.1
- * @date 2023-11-13
+ * @date 2023-11-28
  */
 
 #include <TROOT.h>
@@ -26,26 +26,20 @@
 #include "TRandom3.h"
 
 //////// Run variables
-const std::string target_name("al5"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
-const std::string target_out_name("none"); //none, none_ts, ar_bottle
+const std::string target_name("c1p2_ts"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
+const std::string target_out_name("none_ts"); //none, none_ts, ar_bottle
 // const std::string mode("run");
 // bi1, al3, al5, al8 - none
 
 //Root file
 TFile *outputRootFile = 0;
 
-// TH1D* tof_hist_filter_in = 0;
-// TH1D* energy_hist_filter_in = 0;
-// TH1D* tof_hist_filter_out = 0;
-// TH1D* energy_hist_filter_out = 0;
-// TH1D* trans_hist_fOut = 0;
-// TH1D* trans_hist_fIn = 0;
-// TH1D* trans_hist_fOut_endf = 0;
-// TH1D* trans_hist_fIn_endf = 0;
-TH1D* transmission_hist_e_PTB = 0;
-TH1D* cross_section_hist_e_PTB = 0;
-TH1D* transmission_hist_e_FIMG = 0;
-TH1D* cross_section_hist_e_FIMG = 0;
+TH1D* trans_loose_cut_det_1 = 0;
+TH1D* trans_mid_cut_det_1 = 0;
+TH1D* trans_tight_cut_det_1 = 0;
+TH1D* trans_loose_cut_det_2 = 0;
+TH1D* trans_mid_cut_det_2 = 0;
+TH1D* trans_tight_cut_det_2 = 0;
 
 Int_t bins_per_decade = 1000;
 Double_t flight_path_length_PTB = 182.65 - 0.41; //m
@@ -64,49 +58,6 @@ Double_t FIMG_tof_cut_up_det2 = 89408.0; //in ns
 
 Double_t FIMG_min_amp_cut_det1 = 600.0; //a.u.
 Double_t FIMG_min_amp_cut_det2 = 400.0; //a.u.
-
-Double_t n_Bi_1cm = (1.0 /*cm*/) * (9.78 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (208.9804 /*g/mole*/);
-Double_t n_Bi_1p2cm = (1.2 /*cm*/) * (9.78 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (208.9804 /*g/mole*/);
-Double_t n_Al_3cm = (3.0 /*cm*/) * (2.70 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (26.9815 /*g/mole*/);
-Double_t n_Al_5cm = (5.0 /*cm*/) * (2.70 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (26.9815 /*g/mole*/);
-Double_t n_Al_8cm = (8.0 /*cm*/) * (2.70 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (26.9815 /*g/mole*/);
-Double_t n_C_1p2cm = 0.105;// (1.2 /*cm*/) * (2.267 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (12.011 /*g/mole*/);
-Double_t n_CFib_1cm = (1.0 /*cm*/) * (1.8 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (12.011 /*g/mole*/);
-
-Double_t n_Ar_bottle = (11.0 /*cm*/) * ((ar_bottle_pressure)/(8.31446261815324 * ar_bottle_temp * 1e6)) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/);
-
-Double_t n_Al_0p2cm = (0.2 /*cm*/) * (2.70 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (26.9815 /*g/mole*/);
-
-////////////////////////
-std::map<std::string, Double_t> num_density_map;
-void fillNumDensityMap(){
-    num_density_map.emplace("bi1", n_Bi_1cm);
-    num_density_map.emplace("bi1p2_ts", n_Bi_1p2cm);
-    num_density_map.emplace("al3", n_Al_3cm);
-    num_density_map.emplace("al5", n_Al_5cm);
-    num_density_map.emplace("al5_ts", n_Al_5cm);
-    num_density_map.emplace("al8", n_Al_8cm);
-    num_density_map.emplace("c1p2_ts", n_C_1p2cm);
-    num_density_map.emplace("cf_bottle", n_CFib_1cm);
-    num_density_map.emplace("cf_bottle_rot", n_CFib_1cm);
-    num_density_map.emplace("cf_bottle_rotBack", n_CFib_1cm);
-    num_density_map.emplace("ar_bottle_full", n_Ar_bottle);
-}
-
-std::map<std::string, std::string> eval_file_name_map;
-void fillEValFileNameMap(){
-    eval_file_name_map.emplace("bi1", "Bi_tot_xsec.txt");
-    eval_file_name_map.emplace("bi1p2_ts", "Bi_tot_xsec.txt");
-    eval_file_name_map.emplace("al3", "Al_tot_xsec.txt");
-    eval_file_name_map.emplace("al5", "Al_tot_xsec.txt");
-    eval_file_name_map.emplace("al5_ts", "Al_tot_xsec.txt");
-    eval_file_name_map.emplace("al8", "Al_tot_xsec.txt");
-    eval_file_name_map.emplace("c1p2_ts", "C_tot_xsec.txt");
-    eval_file_name_map.emplace("cf_bottle", "C_tot_xsec.txt");
-    eval_file_name_map.emplace("cf_bottle_rot", "C_tot_xsec.txt");
-    eval_file_name_map.emplace("cf_bottle_rotBack", "C_tot_xsec.txt");
-    eval_file_name_map.emplace("ar_bottle_full", "Ar_tot_xsec.txt");
-}
 
 Double_t t_gamma_PTB = (flight_path_length_PTB / speed_of_light) * 1e9; //converting into ns
 Double_t t_gamma_FIMG = (flight_path_length_FIMG / speed_of_light) * 1e9; //converting into ns
@@ -187,71 +138,6 @@ std::vector<Int_t> f_out_t_arBot_ts = {117665, 117680, 117684, 117685, 117686, 1
 
 //Argon Bottle (Argon Out)
 std::vector<Int_t> f_out_t_arBotEmpty_ts = {117746, 117747, 117748, 117749, 117750, 117751, 117752, 117753, 117754, 117755, 117756, 117757, 117761, 117762, 117763, 117764, 117765, 117766}; //
-
-Double_t fimgCutFunction(Double_t x, Int_t det_num){
-    // // A * (log(x))^2 + B + log(x) + C
-    // // Values obtained from cutoffFitter.C
-    // Double_t A = 120556;
-    // Double_t B = -2.75589e6;
-    // Double_t C = 1.57536e7;
-    // return (A * TMath::Log(x) * TMath::Log(x) + B * TMath::Log(x) + C);
-
-    if(det_num == 1) {
-        // A / ( TMath::Log(x) + B )
-        // Values obtained from cutoffFitter.C
-        Double_t A = 4378.11;
-        Double_t B = -7.695;
-
-        return (A / (TMath::Log(x) + B));
-    }
-
-    if(det_num == 2) {
-        // A / ( TMath::Log(x) + B )
-        // Values obtained from cutoffFitter.C
-        Double_t A = 4145.31;
-        Double_t B = -7.67962;
-
-        return (A / (TMath::Log(x) + B));
-    }
-}
-
-void fillCutsPTBC(){
-    t[0][0] = 780.0;
-    a[0][0] = 7700.0;
-
-    t[0][1] = 1090.0;
-    a[0][1] = 5451.0;
-
-    t[1][0] = 1090.0;
-    a[1][0] = 5451.0;
-
-    t[1][1] = 2605.0;
-    a[1][1] = 7167.0;
-
-    t[2][0] = 2605.0;
-    a[2][0] = 7960.0;
-
-    t[2][1] = 2856.0;
-    a[2][1] = 7960.0;
-
-    t[3][0] = 2856.0;
-    a[3][0] = 7432.0;
-
-    t[3][1] = 15290.0;
-    a[3][1] = 7432.0;
-
-    t[4][0] = 15290.0;
-    a[4][0] = 7432.0;
-
-    t[4][1] = 18708.0;
-    a[4][1] = 4000.0; //2416
-
-    t[5][0] = 18708.0;
-    a[5][0] = 4000.0; //2416
-
-    t[5][1] = 1e8;
-    a[5][1] = 4000.0; //3076
-}
 
 void fillRuns(){
     // if (!mode.compare("test"))
@@ -363,10 +249,6 @@ void fillRuns(){
     f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_c_f_out_t_out.begin(), c_c_f_out_t_out.end() );
 }
 
-Double_t yOnTheCutLinePTBC(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t x3){
-    return ((y2 - y1)*(x3 - x1)/(x2 - x1) + y1);
-}
-
 Double_t EnergyToTOF(Double_t e){ //e is in eV
     Double_t KE_M = (e * 1e-6)/neutron_mass;
     Double_t denominator = 1.0 - 1.0/((KE_M + 1.0)*(KE_M + 1.0));
@@ -391,65 +273,51 @@ Double_t TOFToEnergy(Double_t t, Double_t rf_length){ //t is in seconds, rf_leng
     return energy * 1e6;  //e in eV
 }
 
-Double_t EnergyToVelocity(Double_t e){ //e is in eV
-    Double_t KE_M = (e * 1e-6)/neutron_mass;
-    Double_t factor = std::sqrt(1.0 - 1.0/((KE_M + 1.0)*(KE_M + 1.0)));
-    return speed_of_light * factor; //velocity in m/s
-}
+Double_t fimgCutFunction(Double_t x, Int_t det_num, std::string cut_type){
 
-// void FillHistograms(Double_t tof, Float_t amp, TH1D* tof_hist, TH1D* energy_hist){
-//     //Filling the histograms
-//     for (int k = 0; k < 6; k++)
-//     {
-//         if (tof >= t[k][0] && tof < t[k][1])
-//         {
-//             if ( (Double_t) amp > yOnTheCutLine(t[k][0], a[k][0], t[k][1], a[k][1], tof) )
-//             {
-//                 tof_hist->Fill(tof);
-//                 energy_hist->Fill( TOFToEnergy(tof * 1e-9) );
-//                 break;
-//             }
-//         }
-//     }
-// }
+    Double_t A = 0;
+    Double_t B = 0;
 
-// Double_t xsecToTransmission(Double_t n, Double_t xsec){
-//     return std::exp(- n * xsec);
-// }
-
-Double_t FindFWHM(TH1D* projection_hist){
-    
-    Int_t max_bin_num = projection_hist->GetMaximumBin();
-    Double_t max_value = projection_hist->GetBinContent(max_bin_num);
-    Int_t tot_bins = projection_hist->GetNbinsX();
-    Double_t left_edge = 0;
-    Double_t right_edge = 0;
-    //Find left edge
-    for (Int_t i = max_bin_num-1; i > 0; i--)
-    {
-        Double_t bin_value = projection_hist->GetBinContent(i);
-        if (bin_value > max_value/2.0)
+    if(det_num == 1) {
+        // A / ( TMath::Log(x) + B )
+        if (!cut_type.compare("loose"))
         {
-            continue;
-        } else {
-            left_edge = projection_hist->GetXaxis()->GetBinUpEdge(i);
-            break;
+            A = 4000;
+            B = -7.5;
         }
-    }
-
-    //Find right edge
-    for (Int_t i = max_bin_num+1; i < tot_bins+1; i++)
-    {
-        Double_t bin_value = projection_hist->GetBinContent(i);
-        if (bin_value > max_value/2.0)
+        if (!cut_type.compare("mid"))
         {
-            continue;
-        } else {
-            right_edge = projection_hist->GetXaxis()->GetBinLowEdge(i);
-            break;
+            A = 4500;
+            B = -8;
         }
+        if (!cut_type.compare("tight"))
+        {
+            A = 7000;
+            B = -8;
+        }
+        
+        return (A / (TMath::Log(x) + B));
     }
-    return (right_edge - left_edge);
+    if(det_num == 2) {
+        // A / ( TMath::Log(x) + B )
+        if (!cut_type.compare("loose"))
+        {
+            A = 3000;
+            B = -8;
+        }
+        if (!cut_type.compare("mid"))
+        {
+            A = 5000;
+            B = -7.8;
+        }
+        if (!cut_type.compare("tight"))
+        {
+            A = 6500;
+            B = -8;
+        }
+        
+        return (A / (TMath::Log(x) + B));
+    }
 }
 
 Int_t FindDecadePower(Double_t num){
@@ -476,4 +344,266 @@ Int_t FindDecadePower(Double_t num){
         } 
     }
     return decadePower;
+}
+
+Double_t GetNormFactor(std::vector<Int_t> run_list){
+    
+    Double_t NormFactor = 0; //Integral of the pulse intensity
+
+    for (int i = 0; i < run_list.size(); i++)
+    {
+        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", run_list.at(i)),"read");
+        cout << "Run Number = " << run_list.at(i) << endl;
+
+        //FIMG ---------------------------------------------
+        TTree* FIMG;
+        Int_t BunchNumber_FIMG = 0;
+        Float_t PulseIntensity = 0;
+
+        file_ntof->GetObject("FIMG", FIMG);
+        FIMG->SetBranchAddress("BunchNumber", &BunchNumber_FIMG);
+        FIMG->SetBranchAddress("PulseIntensity", &PulseIntensity);
+
+        int CurrentBunchNum = 0;
+
+        Long64_t Events_FIMG = FIMG->GetEntriesFast();
+
+        for (int j = 0; j < Events_FIMG; j++)
+        {
+            FIMG->GetEntry(j);
+
+            if (CurrentBunchNum != BunchNumber_FIMG)
+            {
+                CurrentBunchNum = BunchNumber_FIMG;
+                NormFactor += (Double_t) PulseIntensity;
+            }
+        }
+
+        file_ntof->Close();
+    }
+
+    return NormFactor;
+}
+
+void fillEnergyHist(std::vector<Int_t> run_list, std::string cut_type, TH1D* energy_hist_det1, TH1D* energy_hist_det2){
+
+    for (int i = 0; i < run_list.size(); i++)
+    {
+        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", run_list.at(i)),"read");
+        cout << "Run Number = " << run_list.at(i) << endl;
+
+        //PKUP ---------------------------------------------
+        TTree* PKUP;
+        Int_t BunchNumber_PKUP = 0;
+        Double_t tpkup = 0;
+
+        file_ntof->GetObject("PKUP", PKUP);
+        PKUP->SetBranchAddress("BunchNumber", &BunchNumber_PKUP);
+        PKUP->SetBranchAddress("tflash", &tpkup);
+
+        std::map<Int_t, Double_t> BNum_tpkup_map;
+        Long64_t Events_PKUP = PKUP->GetEntriesFast();
+
+        for (int j = 0; j < Events_PKUP; j++)
+        {
+            PKUP->GetEntry(j);
+            BNum_tpkup_map.emplace(BunchNumber_PKUP, tpkup);
+        }
+
+        //FIMG ---------------------------------------------
+        TTree* FIMG;
+        Double_t tof_FIMG = 0; //tof is in ns
+        Float_t amp = 0;
+        Float_t area_0 = 0;
+        Int_t det_num = 0;
+        Int_t BunchNumber_FIMG = 0;
+
+        file_ntof->GetObject("FIMG", FIMG);
+        FIMG->SetBranchAddress("BunchNumber", &BunchNumber_FIMG);
+        FIMG->SetBranchAddress("tof", &tof_FIMG);
+        FIMG->SetBranchAddress("amp", &amp);
+        FIMG->SetBranchAddress("area_0", &area_0);
+        FIMG->SetBranchAddress("detn", &det_num);
+
+        Long64_t Events_FIMG = FIMG->GetEntriesFast();
+        std::cout << "Number of entries - FIMG = " << Events_FIMG << std::endl;
+
+        for (int j = 0; j < Events_FIMG; j++)
+        {
+            FIMG->GetEntry(j);
+
+            Double_t t_pkup = BNum_tpkup_map[BunchNumber_FIMG];
+            Double_t corrected_tof = tof_FIMG - t_pkup + delT_pkup_fimg + t_gamma_FIMG;
+
+            //Filling the histograms after cuts
+            if (det_num == 1)
+            {
+                if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num, cut_type))
+                {
+                    energy_hist_det1->Fill( TOFToEnergy(corrected_tof * 1e-9) );
+                }
+            }
+
+            if (det_num == 2)
+            {
+                if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num, cut_type))
+                {
+                    energy_hist_det2->Fill( TOFToEnergy(corrected_tof * 1e-9) );
+                }
+            }
+        }
+
+        file_ntof->Close();
+    }
+}
+
+void calcTransmission(TH1D* e_hist_in, TH1D* e_hist_out, TH1D* trans_hist, Double_t Qout_Qin){
+    Int_t num_bins_e = e_hist_in->GetNbinsX();
+    for (int i = 0; i < num_bins_e; i++)
+    {
+        Double_t bin_content_in = e_hist_in->GetBinContent(i+1);
+        Double_t bin_content_out = e_hist_out->GetBinContent(i+1);
+        if (bin_content_in == 0. || bin_content_out == 0.)
+        {
+            trans_hist->SetBinContent(i+1, 0.);
+            trans_hist->SetBinError(i+1, 0.);
+        } else {
+            Double_t transmission = (bin_content_in * Qout_Qin)/bin_content_out;
+            Double_t bin_unc = transmission * std::sqrt( (1./bin_content_in) + (1./bin_content_out) );
+            trans_hist->SetBinContent(i+1, transmission);
+            trans_hist->SetBinError(i+1, bin_unc);
+        }
+    }
+}
+
+void fillRunHists(Int_t num_bins_e, Double_t bin_edges_e[]){
+
+    TH1D* e_loose_cut_det_1_in = 0;
+    TH1D* e_mid_cut_det_1_in = 0;
+    TH1D* e_tight_cut_det_1_in = 0;
+    TH1D* e_loose_cut_det_2_in = 0;
+    TH1D* e_mid_cut_det_2_in = 0;
+    TH1D* e_tight_cut_det_2_in = 0;
+
+    TH1D* e_loose_cut_det_1_out = 0;
+    TH1D* e_mid_cut_det_1_out = 0;
+    TH1D* e_tight_cut_det_1_out = 0;
+    TH1D* e_loose_cut_det_2_out = 0;
+    TH1D* e_mid_cut_det_2_out = 0;
+    TH1D* e_tight_cut_det_2_out = 0;
+
+    //Target In Hists
+    e_loose_cut_det_1_in = new TH1D("e_loose_cut_det_1_in","Energy Hist",num_bins_e,bin_edges_e);
+    e_mid_cut_det_1_in = new TH1D("e_mid_cut_det_1_in","Energy Hist",num_bins_e,bin_edges_e);
+    e_tight_cut_det_1_in = new TH1D("e_tight_cut_det_1_in","Energy Hist",num_bins_e,bin_edges_e);
+    e_loose_cut_det_2_in = new TH1D("e_loose_cut_det_2_in","Energy Hist",num_bins_e,bin_edges_e);
+    e_mid_cut_det_2_in = new TH1D("e_mid_cut_det_2_in","Energy Hist",num_bins_e,bin_edges_e);
+    e_tight_cut_det_2_in = new TH1D("e_tight_cut_det_2_in","Energy Hist",num_bins_e,bin_edges_e);
+    //Target Out Hists
+    e_loose_cut_det_1_out = new TH1D("e_loose_cut_det_1_out","Energy Hist",num_bins_e,bin_edges_e);
+    e_mid_cut_det_1_out = new TH1D("e_mid_cut_det_1_out","Energy Hist",num_bins_e,bin_edges_e);
+    e_tight_cut_det_1_out = new TH1D("e_tight_cut_det_1_out","Energy Hist",num_bins_e,bin_edges_e);
+    e_loose_cut_det_2_out = new TH1D("e_loose_cut_det_2_out","Energy Hist",num_bins_e,bin_edges_e);
+    e_mid_cut_det_2_out = new TH1D("e_mid_cut_det_2_out","Energy Hist",num_bins_e,bin_edges_e);
+    e_tight_cut_det_2_out = new TH1D("e_tight_cut_det_2_out","Energy Hist",num_bins_e,bin_edges_e);
+    
+    //Norm Factors
+    Double_t norm_factor_target_in = GetNormFactor(ts_target_in_runs);
+    Double_t norm_factor_target_out = 0;
+    if(!target_out_name.compare("ar_bottle")) {
+        norm_factor_target_out = GetNormFactor(ts_target_out_runs);
+    } else if(!target_out_name.compare("none_ts")) {
+        norm_factor_target_out = GetNormFactor(f_out_t_out_ts);
+    } else if(!target_out_name.compare("none")) {
+        norm_factor_target_out = GetNormFactor(f_out_t_out_runs);
+    }
+
+    Double_t Qout_Qin = norm_factor_target_out / norm_factor_target_in;
+    
+    //Filling the Histograms - Target In
+    fillEnergyHist(ts_target_in_runs, "loose", e_loose_cut_det_1_in, e_loose_cut_det_2_in);
+    fillEnergyHist(ts_target_in_runs, "mid", e_mid_cut_det_1_in, e_mid_cut_det_2_in);
+    fillEnergyHist(ts_target_in_runs, "tight", e_tight_cut_det_1_in, e_tight_cut_det_2_in);
+
+    //Filling the Histograms - Target Out
+    if(!target_out_name.compare("ar_bottle")) {
+        fillEnergyHist(ts_target_out_runs, "loose", e_loose_cut_det_1_out, e_loose_cut_det_2_out);
+        fillEnergyHist(ts_target_out_runs, "mid", e_mid_cut_det_1_out, e_mid_cut_det_2_out);
+        fillEnergyHist(ts_target_out_runs, "tight", e_tight_cut_det_1_out, e_tight_cut_det_2_out);
+    } else if(!target_out_name.compare("none_ts")) {
+        fillEnergyHist(f_out_t_out_ts, "loose", e_loose_cut_det_1_out, e_loose_cut_det_2_out);
+        fillEnergyHist(f_out_t_out_ts, "mid", e_mid_cut_det_1_out, e_mid_cut_det_2_out);
+        fillEnergyHist(f_out_t_out_ts, "tight", e_tight_cut_det_1_out, e_tight_cut_det_2_out);
+    } else if(!target_out_name.compare("none")) {
+        fillEnergyHist(f_out_t_out_runs, "loose", e_loose_cut_det_1_out, e_loose_cut_det_2_out);
+        fillEnergyHist(f_out_t_out_runs, "mid", e_mid_cut_det_1_out, e_mid_cut_det_2_out);
+        fillEnergyHist(f_out_t_out_runs, "tight", e_tight_cut_det_1_out, e_tight_cut_det_2_out);
+    }
+
+    //Transmission
+    for (int i = 0; i < num_bins_e; i++)
+    {
+        //Loose
+        calcTransmission(e_loose_cut_det_1_in, e_loose_cut_det_1_out, trans_loose_cut_det_1, Qout_Qin);
+        calcTransmission(e_loose_cut_det_2_in, e_loose_cut_det_2_out, trans_loose_cut_det_2, Qout_Qin);
+
+        //Mid
+        calcTransmission(e_mid_cut_det_1_in, e_mid_cut_det_1_out, trans_mid_cut_det_1, Qout_Qin);
+        calcTransmission(e_mid_cut_det_2_in, e_mid_cut_det_2_out, trans_mid_cut_det_2, Qout_Qin);
+
+        //Tight
+        calcTransmission(e_tight_cut_det_1_in, e_tight_cut_det_1_out, trans_tight_cut_det_1, Qout_Qin);
+        calcTransmission(e_tight_cut_det_2_in, e_tight_cut_det_2_out, trans_tight_cut_det_2, Qout_Qin);
+    }
+
+    cout << Form("Total Protons %s = ", target_name.c_str()) << norm_factor_target_in << endl;
+    cout << "Total Protons Target Out = " << norm_factor_target_out << endl;
+}
+
+void cutoffAnalysis_FIMG() {
+    
+    fillRuns();
+
+    //Calculating Energy bin edges
+    Double_t tof_min = 1e3; //ns
+    Double_t tof_max = 1e8; //ns
+    Double_t e_min = TOFToEnergy(tof_max * 1e-9); //converting into seconds
+    Double_t e_max = TOFToEnergy(tof_min * 1e-9); //converting into seconds
+    int min_power = FindDecadePower(e_min);
+    int max_power = FindDecadePower(e_max);
+    int num_decades_e = max_power - min_power;
+    int num_bins_e = bins_per_decade * num_decades_e;
+    Double_t bin_edges_e[num_bins_e+1];
+    Double_t step_e = ((Double_t) 1.0/(Double_t) bins_per_decade);
+    for(int i = 0; i < num_bins_e+1; i++)
+    {
+        Double_t base = 10.;
+        Double_t exponent = (step_e * (Double_t) i) + (Double_t) min_power;
+        bin_edges_e[i] = (Double_t) std::pow(base, exponent);
+    }
+
+    // cout << "Number of tof bins = " << num_bins_tof << endl;
+    cout << "Number of e bins = " << num_bins_e << endl;
+
+    //transmission histogram
+    trans_loose_cut_det_1 = new TH1D("trans_loose_cut_det_1","Transmission Hist",num_bins_e,bin_edges_e);
+    trans_mid_cut_det_1 = new TH1D("trans_mid_cut_det_1","Transmission Hist",num_bins_e,bin_edges_e);
+    trans_tight_cut_det_1 = new TH1D("trans_tight_cut_det_1","Transmission Hist",num_bins_e,bin_edges_e);
+    trans_loose_cut_det_2 = new TH1D("trans_loose_cut_det_2","Transmission Hist",num_bins_e,bin_edges_e);
+    trans_mid_cut_det_2 = new TH1D("trans_mid_cut_det_2","Transmission Hist",num_bins_e,bin_edges_e);
+    trans_tight_cut_det_2 = new TH1D("trans_tight_cut_det_2","Transmission Hist",num_bins_e,bin_edges_e);
+    
+    fillRunHists(num_bins_e,bin_edges_e);
+
+    //Writing to the output file
+    outputRootFile = new TFile(Form("../rootFiles/cutoffAnalysis_FIMG_%s.root", target_name.c_str()),"recreate");
+    trans_loose_cut_det_1->Write();
+    trans_mid_cut_det_1->Write();
+    trans_tight_cut_det_1->Write();
+    trans_loose_cut_det_2->Write();
+    trans_mid_cut_det_2->Write();
+    trans_tight_cut_det_2->Write();
+
+    outputRootFile->Close();
+    
 }
