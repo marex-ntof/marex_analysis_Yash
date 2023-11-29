@@ -73,7 +73,7 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
                 {
                     if ( (Double_t) amp_PTB > yOnTheCutLinePTBC(t[k][0], a[k][0], t[k][1], a[k][1], corrected_tof) )
                     {
-                        energy_hist_PTB->Fill( TOFToEnergy(corrected_tof * 1e-9) );
+                        energy_hist_PTB->Fill( TOFToEnergy(corrected_tof * 1e-9, flight_path_length_PTB) );
                         break;    
                     }
                 }
@@ -133,13 +133,13 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
 
             if (corrected_tof > tof_cut_up)
             {
-                energy_hist_FIMG->Fill( TOFToEnergy(corrected_tof * 1e-9) );
+                energy_hist_FIMG->Fill( TOFToEnergy(corrected_tof * 1e-9, flight_path_length_FIMG) );
                 continue;
             }
 
             if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num))
             {
-                energy_hist_FIMG->Fill( TOFToEnergy(corrected_tof * 1e-9) );
+                energy_hist_FIMG->Fill( TOFToEnergy(corrected_tof * 1e-9, flight_path_length_FIMG) );
             }
         }
 
@@ -272,8 +272,8 @@ void detectorAna(){
     //Calculating Energy bin edges
     Double_t tof_min = 1e3; //ns
     Double_t tof_max = 1e8; //ns
-    Double_t e_min = TOFToEnergy(tof_max * 1e-9); //converting into seconds
-    Double_t e_max = TOFToEnergy(tof_min * 1e-9); //converting into seconds
+    Double_t e_min = TOFToEnergy(tof_max * 1e-9, flight_path_length_FIMG); //converting into seconds
+    Double_t e_max = TOFToEnergy(tof_min * 1e-9, flight_path_length_FIMG); //converting into seconds
     int min_power = FindDecadePower(e_min);
     int max_power = FindDecadePower(e_max);
     int num_decades_e = max_power - min_power;

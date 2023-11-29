@@ -277,23 +277,27 @@ Double_t fimgCutFunction(Double_t x, Int_t det_num, std::string cut_type){
 
     Double_t A = 0;
     Double_t B = 0;
+    Double_t C = 0;
 
     if(det_num == 1) {
         // A / ( TMath::Log(x) + B )
         if (!cut_type.compare("loose"))
         {
             A = 4000;
-            B = -7.5;
+            B = -TMath::Log(7750);
+            C = 600;
         }
         if (!cut_type.compare("mid"))
         {
             A = 4500;
-            B = -8;
+            B = -TMath::Log(7750);
+            C = 600;
         }
         if (!cut_type.compare("tight"))
         {
             A = 7000;
-            B = -8;
+            B = -TMath::Log(7750);
+            C = 600;
         }
         
         return (A / (TMath::Log(x) + B));
@@ -303,20 +307,23 @@ Double_t fimgCutFunction(Double_t x, Int_t det_num, std::string cut_type){
         if (!cut_type.compare("loose"))
         {
             A = 3000;
-            B = -8;
+            B = -TMath::Log(7080);
+            C = 400;
         }
         if (!cut_type.compare("mid"))
         {
             A = 5000;
-            B = -7.8;
+            B = -TMath::Log(7080);
+            C = 400;
         }
         if (!cut_type.compare("tight"))
         {
             A = 6500;
-            B = -8;
+            B = -TMath::Log(7080);
+            C = 400;
         }
         
-        return (A / (TMath::Log(x) + B));
+        return ((A / (TMath::Log(x) + B)) + C);
     }
 }
 

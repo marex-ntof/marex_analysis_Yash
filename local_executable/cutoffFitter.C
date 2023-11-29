@@ -255,18 +255,28 @@ void cutoffFitter() {
     // f_det1_in->SetLineWidth(2);
     // cutoff_det1_in->Draw("PSAME");
 
-    auto tight_cut_det1 = new TF1("tight_cut_det1","7000 / ( TMath::Log(x) - 8 )",1e3,1e8);
+    auto tight_cut_det1 = new TF1("tight_cut_det1","(800 / ( TMath::Log(x) - TMath::Log(7750) )) + 600",1e3,1e8);
     tight_cut_det1->SetLineColor(2);
     tight_cut_det1->Draw("SAME");
 
-    auto mid_cut_det1 = new TF1("mid_cut_det1","4500 / ( TMath::Log(x) - 8 )",1e3,1e8);
+    auto mid_cut_det1 = new TF1("mid_cut_det1","(1800 / ( TMath::Log(x) - TMath::Log(7750) )) + 600",1e3,1e8);
     mid_cut_det1->SetLineColor(3);
     mid_cut_det1->Draw("SAME");
 
 
-    auto loose_cut_det1 = new TF1("loose_cut_det1","4000 / ( TMath::Log(x) - 7.5 )",1e3,1e8);
+    auto loose_cut_det1 = new TF1("loose_cut_det1","(2800 / ( TMath::Log(x) - TMath::Log(7750) )) + 600",1e3,1e8);
     loose_cut_det1->SetLineColor(4);
     loose_cut_det1->Draw("SAME");
+
+    auto x_asym_det1 = new TF1("x_asym_det1","600",1e3,1e8);
+    x_asym_det1->SetLineColor(1);
+    x_asym_det1->SetLineWidth(2);
+    x_asym_det1->Draw("SAME");
+
+    auto y_asym_det1 = new TLine(7750.0,0,7750.0,4500);
+    y_asym_det1->SetLineColor(1);
+    y_asym_det1->SetLineWidth(2);
+    y_asym_det1->Draw("SAME");
 
     i++;
 
@@ -295,18 +305,26 @@ void cutoffFitter() {
     // f_det2_in->SetLineWidth(2);
     // cutoff_det2_in->Draw("PSAME");
 
-    auto tight_cut_det2 = new TF1("tight_cut_det2","6500 / ( TMath::Log(x) - 8 )",1e3,1e8);
+    auto tight_cut_det2 = new TF1("tight_cut_det2","(1000 / ( TMath::Log(x) - TMath::Log(7080) )) + 400",1e3,1e8);
     tight_cut_det2->SetLineColor(2);
     tight_cut_det2->Draw("SAME");
 
-    auto mid_cut_det2 = new TF1("mid_cut_det2","5000 / ( TMath::Log(x) - 7.8 )",1e3,1e8);
+    auto mid_cut_det2 = new TF1("mid_cut_det2","(2000 / ( TMath::Log(x) - TMath::Log(7080) )) + 400",1e3,1e8);
     mid_cut_det2->SetLineColor(3);
     mid_cut_det2->Draw("SAME");
 
-
-    auto loose_cut_det2 = new TF1("loose_cut_det2","3000 / ( TMath::Log(x) - 8 )",1e3,1e8);
+    auto loose_cut_det2 = new TF1("loose_cut_det2","(3000 / ( TMath::Log(x) - TMath::Log(7080) )) + 400",1e3,1e8);
     loose_cut_det2->SetLineColor(4);
     loose_cut_det2->Draw("SAME");
+
+    auto x_asym_det2 = new TF1("x_asym_det2","400",1e3,1e8);
+    x_asym_det2->SetLineColor(1);
+    x_asym_det2->Draw("SAME");
+
+    auto y_asym_det2 = new TLine(7080.0,0,7080.0,4500);
+    y_asym_det2->SetLineColor(1);
+    y_asym_det2->SetLineWidth(2);
+    y_asym_det2->Draw("SAME");
 
     // i++;
 
