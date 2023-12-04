@@ -70,6 +70,7 @@ TH1D* endf_rf_xsec_hist = 0;
 
 Int_t evalFile_max_line_num = 0;
 const Double_t flight_path_length_PTB = 182.65 - 0.41; //m
+const Double_t flight_path_length_FIMG = 183.5 - 0.41; //m
 const Double_t neutron_mass = 939.56542052; //in MeV
 const Double_t speed_of_light = 299792458.0; //in m/s
 Double_t ar_bottle_pressure = 197.385 * 1e5; // in Pa (SI unit)
@@ -136,24 +137,24 @@ void fillMaxLineCount(){
 
 }
 
-Double_t EnergyToTOF(Double_t e){ //e is in eV
+Double_t EnergyToTOF(Double_t e, Double_t flight_path_length){ //e is in eV, flight_path_length is in m
     Double_t KE_M = (e * 1e-6)/neutron_mass;
     Double_t denominator = 1.0 - 1.0/((KE_M + 1.0)*(KE_M + 1.0));
     Double_t correction_factor = std::sqrt(1.0 / denominator);
-    Double_t TOF = (flight_path_length_PTB/speed_of_light) * correction_factor;
+    Double_t TOF = (flight_path_length/speed_of_light) * correction_factor;
     return TOF; //tof in seconds
 }
     
-Double_t TOFToEnergy(Double_t t){ //t is in seconds
-    Double_t denom_term = (flight_path_length_PTB)/(speed_of_light * t);
+Double_t TOFToEnergy(Double_t t, Double_t flight_path_length){ //t is in seconds
+    Double_t denom_term = (flight_path_length)/(speed_of_light * t);
     Double_t denominator = 1.0 - (denom_term * denom_term);
     Double_t factor = std::sqrt(1.0 / denominator) - 1.0;
     Double_t energy = neutron_mass * factor;
     return energy * 1e6;  //e in eV
 }
 
-Double_t TOFToEnergy(Double_t t, Double_t rf_length){ //t is in seconds, rf_length is in m
-    Double_t denom_term = (flight_path_length_PTB + rf_length)/(speed_of_light * t);
+Double_t TOFToEnergy(Double_t t, Double_t flight_path_length, Double_t rf_length){ //t is in seconds, rf_length is in m
+    Double_t denom_term = (flight_path_length + rf_length)/(speed_of_light * t);
     Double_t denominator = 1.0 - (denom_term * denom_term);
     Double_t factor = std::sqrt(1.0 / denominator) - 1.0;
     Double_t energy = neutron_mass * factor;

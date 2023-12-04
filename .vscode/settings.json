@@ -61,6 +61,7 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "fimgCutsAna.C": "cpp"
+        "fimgCutsAna.C": "cpp",
+        "data_stability.C": "cpp"
     }
 }

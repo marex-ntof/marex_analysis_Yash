@@ -80,8 +80,8 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
             );
             // Double_t fwhm = FindFWHM(projection); //in cm
             Double_t rf_length = projection->GetMean(1) * 0.01; //projection->GetBinCenter( projection->GetMaximumBin() ) * 0.01; //converting to m
-            Double_t e_tof = EnergyToTOF(energy[i]);
-            new_e = TOFToEnergy(e_tof, rf_length); //in eV
+            Double_t e_tof = EnergyToTOF(energy[i], flight_path_length_PTB);
+            new_e = TOFToEnergy(e_tof, flight_path_length_PTB, rf_length); //in eV
         }
         
         if (fillENDF == true && energy[i] > energy_bin_edges[bin_counter])
