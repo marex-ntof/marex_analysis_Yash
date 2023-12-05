@@ -34,7 +34,7 @@ void data_stability(){
         file_ntof->GetObject("PTBC", PTBC);
         PTBC->SetBranchAddress("time", &time_PTBC);
         PTBC->SetBranchAddress("BunchNumber", &BunchNumber_PTBC);
-        PTBC->SetBranchAddress("PulseIntensity_PTBC", &PulseIntensity_PTBC);
+        PTBC->SetBranchAddress("PulseIntensity", &PulseIntensity_PTBC);
 
         Long64_t Events_PTB = PTBC->GetEntriesFast();
         std::cout << "Number of entries - PTBC = " << Events_PTB << std::endl;
@@ -89,7 +89,7 @@ void data_stability(){
         FIMG->SetBranchAddress("time", &time_FIMG);
         FIMG->SetBranchAddress("BunchNumber", &BunchNumber_FIMG);
         FIMG->SetBranchAddress("detn", &det_num);
-        FIMG->SetBranchAddress("PulseIntensity_FIMG", &PulseIntensity_FIMG);
+        FIMG->SetBranchAddress("PulseIntensity", &PulseIntensity_FIMG);
 
         Long64_t Events_FIMG = FIMG->GetEntriesFast();
         std::cout << "Number of entries - FIMG = " << Events_FIMG << std::endl;

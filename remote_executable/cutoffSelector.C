@@ -43,16 +43,22 @@ TH2D* tof_area_hist_fIn_det2 = 0;
 
 // TH2D* tof_area_hist_in_cutoff = 0;
 
-TH2D* tof_amp_hist_fOut_det1_cutoff = 0;
-TH2D* tof_amp_hist_fOut_det2_cutoff = 0;
-TH2D* tof_amp_hist_fIn_det1_cutoff = 0;
-TH2D* tof_amp_hist_fIn_det2_cutoff = 0;
+// TH2D* tof_amp_hist_fOut_det1_cutoff = 0;
+// TH2D* tof_amp_hist_fOut_det2_cutoff = 0;
+// TH2D* tof_amp_hist_fIn_det1_cutoff = 0;
+// TH2D* tof_amp_hist_fIn_det2_cutoff = 0;
 
-//beam off
-TH2D* tof_amp_beam_off_PTBC = 0;
-TH2D* tof_amp_beam_off_FIMG = 0;
+//dedicated and parasitic pulses plots
+TH2D* tof_amp_hist_fIn_det1_dedicated = 0;
+TH2D* tof_amp_hist_fIn_det1_parasitic = 0;
+TH2D* tof_amp_hist_fIn_det2_dedicated = 0;
+TH2D* tof_amp_hist_fIn_det2_parasitic = 0;
 
-//Cut off
+// //beam off
+// TH2D* tof_amp_beam_off_PTBC = 0;
+// TH2D* tof_amp_beam_off_FIMG = 0;
+
+// // Cut off
 // auto cutoff_amp = new TGraph();
 // auto cutoff_tof = new TGraph();
 
@@ -322,64 +328,80 @@ void FilterIn(){
             Double_t corrected_tof = tof - t_pkup + 630.0 + t_gamma_FIMG;
             // tof_amp_hist_out->Fill( corrected_tof , (Double_t) amp);
 
-            Double_t tof_cut_low = 0;
-            Double_t tof_cut_up = 0;
-            Double_t min_amp_cut = 0;
+            // Double_t tof_cut_low = 0;
+            // Double_t tof_cut_up = 0;
+            // Double_t min_amp_cut = 0;
 
             if (det_num == 1){
-                tof_cut_low = FIMG_tof_cut_low_det1;
-                tof_cut_up = FIMG_tof_cut_up_det1;
-                min_amp_cut = FIMG_min_amp_cut_det1;
+                // tof_cut_low = FIMG_tof_cut_low_det1;
+                // tof_cut_up = FIMG_tof_cut_up_det1;
+                // min_amp_cut = FIMG_min_amp_cut_det1;
+
+                if (PulseIntensity > 6e12)
+                {
+                    tof_amp_hist_fIn_det1_dedicated->Fill( corrected_tof , (Double_t) amp);
+                } else if (PulseIntensity <= 6e12)
+                {
+                    tof_amp_hist_fIn_det1_parasitic->Fill( corrected_tof , (Double_t) amp);
+                }
 
                 tof_area_hist_fIn_det1->Fill( corrected_tof , (Double_t) area_0);
                 tof_amp_hist_fIn_det1->Fill( corrected_tof , (Double_t) amp);
             }
             else if (det_num == 2){
-                tof_cut_low = FIMG_tof_cut_low_det2;
-                tof_cut_up = FIMG_tof_cut_up_det2;
-                min_amp_cut = FIMG_min_amp_cut_det2;
+                // tof_cut_low = FIMG_tof_cut_low_det2;
+                // tof_cut_up = FIMG_tof_cut_up_det2;
+                // min_amp_cut = FIMG_min_amp_cut_det2;
+
+                if (PulseIntensity > 6e12)
+                {
+                    tof_amp_hist_fIn_det2_dedicated->Fill( corrected_tof , (Double_t) amp);
+                } else if (PulseIntensity <= 6e12)
+                {
+                    tof_amp_hist_fIn_det2_parasitic->Fill( corrected_tof , (Double_t) amp);
+                }
 
                 tof_area_hist_fIn_det2->Fill( corrected_tof , (Double_t) area_0);
                 tof_amp_hist_fIn_det2->Fill( corrected_tof , (Double_t) amp);
             }
 
-            //Filling the histograms after cuts
-            if (corrected_tof < tof_cut_low)
-            {
-                continue;
-            }
+            // //Filling the histograms after cuts
+            // if (corrected_tof < tof_cut_low)
+            // {
+            //     continue;
+            // }
 
-            if ((Double_t) amp < min_amp_cut)
-            {
-                continue;
-            }
+            // if ((Double_t) amp < min_amp_cut)
+            // {
+            //     continue;
+            // }
 
-            if (corrected_tof > tof_cut_up)
-            {
-                if (det_num == 1)
-                {
-                    tof_amp_hist_fIn_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
-                }
+            // if (corrected_tof > tof_cut_up)
+            // {
+            //     if (det_num == 1)
+            //     {
+            //         tof_amp_hist_fIn_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //     }
 
-                if (det_num == 2)
-                {
-                    tof_amp_hist_fIn_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
-                }
-                continue;
-            }
+            //     if (det_num == 2)
+            //     {
+            //         tof_amp_hist_fIn_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //     }
+            //     continue;
+            // }
 
-            if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num))
-            {
-                if (det_num == 1)
-                {
-                    tof_amp_hist_fIn_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
-                }
+            // if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num))
+            // {
+            //     if (det_num == 1)
+            //     {
+            //         tof_amp_hist_fIn_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //     }
 
-                if (det_num == 2)
-                {
-                    tof_amp_hist_fIn_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
-                }
-            }
+            //     if (det_num == 2)
+            //     {
+            //         tof_amp_hist_fIn_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //     }
+            // }
         }
 
         file_ntof->Close();
@@ -443,64 +465,64 @@ void FilterOut(){
             Double_t corrected_tof = tof - t_pkup + 630.0 + t_gamma_FIMG;
             // tof_amp_hist_out->Fill( corrected_tof , (Double_t) amp);
 
-            Double_t tof_cut_low = 0;
-            Double_t tof_cut_up = 0;
-            Double_t min_amp_cut = 0;
+            // Double_t tof_cut_low = 0;
+            // Double_t tof_cut_up = 0;
+            // Double_t min_amp_cut = 0;
 
             if (det_num == 1){
-                tof_cut_low = FIMG_tof_cut_low_det1;
-                tof_cut_up = FIMG_tof_cut_up_det1;
-                min_amp_cut = FIMG_min_amp_cut_det1;
+                // tof_cut_low = FIMG_tof_cut_low_det1;
+                // tof_cut_up = FIMG_tof_cut_up_det1;
+                // min_amp_cut = FIMG_min_amp_cut_det1;
 
                 tof_area_hist_fOut_det1->Fill( corrected_tof , (Double_t) area_0);
                 tof_amp_hist_fOut_det1->Fill( corrected_tof , (Double_t) amp);
             }
             else if (det_num == 2){
-                tof_cut_low = FIMG_tof_cut_low_det2;
-                tof_cut_up = FIMG_tof_cut_up_det2;
-                min_amp_cut = FIMG_min_amp_cut_det2;
+                // tof_cut_low = FIMG_tof_cut_low_det2;
+                // tof_cut_up = FIMG_tof_cut_up_det2;
+                // min_amp_cut = FIMG_min_amp_cut_det2;
 
                 tof_area_hist_fOut_det2->Fill( corrected_tof , (Double_t) area_0);
                 tof_amp_hist_fOut_det2->Fill( corrected_tof , (Double_t) amp);
             }
 
-            //Filling the histograms after cuts
-            if (corrected_tof < tof_cut_low)
-            {
-                continue;
-            }
+            // //Filling the histograms after cuts
+            // if (corrected_tof < tof_cut_low)
+            // {
+            //     continue;
+            // }
 
-            if ((Double_t) amp < min_amp_cut)
-            {
-                continue;
-            }
+            // if ((Double_t) amp < min_amp_cut)
+            // {
+            //     continue;
+            // }
 
-            if (corrected_tof > tof_cut_up)
-            {
-                if (det_num == 1)
-                {
-                    tof_amp_hist_fOut_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
-                }
+            // if (corrected_tof > tof_cut_up)
+            // {
+            //     if (det_num == 1)
+            //     {
+            //         tof_amp_hist_fOut_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //     }
 
-                if (det_num == 2)
-                {
-                    tof_amp_hist_fOut_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
-                }
-                continue;
-            }
+            //     if (det_num == 2)
+            //     {
+            //         tof_amp_hist_fOut_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //     }
+            //     continue;
+            // }
 
-            if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num))
-            {
-                if (det_num == 1)
-                {
-                    tof_amp_hist_fOut_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
-                }
+            // if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num))
+            // {
+            //     if (det_num == 1)
+            //     {
+            //         tof_amp_hist_fOut_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //     }
 
-                if (det_num == 2)
-                {
-                    tof_amp_hist_fOut_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
-                }
-            }
+            //     if (det_num == 2)
+            //     {
+            //         tof_amp_hist_fOut_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //     }
+            // }
         }
 
         file_ntof->Close();
@@ -526,10 +548,15 @@ void StoreHist(){
     tof_amp_hist_fIn_det2->Write();
     // tof_area_hist_out_cutoff->Write();
 
-    tof_amp_hist_fIn_det1_cutoff->Write();
-    tof_amp_hist_fIn_det2_cutoff->Write();
-    tof_amp_hist_fOut_det1_cutoff->Write();
-    tof_amp_hist_fOut_det2_cutoff->Write();
+    // tof_amp_hist_fIn_det1_cutoff->Write();
+    // tof_amp_hist_fIn_det2_cutoff->Write();
+    // tof_amp_hist_fOut_det1_cutoff->Write();
+    // tof_amp_hist_fOut_det2_cutoff->Write();
+
+    tof_amp_hist_fIn_det1_dedicated->Write();
+    tof_amp_hist_fIn_det1_parasitic->Write();
+    tof_amp_hist_fIn_det2_dedicated->Write();
+    tof_amp_hist_fIn_det2_parasitic->Write();
 
     f->Close();
 }
@@ -539,68 +566,6 @@ void plots(){
     TCanvas *c[2];
 
     int i = 0;
-
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-    // tof_amp_hist_in->GetXaxis()->SetTitle("Time of Flight (in ns)");
-    // tof_amp_hist_in->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    // // tof_amp_hist_in->SetTitle("Track Spacepoints");
-    // tof_amp_hist_in->Draw("colz");
-    // // tof_amp_hist_in->SetMarkerStyle(6);
-    // // tof_amp_hist_in->SetMarkerSize(0.5);
-    // gPad->SetLogx();
-    // gPad->SetLogz();
-    // gStyle->SetPalette(57);
-
-    // // cutoff_amp->SetLineColor(2);
-    // // cutoff_amp->SetLineWidth(4);
-    // // cutoff_amp->Draw("SAME");
-
-    // // cutoff_tof->SetLineColor(2);
-    // // cutoff_tof->SetLineWidth(4);
-    // // cutoff_tof->Draw("SAME");
-
-    // c[i]->Print("../plots/tof_amp_hist_al5_FIMG.png");
-
-    // i++;
-
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-    // tof_amp_hist_out->GetXaxis()->SetTitle("Time of Flight (in ns)");
-    // tof_amp_hist_out->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    // // tof_amp_hist_out->SetTitle("Track Spacepoints");
-    // tof_amp_hist_out->Draw("colz");
-    // // tof_amp_hist_out->SetMarkerStyle(6);
-    // // tof_amp_hist_out->SetMarkerSize(0.5);
-    // gPad->SetLogx();
-    // gPad->SetLogz();
-    // gStyle->SetPalette(57);
-
-    // // cutoff_amp->SetLineColor(2);
-    // // cutoff_amp->SetLineWidth(4);
-    // // cutoff_amp->Draw("SAME");
-
-    // // cutoff_tof->SetLineColor(2);
-    // // cutoff_tof->SetLineWidth(4);
-    // // cutoff_tof->Draw("SAME");
-
-    // c[i]->Print("../plots/tof_amp_hist_out_FIMG.png");
-
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-    // tof_area_hist_in->GetXaxis()->SetTitle("Time of Flight (in ns)");
-    // tof_area_hist_in->GetYaxis()->SetTitle("Area (a.u.)");
-    // tof_area_hist_in->SetTitle("Area vs Area Hist - FIMG - Al (5cm) Filter In");
-    // tof_area_hist_in->Draw("colz");
-    // // tof_area_hist_in->SetMarkerStyle(6);
-    // // tof_area_hist_in->SetMarkerSize(0.5);
-    // gPad->SetLogx();
-    // gPad->SetLogz();
-    // gStyle->SetPalette(57);
-
-    // c[i]->Print("../plots/tof_area_hist_al5_FIMG.png");
-
-    // i++;
 
     c[i] = new TCanvas(Form("c%d", i)," ");
     c[i]->cd();
@@ -615,17 +580,6 @@ void plots(){
     gStyle->SetPalette(57);
 
     c[i]->Print("../plots/h_tof_area_fOut_FIMG_det1.png");
-
-    // Double_t x[6] = {61878.8,28827.2,19880,13155.2,9751.95,7456.49};
-    // Double_t y[6] = {20380.1,171383,290708,455438,600106,774340};
-    // TGraph *cutoff = new TGraph(6,x,y);
-    // cutoff->SetMarkerColor(2);
-    // cutoff->SetMarkerSize(1);
-    // cutoff->SetMarkerStyle(8);
-    // // cutoff->Draw("P");
-    // TF1 *f = new TF1("f", "[3] * x * x * x + [2] * x * x + [1] * x + [0]");
-    // cutoff->Fit(f);
-    // cutoff->Draw("PL");
 
     i++;
 
@@ -642,36 +596,6 @@ void plots(){
     gStyle->SetPalette(57);
 
     c[i]->Print("../plots/h_tof_area_fOut_FIMG_det2.png");
-
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-    // tof_area_hist_in_cutoff->GetXaxis()->SetTitle("Time of Flight (in ns)");
-    // tof_area_hist_in_cutoff->GetYaxis()->SetTitle("Area (a.u.)");
-    // tof_area_hist_in_cutoff->SetTitle("Area vs Area Hist - FIMG - Al (5cm) After Cuts");
-    // tof_area_hist_in_cutoff->Draw("colz");
-    // // tof_area_hist_in_cutoff->SetMarkerStyle(6);
-    // // tof_area_hist_in_cutoff->SetMarkerSize(0.5);
-    // gPad->SetLogx();
-    // gPad->SetLogz();
-    // gStyle->SetPalette(57);
-
-    // c[i]->Print("../plots/tof_area_hist_in_FIMG_cutoff.png");
-
-    // i++;
-
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-    // tof_area_hist_out_cutoff->GetXaxis()->SetTitle("Time of Flight (in ns)");
-    // tof_area_hist_out_cutoff->GetYaxis()->SetTitle("Area (a.u.)");
-    // tof_area_hist_out_cutoff->SetTitle("Area vs Area Hist - FIMG - Filter Out After Cuts");
-    // tof_area_hist_out_cutoff->Draw("colz");
-    // // tof_area_hist_out_cutoff->SetMarkerStyle(6);
-    // // tof_area_hist_out_cutoff->SetMarkerSize(0.5);
-    // gPad->SetLogx();
-    // gPad->SetLogz();
-    // gStyle->SetPalette(57);
-
-    // c[i]->Print("../plots/tof_area_hist_out_FIMG_cutoff.png");
 
 }
 
@@ -742,12 +666,18 @@ void cutoffSelector(){
     
     // tof_area_hist_out_cutoff = new TH2D("tof_area_hist_out_cutoff","ToF vs Area Hist - FIMG - Filter Out After Cuts",num_bins_tof,bin_edges_tof,num_bins_area,bin_edges_area);
 
-    tof_amp_hist_fOut_det1_cutoff = new TH2D("tof_amp_hist_fOut_det1_cutoff","ToF vs Amp Hist - FIMG Det 1 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    tof_amp_hist_fOut_det2_cutoff = new TH2D("tof_amp_hist_fOut_det2_cutoff","ToF vs Amp Hist - FIMG Det 2 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // tof_amp_hist_fOut_det1_cutoff = new TH2D("tof_amp_hist_fOut_det1_cutoff","ToF vs Amp Hist - FIMG Det 1 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // tof_amp_hist_fOut_det2_cutoff = new TH2D("tof_amp_hist_fOut_det2_cutoff","ToF vs Amp Hist - FIMG Det 2 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
 
-    tof_amp_hist_fIn_det1_cutoff = new TH2D("tof_amp_hist_fIn_det1_cutoff","ToF vs Amp Hist - FIMG Det 1 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    tof_amp_hist_fIn_det2_cutoff = new TH2D("tof_amp_hist_fIn_det2_cutoff","ToF vs Amp Hist - FIMG Det 2 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // tof_amp_hist_fIn_det1_cutoff = new TH2D("tof_amp_hist_fIn_det1_cutoff","ToF vs Amp Hist - FIMG Det 1 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // tof_amp_hist_fIn_det2_cutoff = new TH2D("tof_amp_hist_fIn_det2_cutoff","ToF vs Amp Hist - FIMG Det 2 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
 
+    tof_amp_hist_fIn_det1_dedicated = new TH2D("tof_amp_hist_fIn_det1_dedicated","ToF vs Amp Hist - FIMG Det 1 - Al(5cm) - Dedicated",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    tof_amp_hist_fIn_det1_parasitic = new TH2D("tof_amp_hist_fIn_det1_parasitic","ToF vs Amp Hist - FIMG Det 1 - Al(5cm) - Parasitic",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    tof_amp_hist_fIn_det2_dedicated = new TH2D("tof_amp_hist_fIn_det2_dedicated","ToF vs Amp Hist - FIMG Det 2 - Al(5cm) - Dedicated",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    tof_amp_hist_fIn_det2_parasitic = new TH2D("tof_amp_hist_fIn_det2_parasitic","ToF vs Amp Hist - FIMG Det 2 - Al(5cm) - Parasitic",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+
+    
     FilterIn();
     FilterOut();
 
