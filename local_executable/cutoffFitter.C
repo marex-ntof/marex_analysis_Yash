@@ -41,10 +41,15 @@ TH2D* tof_amp_hist_fIn_det1 = 0;
 TH2D* tof_amp_hist_fIn_det2 = 0;
 // TH2D* tof_area_hist_out_cutoff = 0;
 
-TH2D* tof_amp_hist_fOut_det1_cutoff = 0;
-TH2D* tof_amp_hist_fOut_det2_cutoff = 0;
-TH2D* tof_amp_hist_fIn_det1_cutoff = 0;
-TH2D* tof_amp_hist_fIn_det2_cutoff = 0;
+// TH2D* tof_amp_hist_fOut_det1_cutoff = 0;
+// TH2D* tof_amp_hist_fOut_det2_cutoff = 0;
+// TH2D* tof_amp_hist_fIn_det1_cutoff = 0;
+// TH2D* tof_amp_hist_fIn_det2_cutoff = 0;
+
+TH2D* tof_amp_hist_fIn_det1_dedicated = 0;
+TH2D* tof_amp_hist_fIn_det1_parasitic = 0;
+TH2D* tof_amp_hist_fIn_det2_dedicated = 0;
+TH2D* tof_amp_hist_fIn_det2_parasitic = 0;
 
 void retriveHistograms(const char *fname){
     TKey *key;
@@ -69,10 +74,15 @@ void retriveHistograms(const char *fname){
     tof_amp_hist_fIn_det1 = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det1");
     tof_amp_hist_fIn_det2 = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det2");
 
-    tof_amp_hist_fOut_det1_cutoff = (TH2D*)hist_file->Get("tof_amp_hist_fOut_det1_cutoff");
-    tof_amp_hist_fOut_det2_cutoff = (TH2D*)hist_file->Get("tof_amp_hist_fOut_det2_cutoff");
-    tof_amp_hist_fIn_det1_cutoff = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det1_cutoff");
-    tof_amp_hist_fIn_det2_cutoff = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det2_cutoff");
+    // tof_amp_hist_fOut_det1_cutoff = (TH2D*)hist_file->Get("tof_amp_hist_fOut_det1_cutoff");
+    // tof_amp_hist_fOut_det2_cutoff = (TH2D*)hist_file->Get("tof_amp_hist_fOut_det2_cutoff");
+    // tof_amp_hist_fIn_det1_cutoff = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det1_cutoff");
+    // tof_amp_hist_fIn_det2_cutoff = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det2_cutoff");
+
+    tof_amp_hist_fIn_det1_dedicated = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det1_dedicated");
+    tof_amp_hist_fIn_det1_parasitic = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det1_parasitic");
+    tof_amp_hist_fIn_det2_dedicated = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det2_dedicated");
+    tof_amp_hist_fIn_det2_parasitic = (TH2D*)hist_file->Get("tof_amp_hist_fIn_det2_parasitic");
 
     // trans_hist_fOut = (TH1D*)hist_file->Get("trans_hist_fOut");
     // trans_hist_fIn = (TH1D*)hist_file->Get("trans_hist_fIn");
@@ -87,7 +97,7 @@ void retriveHistograms(const char *fname){
 
 void cutoffFitter() {
     
-    retriveHistograms("../rootFiles/cutoffSelector_FIMG.root");
+    retriveHistograms("../rootFiles/cutoffSelector_FIMG_c.root");
 
     //Plotting
     SetMArEXStyle();
@@ -97,70 +107,62 @@ void cutoffFitter() {
     gStyle->SetStatH(0.1);
     gStyle->SetStatW(0.17);
 
-    TCanvas *c[2];
+    TCanvas *c[6];
     Int_t i = 0;
 
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-    // tof_area_hist_fOut_det1->GetXaxis()->SetTitle("Time of Flight (in ns)");
-    // tof_area_hist_fOut_det1->GetYaxis()->SetTitle("Area (a.u.)");
-    // tof_area_hist_fOut_det1->SetTitle("ToF vs Area Hist - FIMG Det 1 - Filter Out");
-    // tof_area_hist_fOut_det1->Draw("colz");
-    // // tof_area_hist_fOut_det1->SetMarkerStyle(6);
-    // // tof_area_hist_fOut_det1->SetMarkerSize(0.5);
-    // gPad->SetLogx();
-    // gPad->SetLogz();
-    // gStyle->SetPalette(57);
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+    tof_amp_hist_fIn_det1_dedicated->GetXaxis()->SetTitle("Time of Flight (in ns)");
+    tof_amp_hist_fIn_det1_dedicated->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    tof_amp_hist_fIn_det1_dedicated->SetTitle("ToF vs Amp Hist - FIMG Det 1 - Al(5cm) - Dedicated");
+    tof_amp_hist_fIn_det1_dedicated->Draw("colz");
+    // tof_amp_hist_fIn_det1_dedicated->SetMarkerStyle(6);
+    // tof_amp_hist_fIn_det1_dedicated->SetMarkerSize(0.5);
+    gPad->SetLogx();
+    gPad->SetLogz();
+    gStyle->SetPalette(57);
 
-    // c[i]->Print("../plots/h_tof_area_fOut_FIMG_det1.png");
+    i++;
 
-    // Double_t x[6] = {61878.8,28827.2,19880,13155.2,9751.95,7456.49};
-    // Double_t y[6] = {20380.1,171383,290708,455438,600106,774340};
-    // TGraph *cutoff = new TGraph(6,x,y);
-    // cutoff->SetMarkerColor(1);
-    // cutoff->SetMarkerSize(1);
-    // cutoff->SetMarkerStyle(8);
-    // // cutoff->Draw("P");
-    // TF1 *f = new TF1("f", "[2] * TMath::Log(x) * TMath::Log(x) + [1] * TMath::Log(x) + [0]");
-    // //[6] * x * x * x * x * x * x + [5] * x * x * x * x * x + [4] * x * x * x * x + [3] * x * x * x + [2] * x * x + [1] * x + [0]
-    // cutoff->Fit(f);
-    // cutoff->Draw("PSAME");
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+    tof_amp_hist_fIn_det1_parasitic->GetXaxis()->SetTitle("Time of Flight (in ns)");
+    tof_amp_hist_fIn_det1_parasitic->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    tof_amp_hist_fIn_det1_parasitic->SetTitle("ToF vs Amp Hist - FIMG Det 1 - Al(5cm) - Parasitic");
+    tof_amp_hist_fIn_det1_parasitic->Draw("colz");
+    // tof_amp_hist_fIn_det1_parasitic->SetMarkerStyle(6);
+    // tof_amp_hist_fIn_det1_parasitic->SetMarkerSize(0.5);
+    gPad->SetLogx();
+    gPad->SetLogz();
+    gStyle->SetPalette(57);
 
-    // c[i]->Print("../plots/h_tof_area_FIMG_cuts.png");
+    i++;
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+    tof_amp_hist_fIn_det2_dedicated->GetXaxis()->SetTitle("Time of Flight (in ns)");
+    tof_amp_hist_fIn_det2_dedicated->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    tof_amp_hist_fIn_det2_dedicated->SetTitle("ToF vs Amp Hist - FIMG Det 2 - Al(5cm) - Dedicated");
+    tof_amp_hist_fIn_det2_dedicated->Draw("colz");
+    // tof_amp_hist_fIn_det2_dedicated->SetMarkerStyle(6);
+    // tof_amp_hist_fIn_det2_dedicated->SetMarkerSize(0.5);
+    gPad->SetLogx();
+    gPad->SetLogz();
+    gStyle->SetPalette(57);
 
-    // i++;
+    i++;
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+    tof_amp_hist_fIn_det2_parasitic->GetXaxis()->SetTitle("Time of Flight (in ns)");
+    tof_amp_hist_fIn_det2_parasitic->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    tof_amp_hist_fIn_det2_parasitic->SetTitle("ToF vs Amp Hist - FIMG Det 2 - Al(5cm) - Parasitic");
+    tof_amp_hist_fIn_det2_parasitic->Draw("colz");
+    // tof_amp_hist_fIn_det2_parasitic->SetMarkerStyle(6);
+    // tof_amp_hist_fIn_det2_parasitic->SetMarkerSize(0.5);
+    gPad->SetLogx();
+    gPad->SetLogz();
+    gStyle->SetPalette(57);
 
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-    // tof_area_hist_fOut_det2->GetXaxis()->SetTitle("Time of Flight (in ns)");
-    // tof_area_hist_fOut_det2->GetYaxis()->SetTitle("Area (a.u.)");
-    // tof_area_hist_fOut_det2->SetTitle("ToF vs Area Hist - FIMG Det 2 - Filter Out");
-    // tof_area_hist_fOut_det2->Draw("colz");
-    // // tof_area_hist_fOut_det2->SetMarkerStyle(6);
-    // // tof_area_hist_fOut_det2->SetMarkerSize(0.5);
-    // gPad->SetLogx();
-    // gPad->SetLogz();
-    // gStyle->SetPalette(57);
-
-    // c[i]->Print("../plots/h_tof_area_fOut_FIMG_det2.png");
-
-    // i++;
-
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-    // tof_area_hist_out_cutoff->GetXaxis()->SetTitle("Time of Flight (in ns)");
-    // tof_area_hist_out_cutoff->GetYaxis()->SetTitle("Area (a.u.)");
-    // tof_area_hist_out_cutoff->SetTitle("Area vs Area Hist - FIMG - Filter Out After Cuts");
-    // tof_area_hist_out_cutoff->Draw("colz");
-    // // tof_area_hist_out_cutoff->SetMarkerStyle(6);
-    // // tof_area_hist_out_cutoff->SetMarkerSize(0.5);
-    // gPad->SetLogx();
-    // gPad->SetLogz();
-    // gStyle->SetPalette(57);
-
-    // c[i]->Print("../plots/h_tof_area_FIMG_afterCuts.png");
-
-    // i++;
+    i++;
 
     // c[i] = new TCanvas(Form("c%d", i)," ");
     // c[i]->cd();
