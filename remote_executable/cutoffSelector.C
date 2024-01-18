@@ -27,32 +27,32 @@
 
 #include <vector>
 
-// TH2D* tof_amp_hist_in = 0;
-// TH2D* tof_amp_hist_out = 0;
+// TH2D* FIMG_tof_amp_in = 0;
+// TH2D* FIMG_tof_amp_out = 0;
 // TH2D* tof_area_hist_in = 0;
 
-TH2D* tof_amp_hist_fOut_det1 = 0;
-TH2D* tof_amp_hist_fOut_det2 = 0;
+TH2D* FIMG_tof_amp_fOut_det1 = 0;
+TH2D* FIMG_tof_amp_fOut_det2 = 0;
 TH2D* tof_area_hist_fOut_det1 = 0;
 TH2D* tof_area_hist_fOut_det2 = 0;
 
-TH2D* tof_amp_hist_fIn_det1 = 0;
-TH2D* tof_amp_hist_fIn_det2 = 0;
+TH2D* FIMG_tof_amp_fIn_det1 = 0;
+TH2D* FIMG_tof_amp_fIn_det2 = 0;
 TH2D* tof_area_hist_fIn_det1 = 0;
 TH2D* tof_area_hist_fIn_det2 = 0;
 
 // TH2D* tof_area_hist_in_cutoff = 0;
 
-// TH2D* tof_amp_hist_fOut_det1_cutoff = 0;
-// TH2D* tof_amp_hist_fOut_det2_cutoff = 0;
-// TH2D* tof_amp_hist_fIn_det1_cutoff = 0;
-// TH2D* tof_amp_hist_fIn_det2_cutoff = 0;
+// TH2D* FIMG_tof_amp_fOut_det1_cutoff = 0;
+// TH2D* FIMG_tof_amp_fOut_det2_cutoff = 0;
+// TH2D* FIMG_tof_amp_fIn_det1_cutoff = 0;
+// TH2D* FIMG_tof_amp_fIn_det2_cutoff = 0;
 
 //dedicated and parasitic pulses plots
-TH2D* tof_amp_hist_fIn_det1_dedicated = 0;
-TH2D* tof_amp_hist_fIn_det1_parasitic = 0;
-TH2D* tof_amp_hist_fIn_det2_dedicated = 0;
-TH2D* tof_amp_hist_fIn_det2_parasitic = 0;
+TH2D* FIMG_tof_amp_fIn_det1_dedicated = 0;
+TH2D* FIMG_tof_amp_fIn_det1_parasitic = 0;
+TH2D* FIMG_tof_amp_fIn_det2_dedicated = 0;
+TH2D* FIMG_tof_amp_fIn_det2_parasitic = 0;
 
 // //beam off
 // TH2D* tof_amp_beam_off_PTBC = 0;
@@ -326,7 +326,7 @@ void FilterIn(){
             // Double_t corrected_tof = (tof - tflash + t_gamma_FIMG);
             Double_t t_pkup = BNum_tpkup_map[BunchNumber_FIMG];
             Double_t corrected_tof = tof - t_pkup + 630.0 + t_gamma_FIMG;
-            // tof_amp_hist_out->Fill( corrected_tof , (Double_t) amp);
+            // FIMG_tof_amp_out->Fill( corrected_tof , (Double_t) amp);
 
             // Double_t tof_cut_low = 0;
             // Double_t tof_cut_up = 0;
@@ -339,14 +339,14 @@ void FilterIn(){
 
                 if (PulseIntensity > 6e12)
                 {
-                    tof_amp_hist_fIn_det1_dedicated->Fill( corrected_tof , (Double_t) amp);
+                    FIMG_tof_amp_fIn_det1_dedicated->Fill( corrected_tof , (Double_t) amp);
                 } else if (PulseIntensity <= 6e12)
                 {
-                    tof_amp_hist_fIn_det1_parasitic->Fill( corrected_tof , (Double_t) amp);
+                    FIMG_tof_amp_fIn_det1_parasitic->Fill( corrected_tof , (Double_t) amp);
                 }
 
                 tof_area_hist_fIn_det1->Fill( corrected_tof , (Double_t) area_0);
-                tof_amp_hist_fIn_det1->Fill( corrected_tof , (Double_t) amp);
+                FIMG_tof_amp_fIn_det1->Fill( corrected_tof , (Double_t) amp);
             }
             else if (det_num == 2){
                 // tof_cut_low = FIMG_tof_cut_low_det2;
@@ -355,14 +355,14 @@ void FilterIn(){
 
                 if (PulseIntensity > 6e12)
                 {
-                    tof_amp_hist_fIn_det2_dedicated->Fill( corrected_tof , (Double_t) amp);
+                    FIMG_tof_amp_fIn_det2_dedicated->Fill( corrected_tof , (Double_t) amp);
                 } else if (PulseIntensity <= 6e12)
                 {
-                    tof_amp_hist_fIn_det2_parasitic->Fill( corrected_tof , (Double_t) amp);
+                    FIMG_tof_amp_fIn_det2_parasitic->Fill( corrected_tof , (Double_t) amp);
                 }
 
                 tof_area_hist_fIn_det2->Fill( corrected_tof , (Double_t) area_0);
-                tof_amp_hist_fIn_det2->Fill( corrected_tof , (Double_t) amp);
+                FIMG_tof_amp_fIn_det2->Fill( corrected_tof , (Double_t) amp);
             }
 
             // //Filling the histograms after cuts
@@ -380,12 +380,12 @@ void FilterIn(){
             // {
             //     if (det_num == 1)
             //     {
-            //         tof_amp_hist_fIn_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //         FIMG_tof_amp_fIn_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
             //     }
 
             //     if (det_num == 2)
             //     {
-            //         tof_amp_hist_fIn_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //         FIMG_tof_amp_fIn_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
             //     }
             //     continue;
             // }
@@ -394,12 +394,12 @@ void FilterIn(){
             // {
             //     if (det_num == 1)
             //     {
-            //         tof_amp_hist_fIn_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //         FIMG_tof_amp_fIn_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
             //     }
 
             //     if (det_num == 2)
             //     {
-            //         tof_amp_hist_fIn_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //         FIMG_tof_amp_fIn_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
             //     }
             // }
         }
@@ -463,7 +463,7 @@ void FilterOut(){
             // Double_t corrected_tof = (tof - tflash + t_gamma_FIMG);
             Double_t t_pkup = BNum_tpkup_map[BunchNumber_FIMG];
             Double_t corrected_tof = tof - t_pkup + 630.0 + t_gamma_FIMG;
-            // tof_amp_hist_out->Fill( corrected_tof , (Double_t) amp);
+            // FIMG_tof_amp_out->Fill( corrected_tof , (Double_t) amp);
 
             // Double_t tof_cut_low = 0;
             // Double_t tof_cut_up = 0;
@@ -475,7 +475,7 @@ void FilterOut(){
                 // min_amp_cut = FIMG_min_amp_cut_det1;
 
                 tof_area_hist_fOut_det1->Fill( corrected_tof , (Double_t) area_0);
-                tof_amp_hist_fOut_det1->Fill( corrected_tof , (Double_t) amp);
+                FIMG_tof_amp_fOut_det1->Fill( corrected_tof , (Double_t) amp);
             }
             else if (det_num == 2){
                 // tof_cut_low = FIMG_tof_cut_low_det2;
@@ -483,7 +483,7 @@ void FilterOut(){
                 // min_amp_cut = FIMG_min_amp_cut_det2;
 
                 tof_area_hist_fOut_det2->Fill( corrected_tof , (Double_t) area_0);
-                tof_amp_hist_fOut_det2->Fill( corrected_tof , (Double_t) amp);
+                FIMG_tof_amp_fOut_det2->Fill( corrected_tof , (Double_t) amp);
             }
 
             // //Filling the histograms after cuts
@@ -501,12 +501,12 @@ void FilterOut(){
             // {
             //     if (det_num == 1)
             //     {
-            //         tof_amp_hist_fOut_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //         FIMG_tof_amp_fOut_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
             //     }
 
             //     if (det_num == 2)
             //     {
-            //         tof_amp_hist_fOut_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //         FIMG_tof_amp_fOut_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
             //     }
             //     continue;
             // }
@@ -515,12 +515,12 @@ void FilterOut(){
             // {
             //     if (det_num == 1)
             //     {
-            //         tof_amp_hist_fOut_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //         FIMG_tof_amp_fOut_det1_cutoff->Fill( corrected_tof , (Double_t) amp );
             //     }
 
             //     if (det_num == 2)
             //     {
-            //         tof_amp_hist_fOut_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
+            //         FIMG_tof_amp_fOut_det2_cutoff->Fill( corrected_tof , (Double_t) amp );
             //     }
             // }
         }
@@ -533,30 +533,30 @@ void StoreHist(){
 
     TFile *f = new TFile("../rootFiles/cutoffSelector_FIMG.root","recreate");
 
-    // tof_amp_hist_in->Write();
-    // tof_amp_hist_out->Write();
+    // FIMG_tof_amp_in->Write();
+    // FIMG_tof_amp_out->Write();
     // tof_area_hist_in->Write();
     // tof_area_hist_in_cutoff->Write();
     tof_area_hist_fOut_det1->Write();
     tof_area_hist_fOut_det2->Write();
-    tof_amp_hist_fOut_det1->Write();
-    tof_amp_hist_fOut_det2->Write();
+    FIMG_tof_amp_fOut_det1->Write();
+    FIMG_tof_amp_fOut_det2->Write();
 
     tof_area_hist_fIn_det1->Write();
     tof_area_hist_fIn_det2->Write();
-    tof_amp_hist_fIn_det1->Write();
-    tof_amp_hist_fIn_det2->Write();
+    FIMG_tof_amp_fIn_det1->Write();
+    FIMG_tof_amp_fIn_det2->Write();
     // tof_area_hist_out_cutoff->Write();
 
-    // tof_amp_hist_fIn_det1_cutoff->Write();
-    // tof_amp_hist_fIn_det2_cutoff->Write();
-    // tof_amp_hist_fOut_det1_cutoff->Write();
-    // tof_amp_hist_fOut_det2_cutoff->Write();
+    // FIMG_tof_amp_fIn_det1_cutoff->Write();
+    // FIMG_tof_amp_fIn_det2_cutoff->Write();
+    // FIMG_tof_amp_fOut_det1_cutoff->Write();
+    // FIMG_tof_amp_fOut_det2_cutoff->Write();
 
-    tof_amp_hist_fIn_det1_dedicated->Write();
-    tof_amp_hist_fIn_det1_parasitic->Write();
-    tof_amp_hist_fIn_det2_dedicated->Write();
-    tof_amp_hist_fIn_det2_parasitic->Write();
+    FIMG_tof_amp_fIn_det1_dedicated->Write();
+    FIMG_tof_amp_fIn_det1_parasitic->Write();
+    FIMG_tof_amp_fIn_det2_dedicated->Write();
+    FIMG_tof_amp_fIn_det2_parasitic->Write();
 
     f->Close();
 }
@@ -645,37 +645,37 @@ void cutoffSelector(){
         bin_edges_area[i] = step_area * (Double_t) i;
     }
 
-    // tof_amp_hist_in = new TH2D("tof_amp_hist_in","ToF vs Amplitude Hist - FIMG - Al (5cm) Filter In",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // FIMG_tof_amp_in = new TH2D("FIMG_tof_amp_in","ToF vs Amplitude Hist - FIMG - Al (5cm) Filter In",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
     // tof_area_hist_in = new TH2D("tof_area_hist_in","Area vs Area Hist - FIMG - Al (5cm) Filter In",num_bins_tof,bin_edges_tof,num_bins_area,bin_edges_area);
     // tof_area_hist_in_cutoff = new TH2D("tof_area_hist_in_cutoff","ToF vs Area Hist - FIMG - Al (5cm) After Cuts",num_bins_tof,bin_edges_tof,num_bins_area,bin_edges_area);
-    // tof_amp_hist_out = new TH2D("tof_amp_hist_out","ToF vs Amplitude Hist - FIMG - Filter Out",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // FIMG_tof_amp_out = new TH2D("FIMG_tof_amp_out","ToF vs Amplitude Hist - FIMG - Filter Out",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
 
     //Filter Out
     tof_area_hist_fOut_det1 = new TH2D("tof_area_hist_fOut_det1","ToF vs Area Hist - FIMG Det 1 - Filter Out",num_bins_tof,bin_edges_tof,num_bins_area,bin_edges_area);
     tof_area_hist_fOut_det2 = new TH2D("tof_area_hist_fOut_det2","ToF vs Area Hist - FIMG Det 2 - Filter Out",num_bins_tof,bin_edges_tof,num_bins_area,bin_edges_area);
 
-    tof_amp_hist_fOut_det1 = new TH2D("tof_amp_hist_fOut_det1","ToF vs Amplitude Hist - FIMG Det 1 - Filter Out",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    tof_amp_hist_fOut_det2 = new TH2D("tof_amp_hist_fOut_det2","ToF vs Amplitude Hist - FIMG Det 2 - Filter Out",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    FIMG_tof_amp_fOut_det1 = new TH2D("FIMG_tof_amp_fOut_det1","ToF vs Amplitude Hist - FIMG Det 1 - Filter Out",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    FIMG_tof_amp_fOut_det2 = new TH2D("FIMG_tof_amp_fOut_det2","ToF vs Amplitude Hist - FIMG Det 2 - Filter Out",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
     
     //Filter In
     tof_area_hist_fIn_det1 = new TH2D("tof_area_hist_fIn_det1","ToF vs Area Hist - FIMG Det 1 - Al (5cm) Filter",num_bins_tof,bin_edges_tof,num_bins_area,bin_edges_area);
     tof_area_hist_fIn_det2 = new TH2D("tof_area_hist_fIn_det2","ToF vs Area Hist - FIMG Det 2 - Al (5cm) Filter",num_bins_tof,bin_edges_tof,num_bins_area,bin_edges_area);
 
-    tof_amp_hist_fIn_det1 = new TH2D("tof_amp_hist_fIn_det1","ToF vs Amplitude Hist - FIMG Det 1 - Al (5cm) Filter",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    tof_amp_hist_fIn_det2 = new TH2D("tof_amp_hist_fIn_det2","ToF vs Amplitude Hist - FIMG Det 2 - Al (5cm) Filter",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    FIMG_tof_amp_fIn_det1 = new TH2D("FIMG_tof_amp_fIn_det1","ToF vs Amplitude Hist - FIMG Det 1 - Al (5cm) Filter",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    FIMG_tof_amp_fIn_det2 = new TH2D("FIMG_tof_amp_fIn_det2","ToF vs Amplitude Hist - FIMG Det 2 - Al (5cm) Filter",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
     
     // tof_area_hist_out_cutoff = new TH2D("tof_area_hist_out_cutoff","ToF vs Area Hist - FIMG - Filter Out After Cuts",num_bins_tof,bin_edges_tof,num_bins_area,bin_edges_area);
 
-    // tof_amp_hist_fOut_det1_cutoff = new TH2D("tof_amp_hist_fOut_det1_cutoff","ToF vs Amp Hist - FIMG Det 1 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    // tof_amp_hist_fOut_det2_cutoff = new TH2D("tof_amp_hist_fOut_det2_cutoff","ToF vs Amp Hist - FIMG Det 2 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // FIMG_tof_amp_fOut_det1_cutoff = new TH2D("FIMG_tof_amp_fOut_det1_cutoff","ToF vs Amp Hist - FIMG Det 1 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // FIMG_tof_amp_fOut_det2_cutoff = new TH2D("FIMG_tof_amp_fOut_det2_cutoff","ToF vs Amp Hist - FIMG Det 2 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
 
-    // tof_amp_hist_fIn_det1_cutoff = new TH2D("tof_amp_hist_fIn_det1_cutoff","ToF vs Amp Hist - FIMG Det 1 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    // tof_amp_hist_fIn_det2_cutoff = new TH2D("tof_amp_hist_fIn_det2_cutoff","ToF vs Amp Hist - FIMG Det 2 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // FIMG_tof_amp_fIn_det1_cutoff = new TH2D("FIMG_tof_amp_fIn_det1_cutoff","ToF vs Amp Hist - FIMG Det 1 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    // FIMG_tof_amp_fIn_det2_cutoff = new TH2D("FIMG_tof_amp_fIn_det2_cutoff","ToF vs Amp Hist - FIMG Det 2 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
 
-    tof_amp_hist_fIn_det1_dedicated = new TH2D("tof_amp_hist_fIn_det1_dedicated","ToF vs Amp Hist - FIMG Det 1 - Al(5cm) - Dedicated",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    tof_amp_hist_fIn_det1_parasitic = new TH2D("tof_amp_hist_fIn_det1_parasitic","ToF vs Amp Hist - FIMG Det 1 - Al(5cm) - Parasitic",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    tof_amp_hist_fIn_det2_dedicated = new TH2D("tof_amp_hist_fIn_det2_dedicated","ToF vs Amp Hist - FIMG Det 2 - Al(5cm) - Dedicated",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    tof_amp_hist_fIn_det2_parasitic = new TH2D("tof_amp_hist_fIn_det2_parasitic","ToF vs Amp Hist - FIMG Det 2 - Al(5cm) - Parasitic",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    FIMG_tof_amp_fIn_det1_dedicated = new TH2D("FIMG_tof_amp_fIn_det1_dedicated","ToF vs Amp Hist - FIMG Det 1 - Al(5cm) - Dedicated",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    FIMG_tof_amp_fIn_det1_parasitic = new TH2D("FIMG_tof_amp_fIn_det1_parasitic","ToF vs Amp Hist - FIMG Det 1 - Al(5cm) - Parasitic",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    FIMG_tof_amp_fIn_det2_dedicated = new TH2D("FIMG_tof_amp_fIn_det2_dedicated","ToF vs Amp Hist - FIMG Det 2 - Al(5cm) - Dedicated",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
+    FIMG_tof_amp_fIn_det2_parasitic = new TH2D("FIMG_tof_amp_fIn_det2_parasitic","ToF vs Amp Hist - FIMG Det 2 - Al(5cm) - Parasitic",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
 
     
     FilterIn();
