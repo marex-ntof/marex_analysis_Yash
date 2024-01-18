@@ -26,8 +26,8 @@
 #include "TRandom3.h"
 
 //////// Run variables
-const std::string target_name("al5"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
-const std::string target_out_name("none"); //none, none_ts, ar_bottle
+const std::string target_name("ar_bottle_full"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
+const std::string target_out_name("ar_bottle"); //none, none_ts, ar_bottle
 // const std::string mode("run");
 // bi1, al3, al5, al8 - none
 
