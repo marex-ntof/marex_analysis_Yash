@@ -62,6 +62,7 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "fimgCutsAna.C": "cpp",
-        "data_stability.C": "cpp"
+        "data_stability.C": "cpp",
+        "Mo_TTOFSort_EAR1.C": "cpp"
     }
 }
