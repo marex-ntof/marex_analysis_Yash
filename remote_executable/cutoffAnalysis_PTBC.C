@@ -28,8 +28,11 @@
 
 #include <vector>
 
-const std::string target_name("ar_bottle_full");
-const std::string target_name_title("Argon Tank");
+const std::string target_name("al5"); ////bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
+const std::string target_out_name("none"); //none, none_ts, ar_bottle
+const std::string target_name_title("Al (5 cm)");
+//Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
+//Argon Bottle
 
 TH2D* PTBC_tof_amp_fOut_total = 0;
 TH2D* PTBC_tof_amp_fOut_det2 = 0;
@@ -63,6 +66,10 @@ TH2D* PTBC_tof_amp_fOut_parasitic = 0;
 
 //cut plots
 TCutG* PTBC_tof_amp_cut;
+
+// Run Vectors
+std::vector<Int_t> filter_in_runs;
+std::vector<Int_t> filter_out_runs;
 
 //beam off
 // TH2D* tof_amp_beam_off_PTBC = 0;
@@ -149,17 +156,16 @@ Double_t yOnTheCutLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Doubl
     return ((y2 - y1)*(x3 - x1)/(x2 - x1) + y1);
 }
 
-///////// FIMG stats from 117386
 //Filter In runs
 //Bi (1 cm) Filter
-std::vector<Int_t> c_au_f_bi_t_out = {117386, 117387, 117388, 117389, 117390, 117436};
+//fimg starts from 117386
+std::vector<Int_t> c_au_f_bi_t_out = {117386, 117387, 117388, 117389, 117390, 117436}; //117369, 117370, 117371, 117372, 117373, 117374, 117375, 117376, 117377, 117378, 117379, 117380, 117381, 117382, 117383, 117384, 117385, 
 std::vector<Int_t> c_out_f_bi_t_out = {117391, 117392, 117393, 117394, 117395, 117396, 117397};
 std::vector<Int_t> c_pb_f_bi_t_out = {117422, 117423, 117424, 117425, 117426, 117427, 117428};
 std::vector<Int_t> c_ta_f_bi_t_out = {117437, 117439, 117440, 117441, 117442, 117443};
-std::vector<Int_t> filter_in_runs;
 
 //Al (8 cm) Filter
-std::vector<Int_t> c_ta_f_al8_t_out = {117449, 117450, 117451, 117453, 117454, 117455, 117456, 117457, 117458, 117459, 117460};
+std::vector<Int_t> c_ta_f_al8_t_out = {117454, 117455, 117456, 117457, 117458, 117459, 117460}; //117449, 117450, 117451, 117453, 
 
 //Al (5 cm) Filter
 std::vector<Int_t> c_ta_f_al5_t_out = {117462, 117463, 117464, 117465, 117466, 117467, 117476, 117477, 117479, 117480, 117481, 117482, 117483, 117484}; //117461, 117478, 117483, 117484
@@ -168,17 +174,45 @@ std::vector<Int_t> c_pb_f_al5_t_out = {117497, 117498, 117499, 117500, 117501, 1
 std::vector<Int_t> c_c_f_al5_t_out = {117503, 117504, 117505, 117506, 117507, 117508, 117509, 117510};
 std::vector<Int_t> c_au_f_al5_t_out = {117519, 117520, 117521, 117522, 117530, 117531, 117532};
 
+//Al (3 cm) Filter
+std::vector<Int_t> c_ta_f_al3_t_out = {117485, 117486, 117487, 117488, 117489, 117490, 117491, 117492, 117493};
+std::vector<Int_t> c_pb_f_al3_t_out = {117496};
+
 //Filter Out runs
-std::vector<Int_t> filter_out_runs;
-std::vector<Int_t> c_au_f_out_t_out = {117350, 117357, 117358, 117359, 117362, 117363, 117364, 117365, 117366, 117367, 117368};
-std::vector<Int_t> c_atic_f_out_t_out = {117351, 117355, 117356}; // 117352, 117353,
+// std::vector<Int_t> c_au_f_out_t_out = {117350, 117357, 117358, 117359, 117362, 117363, 117364, 117365, 117366, 117367, 117368}; //
+// std::vector<Int_t> c_atic_f_out_t_out = {117351, 117355, 117356}; // 117352, 117353,
 std::vector<Int_t> c_out_f_out_t_out = {117398, 117405, 117406, 117408, 117409, 117410, 117411, 117412, 117398}; //
 std::vector<Int_t> c_pb_f_out_t_out = {117429, 117430, 117431, 117432, 117433, 117434, 117435};
 std::vector<Int_t> c_ta_f_out_t_out = {117444, 117445, 117446, 117447, 117448}; //117452
 std::vector<Int_t> c_c_f_out_t_out = {117511, 117512, 117513, 117514, 117515, 117516, 117517, 117518};
 
-//Beam Off runs
-std::vector<Int_t> beam_off = {117740, 117741, 117742, 117743, 117744, 117745};
+///////////// Transmisssion setup in
+//Filter Out runs
+// c_ta_f_out_t_out_ts: 117543, 117544, 117545, 117546, 117547
+// c_out_f_out_t_out_ts: 117548, 117549, 117550, 117551, 117552
+std::vector<Int_t> f_out_t_out_ts = {117543, 117544, 117545, 117546, 117547, 117548, 117549, 117550, 117551, 117552};
+
+//Carbon Target
+// c_ta_f_out_t_c_ts = 117559, 117560, 117561, 117562, 117563, 117564, 117565, 117566
+// c_ta_f_al5_t_c_ts = 117567, 117568, 117569, 117570, 117571, 117572, 117573, 117574
+// c_out_f_out_t_c_ts = 117575, 117576
+std::vector<Int_t> f_out_t_c_ts = {117559, 117560, 117561, 117562, 117563, 117564, 117565, 117566, 117575, 117576, 117577, 117578, 117579, 117580, 117581, 117583};
+std::vector<Int_t> f_al5_t_c_ts = {117567, 117568, 117569, 117570, 117571, 117572, 117573, 117574};
+
+// Al5 Target
+std::vector<Int_t> f_out_t_al5_ts = {117584, 117586, 117587, 117588, 117589, 117590, 117591};
+
+//Bi 1.2 cm target
+std::vector<Int_t> f_out_t_bi_ts = {117593, 117594, 117595, 117596};
+
+//Empty Bottle
+std::vector<Int_t> f_out_t_emptyBot_ts = {117607, 117608, 117609, 117612, 117613, 117614, 117615, 117616, 117617, 117618, 117619, 117620};
+
+//Empty Bottle Rotated
+std::vector<Int_t> f_out_t_emptyBotRot_ts = {117623, 117624, 117627, 117628, 117629, 117630, 117631, 117632, 117633, 117634, 117635, 117636, 117637, 117638, 117639, 117640, 117641};
+
+//Empty Bottle Rotated
+std::vector<Int_t> f_out_t_emptyBotRotBack_ts = {117642, 117645, 117646, 117647, 117648, 117649};
 
 //Argon Bottle
 std::vector<Int_t> f_out_t_arBot_ts = {117665, 117680, 117684, 117685, 117686, 117687, 117688, 117692, 117693, 117710, 117711, 117712, 117713, 117714, 117716, 117717, 117718, 117719, 117724, 117725, 117726, 117727, 117728, 117729, 117730, 117731, 117732, 117733, 117734, 117735, 117736, 117737, 117738};
@@ -187,31 +221,109 @@ std::vector<Int_t> f_out_t_arBot_ts = {117665, 117680, 117684, 117685, 117686, 1
 std::vector<Int_t> f_out_t_arBotEmpty_ts = {117746, 117747, 117748, 117749, 117750, 117751, 117752, 117753, 117754, 117755, 117756, 117757, 117761, 117762, 117763, 117764, 117765, 117766}; //
 
 void fillRuns(){
-    // filter_in_runs.reserve( c_au_f_bi_t_out.size() + c_out_f_bi_t_out.size() + c_pb_f_bi_t_out.size() + c_ta_f_bi_t_out.size() );
-    // filter_in_runs.insert( filter_in_runs.end(), c_au_f_bi_t_out.begin(), c_au_f_bi_t_out.end() );
-    // filter_in_runs.insert( filter_in_runs.end(), c_out_f_bi_t_out.begin(), c_out_f_bi_t_out.end() );
-    // filter_in_runs.insert( filter_in_runs.end(), c_pb_f_bi_t_out.begin(), c_pb_f_bi_t_out.end() );
-    // filter_in_runs.insert( filter_in_runs.end(), c_ta_f_bi_t_out.begin(), c_ta_f_bi_t_out.end() );
+    // Bi 1 cm filter
+    if(!target_name.compare("bi1")){
+        cout << "Setting up Bi (1 cm) run list" << endl;
+        // filter_in_runs.reserve( c_au_f_bi_t_out.size() + c_out_f_bi_t_out.size() + c_pb_f_bi_t_out.size() + c_ta_f_bi_t_out.size() );
+        filter_in_runs.insert( filter_in_runs.end(), c_au_f_bi_t_out.begin(), c_au_f_bi_t_out.end() );
+        filter_in_runs.insert( filter_in_runs.end(), c_out_f_bi_t_out.begin(), c_out_f_bi_t_out.end() );
+        filter_in_runs.insert( filter_in_runs.end(), c_pb_f_bi_t_out.begin(), c_pb_f_bi_t_out.end() );
+        filter_in_runs.insert( filter_in_runs.end(), c_ta_f_bi_t_out.begin(), c_ta_f_bi_t_out.end() );
+    }
 
-    // filter_in_runs.reserve( c_ta_f_al8_t_out.size() );
-    // filter_in_runs.insert( filter_in_runs.end(), c_ta_f_al8_t_out.begin(), c_ta_f_al8_t_out.end() );
+    // Al 8 cm filter
+    if(!target_name.compare("al8")){
+        cout << "Setting up Al (8 cm) run list" << endl;
+        // filter_in_runs.reserve( c_ta_f_al8_t_out.size() );
+        filter_in_runs.insert( filter_in_runs.end(), c_ta_f_al8_t_out.begin(), c_ta_f_al8_t_out.end() );
+    }
 
-    // filter_in_runs.insert( filter_in_runs.end(), c_ta_f_al5_t_out.begin(), c_ta_f_al5_t_out.end() );
-    // filter_in_runs.insert( filter_in_runs.end(), c_out_f_al5_t_out.begin(), c_out_f_al5_t_out.end() );
-    // filter_in_runs.insert( filter_in_runs.end(), c_pb_f_al5_t_out.begin(), c_pb_f_al5_t_out.end() );
-    // filter_in_runs.insert( filter_in_runs.end(), c_c_f_al5_t_out.begin(), c_c_f_al5_t_out.end() );
-    // filter_in_runs.insert( filter_in_runs.end(), c_au_f_al5_t_out.begin(), c_au_f_al5_t_out.end() );
+    // Al 5 cm filter
+    if(!target_name.compare("al5")){
+        cout << "Setting up Al (5 cm) run list" << endl;
+        // filter_in_runs.reserve( c_ta_f_al5_t_out.size() + c_out_f_al5_t_out.size() + c_pb_f_al5_t_out.size() + c_c_f_al5_t_out.size() + c_au_f_al5_t_out.size() ); //
+        filter_in_runs.insert( filter_in_runs.end(), c_ta_f_al5_t_out.begin(), c_ta_f_al5_t_out.end() );
+        filter_in_runs.insert( filter_in_runs.end(), c_out_f_al5_t_out.begin(), c_out_f_al5_t_out.end() );
+        filter_in_runs.insert( filter_in_runs.end(), c_pb_f_al5_t_out.begin(), c_pb_f_al5_t_out.end() );
+        filter_in_runs.insert( filter_in_runs.end(), c_c_f_al5_t_out.begin(), c_c_f_al5_t_out.end() );
+        filter_in_runs.insert( filter_in_runs.end(), c_au_f_al5_t_out.begin(), c_au_f_al5_t_out.end() );
+    }
 
-    filter_in_runs.insert( filter_in_runs.end(), f_out_t_arBot_ts.begin(), f_out_t_arBot_ts.end() );
+    // Al 3 cm filter
+    if(!target_name.compare("al3")){
+        cout << "Setting up Al (3 cm) run list" << endl;
+        // filter_in_runs.reserve( c_ta_f_al3_t_out.size() + c_pb_f_al3_t_out.size() );
+        filter_in_runs.insert( filter_in_runs.end(), c_ta_f_al3_t_out.begin(), c_ta_f_al3_t_out.end() );
+        filter_in_runs.insert( filter_in_runs.end(), c_pb_f_al3_t_out.begin(), c_pb_f_al3_t_out.end() );
+    }
 
+    //--------------------------------------------------
+
+    if(!target_name.compare("bi1p2_ts")){
+        cout << "Setting up Bi (1.2 cm) target run list" << endl;
+        filter_in_runs.insert( filter_in_runs.end(), f_out_t_bi_ts.begin(), f_out_t_bi_ts.end() );
+    }
+
+    if(!target_name.compare("c1p2_ts")){
+        cout << "Setting up C (1.2 cm) target run list" << endl;
+        filter_in_runs.insert( filter_in_runs.end(), f_out_t_c_ts.begin(), f_out_t_c_ts.end() );
+    }
+
+    if(!target_name.compare("al5_ts")){
+        cout << "Setting up Al (5 cm) target run list" << endl;
+        filter_in_runs.insert( filter_in_runs.end(), f_out_t_al5_ts.begin(), f_out_t_al5_ts.end() );
+    }
+
+    if(!target_name.compare("cf_bottle")){
+        cout << "Setting up Empty Bottle target run list" << endl;
+        filter_in_runs.insert( filter_in_runs.end(), f_out_t_emptyBot_ts.begin(), f_out_t_emptyBot_ts.end() );
+    }
+
+    if(!target_name.compare("cf_bottle_rot")){
+        cout << "Setting up Empty Bottle Rotated target run list" << endl;
+        filter_in_runs.insert( filter_in_runs.end(), f_out_t_emptyBotRot_ts.begin(), f_out_t_emptyBotRot_ts.end() );
+    }
+
+    if(!target_name.compare("cf_bottle_rotBack")){
+        cout << "Setting up Empty Bottle Rotated Back target run list" << endl;
+        filter_in_runs.insert( filter_in_runs.end(), f_out_t_emptyBotRotBack_ts.begin(), f_out_t_emptyBotRotBack_ts.end() );
+    }
+
+    if(!target_name.compare("ar_bottle_full")){
+        cout << "Setting up Argon Bottle target run list" << endl;
+        filter_in_runs.insert( filter_in_runs.end(), f_out_t_arBot_ts.begin(), f_out_t_arBot_ts.end() );
+    }
+
+    // // Al 5 cm filter
+    // cout << "Setting up Al (5 cm) filter run list" << endl;
+    // // filter_in_runs.reserve( c_ta_f_al5_t_out.size() + c_out_f_al5_t_out.size() + c_pb_f_al5_t_out.size() + c_c_f_al5_t_out.size() + c_au_f_al5_t_out.size() ); //
+    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_ta_f_al5_t_out.begin(), c_ta_f_al5_t_out.end() );
+    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_out_f_al5_t_out.begin(), c_out_f_al5_t_out.end() );
+    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_pb_f_al5_t_out.begin(), c_pb_f_al5_t_out.end() );
+    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_c_f_al5_t_out.begin(), c_c_f_al5_t_out.end() );
+    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_au_f_al5_t_out.begin(), c_au_f_al5_t_out.end() );
+
+    cout << "Setting up filter out run list" << endl;
+    // filter_out_runs.reserve( c_au_f_out_t_out.size() + c_atic_f_out_t_out.size() + c_out_f_out_t_out.size() + c_pb_f_out_t_out.size() + c_ta_f_out_t_out.size() + c_c_f_out_t_out.size() );
     // filter_out_runs.insert( filter_out_runs.end(), c_au_f_out_t_out.begin(), c_au_f_out_t_out.end() );
     // filter_out_runs.insert( filter_out_runs.end(), c_atic_f_out_t_out.begin(), c_atic_f_out_t_out.end() );
-    // filter_out_runs.insert( filter_out_runs.end(), c_out_f_out_t_out.begin(), c_out_f_out_t_out.end() );
-    // filter_out_runs.insert( filter_out_runs.end(), c_pb_f_out_t_out.begin(), c_pb_f_out_t_out.end() );
-    // filter_out_runs.insert( filter_out_runs.end(), c_ta_f_out_t_out.begin(), c_ta_f_out_t_out.end() );
-    // filter_out_runs.insert( filter_out_runs.end(), c_c_f_out_t_out.begin(), c_c_f_out_t_out.end() );
 
-    filter_out_runs.insert( filter_out_runs.end(), f_out_t_arBotEmpty_ts.begin(), f_out_t_arBotEmpty_ts.end() );
+    if(!target_out_name.compare("empty_bottle")){
+        filter_out_runs.insert( filter_out_runs.end(), f_out_t_emptyBot_ts.begin(), f_out_t_emptyBot_ts.end() );
+        filter_out_runs.insert( filter_out_runs.end(), f_out_t_emptyBotRot_ts.begin(), f_out_t_emptyBotRot_ts.end() );
+        filter_out_runs.insert( filter_out_runs.end(), f_out_t_emptyBotRotBack_ts.begin(), f_out_t_emptyBotRotBack_ts.end() );
+    }
+
+    if(!target_out_name.compare("ar_bottle")){
+        filter_out_runs.insert( filter_out_runs.end(), f_out_t_arBotEmpty_ts.begin(), f_out_t_arBotEmpty_ts.end() );
+    }
+
+    if(!target_out_name.compare("none")){
+        filter_out_runs.insert( filter_out_runs.end(), c_out_f_out_t_out.begin(), c_out_f_out_t_out.end() );
+        filter_out_runs.insert( filter_out_runs.end(), c_pb_f_out_t_out.begin(), c_pb_f_out_t_out.end() );
+        filter_out_runs.insert( filter_out_runs.end(), c_ta_f_out_t_out.begin(), c_ta_f_out_t_out.end() );
+        filter_out_runs.insert( filter_out_runs.end(), c_c_f_out_t_out.begin(), c_c_f_out_t_out.end() );
+    }
 }
 
 void FilterIn(){
