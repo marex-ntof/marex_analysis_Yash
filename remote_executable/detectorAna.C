@@ -39,6 +39,7 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
         TTree* PTBC;
         Double_t tof_PTB = 0; //tof is in ns
         Float_t amp_PTB = 0;
+        Int_t det_num_PTB = 0;
         Int_t BunchNumber_PTB = 0;
         Float_t PulseIntensity = 0;
 
@@ -47,6 +48,7 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
         PTBC->SetBranchAddress("PulseIntensity", &PulseIntensity);
         PTBC->SetBranchAddress("tof", &tof_PTB);
         PTBC->SetBranchAddress("amp", &amp_PTB);
+        PTBC->SetBranchAddress("detn", &det_num_PTB);
 
         Long64_t Events_PTB = PTBC->GetEntriesFast();
         std::cout << "Number of entries - PTBC = " << Events_PTB << std::endl;
@@ -56,6 +58,10 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
         for (int j = 0; j < Events_PTB; j++)
         {
             PTBC->GetEntry(j);
+
+            if (det_num_PTB == 1 || det_num_PTB == 8) {
+                continue;
+            }
 
             Double_t t_pkup = BNum_tpkup_map[BunchNumber_PTB];
             Double_t corrected_tof = tof_PTB - t_pkup + delT_pkup_ptbc + t_gamma_PTB;
@@ -67,14 +73,44 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
             }
 
             //Filling the histograms
-            for (int k = 0; k < 6; k++)
+            if (PulseIntensity <= 6e12)
             {
-                if (corrected_tof >= t[k][0] && corrected_tof < t[k][1])
+                for (int k = 0; k < 2; k++)
                 {
-                    if ( (Double_t) amp_PTB > yOnTheCutLinePTBC(t[k][0], a[k][0], t[k][1], a[k][1], corrected_tof) )
+                    if (corrected_tof >= t_para[k][0] && corrected_tof < t_para[k][1])
                     {
-                        energy_hist_PTB->Fill( TOFToEnergy(corrected_tof * 1e-9, flight_path_length_PTB) );
-                        break;    
+                        if ( (Double_t) amp_PTB > yOnTheCutLinePTBC(t_para[k][0], a_para[k][0], t_para[k][1], a_para[k][1], corrected_tof) )
+                        {
+                            energy_hist_PTB->Fill( TOFToEnergy(corrected_tof * 1e-9, flight_path_length_PTB) );
+                            break;    
+                        }
+                    }
+                }
+                continue;
+            }
+
+            if (det_num_PTB == 2) {
+                for (int k = 0; k < 4; k++)
+                {
+                    if (corrected_tof >= t_det2[k][0] && corrected_tof < t_det2[k][1])
+                    {
+                        if ( (Double_t) amp_PTB > yOnTheCutLinePTBC(t_det2[k][0], a_det2[k][0], t_det2[k][1], a_det2[k][1], corrected_tof) )
+                        {
+                            energy_hist_PTB->Fill( TOFToEnergy(corrected_tof * 1e-9, flight_path_length_PTB) );
+                            break;    
+                        }
+                    }
+                }
+            } else {
+                for (int k = 0; k < 2; k++)
+                {
+                    if (corrected_tof >= t_det3to7[det_num_PTB-3][k][0] && corrected_tof < t_det3to7[det_num_PTB-3][k][1])
+                    {
+                        if ( (Double_t) amp_PTB > yOnTheCutLinePTBC(t_det3to7[det_num_PTB-3][k][0], a_det3to7[det_num_PTB-3][k][0], t_det3to7[det_num_PTB-3][k][1], a_det3to7[det_num_PTB-3][k][1], corrected_tof) )
+                        {
+                            energy_hist_PTB->Fill( TOFToEnergy(corrected_tof * 1e-9, flight_path_length_PTB) );
+                            break;    
+                        }
                     }
                 }
             }
@@ -84,7 +120,6 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
         TTree* FIMG;
         Double_t tof_FIMG = 0; //tof is in ns
         Float_t amp = 0;
-        Float_t area_0 = 0;
         Int_t det_num = 0;
         Int_t BunchNumber_FIMG = 0;
 
@@ -92,7 +127,6 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
         FIMG->SetBranchAddress("BunchNumber", &BunchNumber_FIMG);
         FIMG->SetBranchAddress("tof", &tof_FIMG);
         FIMG->SetBranchAddress("amp", &amp);
-        FIMG->SetBranchAddress("area_0", &area_0);
         FIMG->SetBranchAddress("detn", &det_num);
 
         Long64_t Events_FIMG = FIMG->GetEntriesFast();
@@ -253,7 +287,12 @@ void fillRunHists(Int_t num_bins_e, Double_t bin_edges_e[]){
 
 void detectorAna(){
 
-    fillCutsPTBC();
+    fillCutsPTBC_det2();
+    fillCutsPTBC_det3();
+    fillCutsPTBC_det4();
+    fillCutsPTBC_det5();
+    fillCutsPTBC_det6();
+    fillCutsPTBC_det7();
     fillRuns();
     fillNumDensityMap();
 
