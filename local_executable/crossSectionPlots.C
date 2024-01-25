@@ -324,7 +324,7 @@ void crossSectionPlots(){
 
     bool fillENDF = true;
     bool fillENDFSmeared = false;
-    bool fillJENDL = false;
+    bool fillJENDL = true;
 
     //Getting energy bin edges
     Int_t num_bins_e = transmission_hist_e_PTB->GetNbinsX();
@@ -396,11 +396,11 @@ void crossSectionPlots(){
     gPad->SetLogx();
     // gStyle->SetPalette(57);
 
-    // l[i]->AddEntry(transmission_hist_e_FIMG,"FIMG","l");
-    // transmission_hist_e_FIMG->SetLineColor(3);
-    // transmission_hist_e_FIMG->SetLineWidth(2);
-    // transmission_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-2,1e3);
-    // transmission_hist_e_FIMG->Draw("SAME");
+    l[i]->AddEntry(transmission_hist_e_FIMG,"FIMG","l");
+    transmission_hist_e_FIMG->SetLineColor(3);
+    transmission_hist_e_FIMG->SetLineWidth(2);
+    transmission_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-2,1e3);
+    transmission_hist_e_FIMG->Draw("SAME");
 
     // l[i]->AddEntry(trans_hist_fOut,"No Al5","l");
     // trans_hist_fOut->SetLineColor(2);

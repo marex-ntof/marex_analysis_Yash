@@ -31,11 +31,11 @@
 
 //////// Run variables
 // std::string mode = "run"; //"run", "test"
-const std::string filter_name("al5"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, ar_bottle_full
-const std::string filter_name_title("Al (5 cm)");
-Int_t bins_per_decade = 100;
+const std::string filter_name("ar_bottle_full"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, ar_bottle_full
+const std::string filter_name_title("Argon Tank");
+Int_t bins_per_decade = 20;
 //Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
-//Argon Bottle
+//Argon Tank
 
 // const std::string root_file_name("rootFiles/crossSectionAna_al_8cm.root"); //Al_tot_xsec.txt, Bi_tot_xsec.txt
 // const std::string endf_file_name("evalData/Bi_tot_xsec.txt"); //Al_tot_xsec.txt, Bi_tot_xsec.txt
