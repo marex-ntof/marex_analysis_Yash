@@ -220,7 +220,8 @@ Double_t fimgCutFunction(Double_t x, Int_t det_num){
     }
 }
 
-void fillCutsPTBC_det2(){
+void fillCutsPTBC(){
+    //Det 2
     t_det2[0][0] = 800.0;
     a_det2[0][0] = 8000.0;
 
@@ -243,10 +244,9 @@ void fillCutsPTBC_det2(){
     a_det2[3][0] = 4000.0; 
 
     t_det2[3][1] = 1e8;
-    a_det2[3][1] = 4000.0; 
-}
+    a_det2[3][1] = 4000.0;
 
-void fillCutsPTBC_det3(){
+    //Det 3
     t_det3to7[0][0][0] = 800.0;
     a_det3to7[0][0][0] = 5000.0;
 
@@ -258,9 +258,8 @@ void fillCutsPTBC_det3(){
 
     t_det3to7[0][1][1] = 1e8;
     a_det3to7[0][1][1] = 3500.0;
-}
 
-void fillCutsPTBC_det4(){
+    //Det 4
     t_det3to7[1][0][0] = 800.0;
     a_det3to7[1][0][0] = 6000.0;
 
@@ -272,9 +271,8 @@ void fillCutsPTBC_det4(){
 
     t_det3to7[1][1][1] = 1e8;
     a_det3to7[1][1][1] = 3500.0;
-}
 
-void fillCutsPTBC_det5(){
+    //Det 5
     t_det3to7[2][0][0] = 800.0;
     a_det3to7[2][0][0] = 7000.0;
 
@@ -286,9 +284,8 @@ void fillCutsPTBC_det5(){
 
     t_det3to7[2][1][1] = 1e8;
     a_det3to7[2][1][1] = 3500.0;
-}
 
-void fillCutsPTBC_det6(){
+    //Det 6
     t_det3to7[3][0][0] = 800.0;
     a_det3to7[3][0][0] = 6000.0;
 
@@ -300,9 +297,8 @@ void fillCutsPTBC_det6(){
 
     t_det3to7[3][1][1] = 1e8;
     a_det3to7[3][1][1] = 4000.0;
-}
 
-void fillCutsPTBC_det7(){
+    //Det 7
     t_det3to7[4][0][0] = 800.0;
     a_det3to7[4][0][0] = 4000.0;
 
@@ -314,9 +310,8 @@ void fillCutsPTBC_det7(){
 
     t_det3to7[4][1][1] = 1e8;
     a_det3to7[4][1][1] = 3000.0;
-}
-
-void fillCutsPTBC_para(){
+    
+    //Parasitic Cuts
     t_para[0][0] = 800.0;
     a_para[0][0] = 5000.0;
 
@@ -328,6 +323,108 @@ void fillCutsPTBC_para(){
 
     t_para[1][1] = 1e8;
     a_para[1][1] = 4000.0;
+}
+
+//nTOF - PTBC cuts
+//det_num, cut num, x or y
+Double_t t_det2to4_nTOF[3][2][2];
+Double_t a_det2to4_nTOF[3][2][2];
+Double_t t_det5to7_nTOF[3][3][2];
+Double_t a_det5to7_nTOF[3][3][2];
+
+void fillCutsPTBC_nTOF(){
+    //Det 2
+    t_det2to4_nTOF[0][0][0] = 700.0;
+    a_det2to4_nTOF[0][0][0] = 8000.0;
+    t_det2to4_nTOF[0][0][1] = 20000.0;
+    a_det2to4_nTOF[0][0][1] = 8000.0;
+
+    t_det2to4_nTOF[0][1][0] = 20000.0;
+    a_det2to4_nTOF[0][1][0] = 5000.0;
+    t_det2to4_nTOF[0][1][1] = 1e8;
+    a_det2to4_nTOF[0][1][1] = 5000.0;
+
+    //Det 3
+    t_det2to4_nTOF[1][0][0] = 700.0;
+    a_det2to4_nTOF[1][0][0] = 7000.0;
+    t_det2to4_nTOF[1][0][1] = 2000.0;
+    a_det2to4_nTOF[1][0][1] = 7000.0;
+
+    t_det2to4_nTOF[1][1][0] = 2000.0;
+    a_det2to4_nTOF[1][1][0] = 4500.0;
+    t_det2to4_nTOF[1][1][1] = 1e8;
+    a_det2to4_nTOF[1][1][1] = 4500.0;
+
+    //Det 4
+    t_det2to4_nTOF[2][0][0] = 700.0;
+    a_det2to4_nTOF[2][0][0] = 10000.0;
+    t_det2to4_nTOF[2][0][1] = 2000.0;
+    a_det2to4_nTOF[2][0][1] = 10000.0;
+
+    t_det2to4_nTOF[2][1][0] = 2000.0;
+    a_det2to4_nTOF[2][1][0] = 5000.0;
+    t_det2to4_nTOF[2][1][1] = 1e8;
+    a_det2to4_nTOF[2][1][1] = 5000.0;
+
+    //Det 5
+    t_det5to7_nTOF[0][0][0] = 700.0;
+    a_det5to7_nTOF[0][0][0] = 10000.0;
+    t_det5to7_nTOF[0][0][1] = 2000.0;
+    a_det5to7_nTOF[0][0][1] = 10000.0;
+
+    t_det5to7_nTOF[0][1][0] = 2000.0;
+    a_det5to7_nTOF[0][1][0] = 8000.0;
+    t_det5to7_nTOF[0][1][1] = 20000.0;
+    a_det5to7_nTOF[0][1][1] = 8000.0;
+
+    t_det5to7_nTOF[0][2][0] = 20000.0;
+    a_det5to7_nTOF[0][2][0] = 4500.0;
+    t_det5to7_nTOF[0][2][1] = 1e8;
+    a_det5to7_nTOF[0][2][1] = 4500.0;
+
+    //Det 6
+    t_det5to7_nTOF[1][0][0] = 700.0;
+    a_det5to7_nTOF[1][0][0] = 9000.0;
+    t_det5to7_nTOF[1][0][1] = 2000.0;
+    a_det5to7_nTOF[1][0][1] = 9000.0;
+
+    t_det5to7_nTOF[1][1][0] = 2000.0;
+    a_det5to7_nTOF[1][1][0] = 6000.0;
+    t_det5to7_nTOF[1][1][1] = 20000.0;
+    a_det5to7_nTOF[1][1][1] = 6000.0;
+
+    t_det5to7_nTOF[1][2][0] = 20000.0;
+    a_det5to7_nTOF[1][2][0] = 4500.0;
+    t_det5to7_nTOF[1][2][1] = 1e8;
+    a_det5to7_nTOF[1][2][1] = 4500.0;
+
+    //Det 7
+    t_det5to7_nTOF[2][0][0] = 700.0;
+    a_det5to7_nTOF[2][0][0] = 8000.0;
+    t_det5to7_nTOF[2][0][1] = 2000.0;
+    a_det5to7_nTOF[2][0][1] = 8000.0;
+
+    t_det5to7_nTOF[2][1][0] = 2000.0;
+    a_det5to7_nTOF[2][1][0] = 4000.0;
+    t_det5to7_nTOF[2][1][1] = 20000.0;
+    a_det5to7_nTOF[2][1][1] = 4000.0;
+
+    t_det5to7_nTOF[2][2][0] = 20000.0;
+    a_det5to7_nTOF[2][2][0] = 3500.0;
+    t_det5to7_nTOF[2][2][1] = 1e8;
+    a_det5to7_nTOF[2][2][1] = 3500.0;
+}
+
+//nTOF - PTBC cuts
+Double_t a_para_nTOF[6];
+
+void fillCutsPTBC_para_nTOF(){
+    a_para_nTOF[0] = 5000.0;
+    a_para_nTOF[1] = 4500.0;
+    a_para_nTOF[2] = 5000.0;
+    a_para_nTOF[3] = 4500.0;
+    a_para_nTOF[4] = 4500.0;
+    a_para_nTOF[5] = 3500.0;
 }
 
 //////////// Old Cuts
@@ -481,6 +578,9 @@ void fillRuns(){
 }
 
 Double_t yOnTheCutLinePTBC(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t x3){
+    if(y1 == y2){
+        return y1;
+    }
     return ((y2 - y1)*(x3 - x1)/(x2 - x1) + y1);
 }
 

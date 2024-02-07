@@ -328,19 +328,8 @@ void cutoffAnalysis_PTBC(){
     gStyle->SetStatH(0.1);
     gStyle->SetStatW(0.17);
 
-    fillCutsPTBC_det2();
-    fillCutsPTBC_det3();
-    fillCutsPTBC_det4();
-    fillCutsPTBC_det5();
-    fillCutsPTBC_det6();
-    fillCutsPTBC_det7();
-    fillCut_para();
-    fillCut_det2();
-    fillCut_det3();
-    fillCut_det4();
-    fillCut_det5();
-    fillCut_det6();
-    fillCut_det7();
+    fillCutsPTBC();
+    fillCutGraph();
     fillRuns();
 
     //Calculating TOF (x) bin edges

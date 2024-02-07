@@ -115,7 +115,8 @@ Double_t a_det3to7[5][2][2];
 Double_t t_para[4][2];
 Double_t a_para[4][2];
 
-void fillCutsPTBC_det2(){
+void fillCutsPTBC(){
+    //Det 2
     t_det2[0][0] = 800.0;
     a_det2[0][0] = 8000.0;
 
@@ -139,9 +140,8 @@ void fillCutsPTBC_det2(){
 
     t_det2[3][1] = 1e8;
     a_det2[3][1] = 4000.0; 
-}
 
-void fillCutsPTBC_det3(){
+    //Det 3
     t_det3to7[0][0][0] = 800.0;
     a_det3to7[0][0][0] = 5000.0;
 
@@ -153,9 +153,8 @@ void fillCutsPTBC_det3(){
 
     t_det3to7[0][1][1] = 1e8;
     a_det3to7[0][1][1] = 3500.0;
-}
 
-void fillCutsPTBC_det4(){
+    //Det 4
     t_det3to7[1][0][0] = 800.0;
     a_det3to7[1][0][0] = 6000.0;
 
@@ -167,9 +166,8 @@ void fillCutsPTBC_det4(){
 
     t_det3to7[1][1][1] = 1e8;
     a_det3to7[1][1][1] = 3500.0;
-}
 
-void fillCutsPTBC_det5(){
+    //Det 5
     t_det3to7[2][0][0] = 800.0;
     a_det3to7[2][0][0] = 7000.0;
 
@@ -181,9 +179,8 @@ void fillCutsPTBC_det5(){
 
     t_det3to7[2][1][1] = 1e8;
     a_det3to7[2][1][1] = 3500.0;
-}
 
-void fillCutsPTBC_det6(){
+    //Det 6
     t_det3to7[3][0][0] = 800.0;
     a_det3to7[3][0][0] = 6000.0;
 
@@ -195,9 +192,8 @@ void fillCutsPTBC_det6(){
 
     t_det3to7[3][1][1] = 1e8;
     a_det3to7[3][1][1] = 4000.0;
-}
 
-void fillCutsPTBC_det7(){
+    //Det 7
     t_det3to7[4][0][0] = 800.0;
     a_det3to7[4][0][0] = 4000.0;
 
@@ -209,9 +205,7 @@ void fillCutsPTBC_det7(){
 
     t_det3to7[4][1][1] = 1e8;
     a_det3to7[4][1][1] = 3000.0;
-}
-
-void fillCutsPTBC_para(){
+    
     t_para[0][0] = 800.0;
     a_para[0][0] = 5000.0;
 
@@ -225,7 +219,7 @@ void fillCutsPTBC_para(){
     a_para[1][1] = 4000.0;
 }
 
-void fillCut_det2(){
+void fillCutGraph(){
     PTBC_tof_amp_cut_det2 = new TCutG("PTBC_tof_amp_cut_det2",8);
     PTBC_tof_amp_cut_det2->SetLineColor(2);
     PTBC_tof_amp_cut_det2->SetLineWidth(2);
@@ -240,9 +234,7 @@ void fillCut_det2(){
     PTBC_tof_amp_cut_det2->SetPoint(6, t_det2[2][1], a_det2[2][1]);
     PTBC_tof_amp_cut_det2->SetPoint(7, t_det2[3][0], a_det2[3][0]);
     PTBC_tof_amp_cut_det2->SetPoint(8, t_det2[3][1], a_det2[3][1]);
-}
-
-void fillCut_det3(){
+    
     PTBC_tof_amp_cut_det3 = new TCutG("PTBC_tof_amp_cut_det3",4);
     PTBC_tof_amp_cut_det3->SetLineColor(2);
     PTBC_tof_amp_cut_det3->SetLineWidth(2);
@@ -253,9 +245,7 @@ void fillCut_det3(){
     PTBC_tof_amp_cut_det3->SetPoint(2, t_det3to7[0][0][1], a_det3to7[0][0][1]);
     PTBC_tof_amp_cut_det3->SetPoint(3, t_det3to7[0][1][0], a_det3to7[0][1][0]);
     PTBC_tof_amp_cut_det3->SetPoint(4, t_det3to7[0][1][1], a_det3to7[0][1][1]);
-}
-
-void fillCut_det4(){
+    
     PTBC_tof_amp_cut_det4 = new TCutG("PTBC_tof_amp_cut_det4",4);
     PTBC_tof_amp_cut_det4->SetLineColor(2);
     PTBC_tof_amp_cut_det4->SetLineWidth(2);
@@ -266,9 +256,7 @@ void fillCut_det4(){
     PTBC_tof_amp_cut_det4->SetPoint(2, t_det3to7[1][0][1], a_det3to7[1][0][1]);
     PTBC_tof_amp_cut_det4->SetPoint(3, t_det3to7[1][1][0], a_det3to7[1][1][0]);
     PTBC_tof_amp_cut_det4->SetPoint(4, t_det3to7[1][1][1], a_det3to7[1][1][1]);
-}
-
-void fillCut_det5(){
+    
     PTBC_tof_amp_cut_det5 = new TCutG("PTBC_tof_amp_cut_det5",4);
     PTBC_tof_amp_cut_det5->SetLineColor(2);
     PTBC_tof_amp_cut_det5->SetLineWidth(2);
@@ -279,9 +267,7 @@ void fillCut_det5(){
     PTBC_tof_amp_cut_det5->SetPoint(2, t_det3to7[2][0][1], a_det3to7[2][0][1]);
     PTBC_tof_amp_cut_det5->SetPoint(3, t_det3to7[2][1][0], a_det3to7[2][1][0]);
     PTBC_tof_amp_cut_det5->SetPoint(4, t_det3to7[2][1][1], a_det3to7[2][1][1]);
-}
-
-void fillCut_det6(){
+    
     PTBC_tof_amp_cut_det6 = new TCutG("PTBC_tof_amp_cut_det6",4);
     PTBC_tof_amp_cut_det6->SetLineColor(2);
     PTBC_tof_amp_cut_det6->SetLineWidth(2);
@@ -292,9 +278,7 @@ void fillCut_det6(){
     PTBC_tof_amp_cut_det6->SetPoint(2, t_det3to7[3][0][1], a_det3to7[3][0][1]);
     PTBC_tof_amp_cut_det6->SetPoint(3, t_det3to7[3][1][0], a_det3to7[3][1][0]);
     PTBC_tof_amp_cut_det6->SetPoint(4, t_det3to7[3][1][1], a_det3to7[3][1][1]);
-}
-
-void fillCut_det7(){
+    
     PTBC_tof_amp_cut_det7 = new TCutG("PTBC_tof_amp_cut_det7",4);
     PTBC_tof_amp_cut_det7->SetLineColor(2);
     PTBC_tof_amp_cut_det7->SetLineWidth(2);
@@ -305,9 +289,7 @@ void fillCut_det7(){
     PTBC_tof_amp_cut_det7->SetPoint(2, t_det3to7[4][0][1], a_det3to7[4][0][1]);
     PTBC_tof_amp_cut_det7->SetPoint(3, t_det3to7[4][1][0], a_det3to7[4][1][0]);
     PTBC_tof_amp_cut_det7->SetPoint(4, t_det3to7[4][1][1], a_det3to7[4][1][1]);
-}
 
-void fillCut_para(){
     PTBC_tof_amp_cut_para = new TCutG("PTBC_tof_amp_cut_para",4);
     PTBC_tof_amp_cut_para->SetLineColor(2);
     PTBC_tof_amp_cut_para->SetLineWidth(2);
@@ -319,6 +301,112 @@ void fillCut_para(){
     PTBC_tof_amp_cut_para->SetPoint(3, 3000.0, 4000.0);
     PTBC_tof_amp_cut_para->SetPoint(4, 1e8, 4000.0);
 }
+
+///////////////////////////// nTOF Cuts
+
+//nTOF - PTBC cuts
+//det_num, cut num, x or y
+Double_t t_det2to4_nTOF[3][2][2];
+Double_t a_det2to4_nTOF[3][2][2];
+Double_t t_det5to7_nTOF[3][3][2];
+Double_t a_det5to7_nTOF[3][3][2];
+
+void fillCutsPTBC_nTOF(){
+    //Det 2
+    t_det2to4_nTOF[0][0][0] = 700.0;
+    a_det2to4_nTOF[0][0][0] = 8000.0;
+    t_det2to4_nTOF[0][0][1] = 20000.0;
+    a_det2to4_nTOF[0][0][1] = 8000.0;
+
+    t_det2to4_nTOF[0][1][0] = 20000.0;
+    a_det2to4_nTOF[0][1][0] = 5000.0;
+    t_det2to4_nTOF[0][1][1] = 1e8;
+    a_det2to4_nTOF[0][1][1] = 5000.0;
+
+    //Det 3
+    t_det2to4_nTOF[1][0][0] = 700.0;
+    a_det2to4_nTOF[1][0][0] = 7000.0;
+    t_det2to4_nTOF[1][0][1] = 2000.0;
+    a_det2to4_nTOF[1][0][1] = 7000.0;
+
+    t_det2to4_nTOF[1][1][0] = 2000.0;
+    a_det2to4_nTOF[1][1][0] = 4500.0;
+    t_det2to4_nTOF[1][1][1] = 1e8;
+    a_det2to4_nTOF[1][1][1] = 4500.0;
+
+    //Det 4
+    t_det2to4_nTOF[2][0][0] = 700.0;
+    a_det2to4_nTOF[2][0][0] = 10000.0;
+    t_det2to4_nTOF[2][0][1] = 2000.0;
+    a_det2to4_nTOF[2][0][1] = 10000.0;
+
+    t_det2to4_nTOF[2][1][0] = 2000.0;
+    a_det2to4_nTOF[2][1][0] = 5000.0;
+    t_det2to4_nTOF[2][1][1] = 1e8;
+    a_det2to4_nTOF[2][1][1] = 5000.0;
+
+    //Det 5
+    t_det5to7_nTOF[0][0][0] = 700.0;
+    a_det5to7_nTOF[0][0][0] = 10000.0;
+    t_det5to7_nTOF[0][0][1] = 2000.0;
+    a_det5to7_nTOF[0][0][1] = 10000.0;
+
+    t_det5to7_nTOF[0][1][0] = 2000.0;
+    a_det5to7_nTOF[0][1][0] = 8000.0;
+    t_det5to7_nTOF[0][1][1] = 20000.0;
+    a_det5to7_nTOF[0][1][1] = 8000.0;
+
+    t_det5to7_nTOF[0][2][0] = 20000.0;
+    a_det5to7_nTOF[0][2][0] = 4500.0;
+    t_det5to7_nTOF[0][2][1] = 1e8;
+    a_det5to7_nTOF[0][2][1] = 4500.0;
+
+    //Det 6
+    t_det5to7_nTOF[1][0][0] = 700.0;
+    a_det5to7_nTOF[1][0][0] = 9000.0;
+    t_det5to7_nTOF[1][0][1] = 2000.0;
+    a_det5to7_nTOF[1][0][1] = 9000.0;
+
+    t_det5to7_nTOF[1][1][0] = 2000.0;
+    a_det5to7_nTOF[1][1][0] = 6000.0;
+    t_det5to7_nTOF[1][1][1] = 20000.0;
+    a_det5to7_nTOF[1][1][1] = 6000.0;
+
+    t_det5to7_nTOF[1][2][0] = 20000.0;
+    a_det5to7_nTOF[1][2][0] = 4500.0;
+    t_det5to7_nTOF[1][2][1] = 1e8;
+    a_det5to7_nTOF[1][2][1] = 4500.0;
+
+    //Det 7
+    t_det5to7_nTOF[2][0][0] = 700.0;
+    a_det5to7_nTOF[2][0][0] = 8000.0;
+    t_det5to7_nTOF[2][0][1] = 2000.0;
+    a_det5to7_nTOF[2][0][1] = 8000.0;
+
+    t_det5to7_nTOF[2][1][0] = 2000.0;
+    a_det5to7_nTOF[2][1][0] = 4000.0;
+    t_det5to7_nTOF[2][1][1] = 20000.0;
+    a_det5to7_nTOF[2][1][1] = 4000.0;
+
+    t_det5to7_nTOF[2][2][0] = 20000.0;
+    a_det5to7_nTOF[2][2][0] = 3500.0;
+    t_det5to7_nTOF[2][2][1] = 1e8;
+    a_det5to7_nTOF[2][2][1] = 3500.0;
+}
+
+//nTOF - PTBC cuts
+Double_t a_para_nTOF[6];
+
+void fillCutsPTBC_para_nTOF(){
+    a_para_nTOF[0] = 5000.0;
+    a_para_nTOF[1] = 4500.0;
+    a_para_nTOF[2] = 5000.0;
+    a_para_nTOF[3] = 4500.0;
+    a_para_nTOF[4] = 4500.0;
+    a_para_nTOF[5] = 3500.0;
+}
+
+////////////////////////////////////////////////////
 
 Double_t yOnTheCutLinePTBC(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t x3){
     return ((y2 - y1)*(x3 - x1)/(x2 - x1) + y1);
