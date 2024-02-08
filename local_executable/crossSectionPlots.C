@@ -80,8 +80,8 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
             );
             // Double_t fwhm = FindFWHM(projection); //in cm
             Double_t rf_length = projection->GetMean(1) * 0.01; //projection->GetBinCenter( projection->GetMaximumBin() ) * 0.01; //converting to m
-            Double_t e_tof = EnergyToTOF(energy[i], flight_path_length_PTB);
-            new_e = TOFToEnergy(e_tof, flight_path_length_PTB, rf_length); //in eV
+            Double_t e_tof = EnergyToTOF(energy[i], flight_path_length_PTBC);
+            new_e = TOFToEnergy(e_tof, flight_path_length_PTBC, rf_length); //in eV
         }
         
         if (fillENDF == true && energy[i] > energy_bin_edges[bin_counter])
@@ -92,11 +92,11 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
                 endf_trans_hist->SetBinContent(bin_counter, 0);
             } else {
                 endf_xsec_hist->SetBinContent(bin_counter, xsec_sum/sum_counter);
-                endf_trans_hist->SetBinContent(bin_counter, trans_sum/sum_counter);
+                endf_trans_hist->SetBinContent(bin_counter, std::exp(- n * xsec_sum/sum_counter));
             }
             
             xsec_sum = xsec[i];
-            trans_sum = std::exp(- n * xsec[i]);
+            // trans_sum = std::exp(- n * xsec[i]);
             sum_counter = 1;
             bin_counter++;
             i--;
@@ -111,11 +111,11 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
                 endf_rf_trans_hist->SetBinContent(bin_counter_rf, 0);
             } else {
                 endf_rf_xsec_hist->SetBinContent(bin_counter_rf, xsec_sum_rf/sum_counter_rf);
-                endf_rf_trans_hist->SetBinContent(bin_counter_rf, trans_sum_rf/sum_counter_rf);
+                endf_rf_trans_hist->SetBinContent(bin_counter_rf, std::exp(- n * xsec_sum_rf/sum_counter_rf));
             }
             
             xsec_sum_rf = xsec[i];
-            trans_sum_rf = std::exp(- n * xsec[i]);
+            // trans_sum_rf = std::exp(- n * xsec[i]);
             sum_counter_rf = 1;
             bin_counter_rf++;
             i--;
@@ -125,14 +125,14 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
         if (fillENDF == true && energy[i] < energy_bin_edges[bin_counter])
         {
             xsec_sum += xsec[i];
-            trans_sum += std::exp(- n * xsec[i]);
+            // trans_sum += std::exp(- n * xsec[i]);
             sum_counter++;
         }
 
         if (fillENDFSmeared == true && new_e < energy_bin_edges[bin_counter])
         {
             xsec_sum_rf += xsec[i];
-            trans_sum_rf += std::exp(- n * xsec[i]);
+            // trans_sum_rf += std::exp(- n * xsec[i]);
             sum_counter_rf++;
         }
     }
@@ -195,11 +195,11 @@ void jendl(Double_t n, Double_t energy_bin_edges[]){
                 jendl_trans_hist->SetBinContent(bin_counter, 0);
             } else {
                 jendl_xsec_hist->SetBinContent(bin_counter, xsec_sum/sum_counter);
-                jendl_trans_hist->SetBinContent(bin_counter, trans_sum/sum_counter);
+                jendl_trans_hist->SetBinContent(bin_counter, std::exp(- n * xsec_sum/sum_counter));
             }
             
             xsec_sum = xsec[i];
-            trans_sum = std::exp(- n * xsec[i]);
+            // trans_sum = std::exp(- n * xsec[i]);
             sum_counter = 1;
             bin_counter++;
             i--;
@@ -209,7 +209,7 @@ void jendl(Double_t n, Double_t energy_bin_edges[]){
         if (energy[i] < energy_bin_edges[bin_counter])
         {
             xsec_sum += xsec[i];
-            trans_sum += std::exp(- n * xsec[i]);
+            // trans_sum += std::exp(- n * xsec[i]);
             sum_counter++;
         }
     }
@@ -303,12 +303,173 @@ void retriveHistograms(const char *fname){
     // trans_hist_fIn = (TH1D*)hist_file->Get("trans_hist_fIn");
     // trans_hist_fOut_endf = (TH1D*)hist_file->Get("trans_hist_fOut_endf");
     // trans_hist_fIn_endf = (TH1D*)hist_file->Get("trans_hist_fIn_endf");
-    transmission_hist_e_PTB = (TH1D*)hist_file->Get("transmission_hist_e_PTB");
+    transmission_hist_e_PTBC = (TH1D*)hist_file->Get("transmission_hist_e_PTBC");
     transmission_hist_e_FIMG = (TH1D*)hist_file->Get("transmission_hist_e_FIMG");
-    cross_section_hist_e_PTB = (TH1D*)hist_file->Get("cross_section_hist_e_PTB");
+    cross_section_hist_e_PTBC = (TH1D*)hist_file->Get("cross_section_hist_e_PTBC");
     cross_section_hist_e_FIMG = (TH1D*)hist_file->Get("cross_section_hist_e_FIMG");
 
     // hist_file->Close();
+}
+
+void changeHistBPD(TH1D* hist_new, TH1D* hist_old, Int_t num_bins_new, Double_t bin_edges_new[]){
+
+    Int_t num_bins_old = hist_old->GetNbinsX();
+    Int_t max_sum_bin_count = (num_bins_old/num_bins_new); // Number of old bins that need to be summed to make a new bin
+
+    // Double_t bin_edges_new[num_bins_new + 1];
+    Double_t bin_content[num_bins_new];
+    Double_t bin_error[num_bins_new];
+    Int_t sum_bin_count = 0;
+    Int_t new_bin_counter = 0;
+    for (int i = 1; i < num_bins_old + 1; i++)
+    {
+        if (i == 1)
+        {
+            // bin_edges_new[new_bin_counter] = hist_old->GetXaxis()->GetBinLowEdge(i);
+            bin_content[new_bin_counter] = 0;
+            bin_error[new_bin_counter] = 0;
+        }
+        bin_content[new_bin_counter] += hist_old->GetBinContent(i);
+        sum_bin_count++;
+
+        if (i == num_bins_old)
+        {
+            sum_bin_count = 0;
+            bin_error[new_bin_counter] = sqrt(bin_content[new_bin_counter]);
+            // bin_edges_new[new_bin_counter+1] = hist_old->GetXaxis()->GetBinUpEdge(i);
+        }
+        else if (sum_bin_count == max_sum_bin_count)
+        {
+            sum_bin_count = 0;
+            bin_error[new_bin_counter] = sqrt(bin_content[new_bin_counter]);
+            new_bin_counter++;
+            // bin_edges_new[new_bin_counter] = hist_old->GetXaxis()->GetBinUpEdge(i);
+            bin_content[new_bin_counter] = 0;
+            bin_error[new_bin_counter] = 0;
+        } 
+    }
+
+    for(int i = 0; i < num_bins_new; i++){
+        hist_new->SetBinContent(i+1, bin_content[i]);
+        hist_new->SetBinError(i+1, bin_error[i]);
+    }
+
+    return;
+}
+
+void calc_xsec(const char *fname, Int_t num_bins_e, Double_t bin_edges_e[]){
+    cout << "Opening File " << fname << endl;
+    TFile *hist_file = TFile::Open(fname, "READ");
+
+    cout << "Extracting Histograms " << endl;
+    energy_hist_target_in_PTBC = (TH1D*)hist_file->Get("energy_hist_target_in_PTB");
+    energy_hist_target_in_FIMG = (TH1D*)hist_file->Get("energy_hist_target_in_FIMG");
+    energy_hist_target_out_PTBC = (TH1D*)hist_file->Get("energy_hist_target_out_PTB");
+    energy_hist_target_out_FIMG = (TH1D*)hist_file->Get("energy_hist_target_out_FIMG");
+
+    cout << "Extracting Norm Factors " << endl;
+    // norm_factor_target_in = (Double_t)hist_file->Get("norm_factor_target_in");
+    // norm_factor_target_out = (Double_t)hist_file->Get("norm_factor_target_out");
+    std::vector<Double_t> *norm_factors_temp;
+    hist_file->GetObject("norm_factors", norm_factors_temp);
+    norm_factors = *norm_factors_temp;
+    Double_t Qout_Qin = norm_factors[1]/norm_factors[0]; //norm_factor_target_out / norm_factor_target_in;
+
+    TH1D* energy_hist_target_in_PTBC_new = 0;
+    TH1D* energy_hist_target_in_FIMG_new = 0;
+    TH1D* energy_hist_target_out_PTBC_new = 0;
+    TH1D* energy_hist_target_out_FIMG_new = 0;
+
+    //Target In Hists
+    energy_hist_target_in_PTBC_new = new TH1D("energy_hist_target_in_PTBC_new","Energy Hist Target In - PTBC", num_bins_e, bin_edges_e);
+    energy_hist_target_in_FIMG_new = new TH1D("energy_hist_target_in_FIMG_new","Energy Hist Target In - FIMG", num_bins_e, bin_edges_e);\
+    //Target Out Hists
+    energy_hist_target_out_PTBC_new = new TH1D("energy_hist_target_out_PTBC_new","Energy Hist Target Out - PTBC", num_bins_e, bin_edges_e);
+    energy_hist_target_out_FIMG_new = new TH1D("energy_hist_target_out_FIMG_new","Energy Hist Target Out - FIMG", num_bins_e, bin_edges_e);
+
+    changeHistBPD(energy_hist_target_in_PTBC_new, energy_hist_target_in_PTBC, num_bins_e, bin_edges_e);
+    changeHistBPD(energy_hist_target_in_FIMG_new, energy_hist_target_in_FIMG, num_bins_e, bin_edges_e);
+    changeHistBPD(energy_hist_target_out_PTBC_new, energy_hist_target_out_PTBC, num_bins_e, bin_edges_e);
+    changeHistBPD(energy_hist_target_out_FIMG_new, energy_hist_target_out_FIMG, num_bins_e, bin_edges_e);
+
+    //transmission histogram
+    transmission_hist_e_PTBC = new TH1D("transmission_hist_e_PTBC","Transmission Hist - PTBC",num_bins_e,bin_edges_e);
+    transmission_hist_e_FIMG = new TH1D("transmission_hist_e_FIMG","Transmission Hist - FIMG",num_bins_e,bin_edges_e);
+    //cross section histogram
+    cross_section_hist_e_PTBC = new TH1D("cross_section_hist_e_PTBC","Cross Section Hist - PTBC",num_bins_e,bin_edges_e);
+    cross_section_hist_e_FIMG = new TH1D("cross_section_hist_e_FIMG","Cross Section Hist - FIMG",num_bins_e,bin_edges_e);
+
+    //Transmission
+    for (int i = 0; i < num_bins_e; i++)
+    {
+        //PTBC
+        Double_t bin_content_in_PTBC = energy_hist_target_in_PTBC_new->GetBinContent(i+1);
+        Double_t bin_content_out_PTBC = energy_hist_target_out_PTBC_new->GetBinContent(i+1);
+        if (bin_content_in_PTBC == 0. || bin_content_out_PTBC == 0.)
+        {
+            transmission_hist_e_PTBC->SetBinContent(i+1, 0.);
+            transmission_hist_e_PTBC->SetBinError(i+1, 0.);
+        } else {
+            Double_t transmission_PTBC = (bin_content_in_PTBC * Qout_Qin)/bin_content_out_PTBC;
+            Double_t bin_unc_PTBC = transmission_PTBC * std::sqrt( (1./bin_content_in_PTBC) + (1./bin_content_out_PTBC) );
+            transmission_hist_e_PTBC->SetBinContent(i+1, transmission_PTBC);
+            transmission_hist_e_PTBC->SetBinError(i+1, bin_unc_PTBC);
+        }
+
+        //FIMG
+        Double_t bin_content_in_FIMG = energy_hist_target_in_FIMG_new->GetBinContent(i+1);
+        Double_t bin_content_out_FIMG = energy_hist_target_out_FIMG_new->GetBinContent(i+1);
+        if (bin_content_in_FIMG == 0. || bin_content_out_FIMG == 0.)
+        {
+            transmission_hist_e_FIMG->SetBinContent(i+1, 0.);
+            transmission_hist_e_FIMG->SetBinError(i+1, 0.);
+        } else {
+            Double_t transmission_FIMG = (bin_content_in_FIMG * Qout_Qin)/bin_content_out_FIMG;
+            Double_t bin_unc_FIMG = transmission_FIMG * std::sqrt( (1./bin_content_in_FIMG) + (1./bin_content_out_FIMG) );
+            transmission_hist_e_FIMG->SetBinContent(i+1, transmission_FIMG);
+            transmission_hist_e_FIMG->SetBinError(i+1, bin_unc_FIMG);
+        }
+    }
+
+    //Cross Section
+    Double_t num_density = num_density_map[filter_name];
+    cout << Form("Number density of %s = ", filter_name.c_str()) << num_density << endl;
+    Double_t n_inverse = ( (Double_t) 1.0/num_density);
+    cout << Form("1/n of %s = ", filter_name.c_str()) << n_inverse << endl;
+
+    for (int i = 0; i < num_bins_e; i++)
+    {
+        //PTBC
+        Double_t trans_bin_content_PTBC = transmission_hist_e_PTBC->GetBinContent(i+1);
+        Double_t trans_bin_error_PTBC = transmission_hist_e_PTBC->GetBinError(i+1);
+        if (trans_bin_content_PTBC == 0)
+        {
+            cross_section_hist_e_PTBC->SetBinContent(i+1, 0);
+            cross_section_hist_e_PTBC->SetBinError(i+1, 0);
+        } else {
+            Double_t cross_section_PTBC = - n_inverse * std::log(trans_bin_content_PTBC);
+            Double_t bin_unc_PTBC = n_inverse * (1./trans_bin_content_PTBC) * trans_bin_error_PTBC;
+            cross_section_hist_e_PTBC->SetBinContent(i+1, cross_section_PTBC);
+            cross_section_hist_e_PTBC->SetBinError(i+1, bin_unc_PTBC);
+        }
+
+        //FIMG
+        Double_t trans_bin_content_FIMG = transmission_hist_e_FIMG->GetBinContent(i+1);
+        Double_t trans_bin_error_FIMG = transmission_hist_e_FIMG->GetBinError(i+1);
+        if (trans_bin_content_FIMG == 0)
+        {
+            cross_section_hist_e_FIMG->SetBinContent(i+1, 0);
+            cross_section_hist_e_FIMG->SetBinError(i+1, 0);
+        } else {
+            Double_t cross_section_FIMG = - n_inverse * std::log(trans_bin_content_FIMG);
+            Double_t bin_unc_FIMG = n_inverse * (1./trans_bin_content_FIMG) * trans_bin_error_FIMG;
+            cross_section_hist_e_FIMG->SetBinContent(i+1, cross_section_FIMG);
+            cross_section_hist_e_FIMG->SetBinError(i+1, bin_unc_FIMG);
+        }
+    }
+
+    cout << Form("Total Protons %s = ", filter_name.c_str()) << norm_factors[0] << endl;
+    cout << "Total Protons Target Out = " << norm_factors[1] << endl;
 }
 
 void crossSectionPlots(){
@@ -317,27 +478,51 @@ void crossSectionPlots(){
     fillEValFileNameMap();
 
     // retriveHistograms(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str())); //root_file_name.c_str()
-    transmission_hist_e_PTB = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"transmission_hist_e_PTB", 1000, bins_per_decade);
-    transmission_hist_e_FIMG = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"transmission_hist_e_FIMG", 1000, bins_per_decade);
-    cross_section_hist_e_PTB = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"cross_section_hist_e_PTB", 1000, bins_per_decade);
-    cross_section_hist_e_FIMG = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"cross_section_hist_e_FIMG", 1000, bins_per_decade);
+    // transmission_hist_e_PTBC = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"transmission_hist_e_PTBC", 1000, bins_per_decade);
+    // transmission_hist_e_FIMG = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"transmission_hist_e_FIMG", 1000, bins_per_decade);
+    // cross_section_hist_e_PTBC = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"cross_section_hist_e_PTBC", 1000, bins_per_decade);
+    // cross_section_hist_e_FIMG = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"cross_section_hist_e_FIMG", 1000, bins_per_decade);
+
+    // transmission_hist_e_PTBC_nTOF_Cuts = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s_nTOF_cuts.root", filter_name.c_str()),"transmission_hist_e_PTBC", 1000, bins_per_decade);
 
     bool fillENDF = true;
     bool fillENDFSmeared = false;
     bool fillJENDL = true;
 
-    //Getting energy bin edges
-    Int_t num_bins_e = transmission_hist_e_PTB->GetNbinsX();
-    Double_t bin_edges_e[num_bins_e + 1];
-    for (int i = 0; i < num_bins_e; i++)
-    {
-        bin_edges_e[i] = transmission_hist_e_PTB->GetXaxis()->GetBinLowEdge(i+1);
+    // //Getting energy bin edges
+    // Int_t num_bins_e = transmission_hist_e_PTBC->GetNbinsX();
+    // Double_t bin_edges_e[num_bins_e + 1];
+    // for (int i = 0; i < num_bins_e; i++)
+    // {
+    //     bin_edges_e[i] = transmission_hist_e_PTBC->GetXaxis()->GetBinLowEdge(i+1);
 
-        if (i == num_bins_e - 1)
-        {
-            bin_edges_e[i+1] = transmission_hist_e_PTB->GetXaxis()->GetBinUpEdge(i+1);
-        }
+    //     if (i == num_bins_e - 1)
+    //     {
+    //         bin_edges_e[i+1] = transmission_hist_e_PTBC->GetXaxis()->GetBinUpEdge(i+1);
+    //     }
+    // }
+
+    //Calculating Energy bin edges
+    Double_t tof_min = 1e3; //ns
+    Double_t tof_max = 1e8; //ns
+    Double_t e_min = TOFToEnergy(tof_max * 1e-9, flight_path_length_FIMG); //converting into seconds
+    Double_t e_max = TOFToEnergy(tof_min * 1e-9, flight_path_length_FIMG); //converting into seconds
+    int min_power = FindDecadePower(e_min);
+    int max_power = FindDecadePower(e_max);
+    int num_decades_e = max_power - min_power;
+    int num_bins_e = bins_per_decade * num_decades_e;
+    Double_t bin_edges_e[num_bins_e+1];
+    Double_t step_e = ((Double_t) 1.0/(Double_t) bins_per_decade);
+    for(int i = 0; i < num_bins_e+1; i++)
+    {
+        Double_t base = 10.;
+        Double_t exponent = (step_e * (Double_t) i) + (Double_t) min_power;
+        bin_edges_e[i] = (Double_t) std::pow(base, exponent);
     }
+
+    cout << "Number of e bins = " << num_bins_e << endl;
+
+    calc_xsec(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()), num_bins_e, bin_edges_e);
 
     //ENDF Hists
     if (fillENDF){
@@ -382,16 +567,16 @@ void crossSectionPlots(){
     c[i]->cd();
 
     l[i] = new TLegend(0.77,0.7,0.86,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
-    l[i]->AddEntry(transmission_hist_e_PTB,"PTBC","l");
+    l[i]->AddEntry(transmission_hist_e_PTBC,"PTBC","l");
     
-    transmission_hist_e_PTB->GetXaxis()->SetTitle("Energy (in eV)");
-    transmission_hist_e_PTB->GetYaxis()->SetTitle("Transmission");
-    transmission_hist_e_PTB->SetTitle(Form("Transmission Histogram - %s", filter_name_title.c_str()));
-    transmission_hist_e_PTB->SetLineWidth(2);
-    transmission_hist_e_PTB->Draw(); //"HISTE"
-    transmission_hist_e_PTB->SetStats(0);
-    // transmission_hist_e_PTB->SetMarkerStyle(6);
-    // transmission_hist_e_PTB->SetMarkerSize(0.5);
+    transmission_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
+    transmission_hist_e_PTBC->GetYaxis()->SetTitle("Transmission");
+    transmission_hist_e_PTBC->SetTitle(Form("Transmission Histogram - %s", filter_name_title.c_str()));
+    transmission_hist_e_PTBC->SetLineWidth(2);
+    transmission_hist_e_PTBC->Draw(); //"HISTE"
+    transmission_hist_e_PTBC->SetStats(0);
+    // transmission_hist_e_PTBC->SetMarkerStyle(6);
+    // transmission_hist_e_PTBC->SetMarkerSize(0.5);
     // gPad->SetGrid();
     gPad->SetLogx();
     // gStyle->SetPalette(57);
@@ -399,8 +584,13 @@ void crossSectionPlots(){
     l[i]->AddEntry(transmission_hist_e_FIMG,"FIMG","l");
     transmission_hist_e_FIMG->SetLineColor(3);
     transmission_hist_e_FIMG->SetLineWidth(2);
-    transmission_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-2,1e3);
+    // transmission_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-2,1e3);
     transmission_hist_e_FIMG->Draw("SAME");
+
+    // l[i]->AddEntry(transmission_hist_e_PTBC_nTOF_Cuts,"PTBC - nTOF Cuts","l");
+    // transmission_hist_e_PTBC_nTOF_Cuts->SetLineColor(6);
+    // transmission_hist_e_PTBC_nTOF_Cuts->SetLineWidth(2);
+    // transmission_hist_e_PTBC_nTOF_Cuts->Draw("SAME");
 
     // l[i]->AddEntry(trans_hist_fOut,"No Al5","l");
     // trans_hist_fOut->SetLineColor(2);
@@ -453,16 +643,16 @@ void crossSectionPlots(){
     c[i]->cd();
 
     l[i] = new TLegend(0.80,0.7,0.86,0.8);
-    l[i]->AddEntry(cross_section_hist_e_PTB,"PTBC","l");
+    l[i]->AddEntry(cross_section_hist_e_PTBC,"PTBC","l");
 
-    cross_section_hist_e_PTB->GetXaxis()->SetTitle("Energy (in eV)");
-    cross_section_hist_e_PTB->GetYaxis()->SetTitle("Cross Section (in barns)");
-    cross_section_hist_e_PTB->SetTitle(Form("Cross Section Histogram - %s", filter_name_title.c_str()));
-    cross_section_hist_e_PTB->SetLineWidth(2);
-    cross_section_hist_e_PTB->Draw(); //"HISTE"
-    cross_section_hist_e_PTB->SetStats(0);
-    // cross_section_hist_e_PTB->SetMarkerStyle(6);
-    // cross_section_hist_e_PTB->SetMarkerSize(0.5);
+    cross_section_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
+    cross_section_hist_e_PTBC->GetYaxis()->SetTitle("Cross Section (in barns)");
+    cross_section_hist_e_PTBC->SetTitle(Form("Cross Section Histogram - %s", filter_name_title.c_str()));
+    cross_section_hist_e_PTBC->SetLineWidth(2);
+    cross_section_hist_e_PTBC->Draw(); //"HISTE"
+    cross_section_hist_e_PTBC->SetStats(0);
+    // cross_section_hist_e_PTBC->SetMarkerStyle(6);
+    // cross_section_hist_e_PTBC->SetMarkerSize(0.5);
     // gPad->SetGrid();
     gPad->SetLogx();
     // gStyle->SetPalette(57);

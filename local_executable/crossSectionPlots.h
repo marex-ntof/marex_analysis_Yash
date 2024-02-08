@@ -45,10 +45,22 @@ Int_t bins_per_decade = 20;
 // TH1D* tof_hist_filter_out = 0;
 // TH1D* energy_hist_filter_out = 0;
 
-TH1D* transmission_hist_e_PTB = 0;
+TH1D* transmission_hist_e_PTBC = 0;
 TH1D* transmission_hist_e_FIMG = 0;
-TH1D* cross_section_hist_e_PTB = 0;
+TH1D* cross_section_hist_e_PTBC = 0;
 TH1D* cross_section_hist_e_FIMG = 0;
+
+TH1D* energy_hist_target_in_PTBC = 0;
+TH1D* energy_hist_target_in_FIMG = 0;
+TH1D* energy_hist_target_out_PTBC = 0;
+TH1D* energy_hist_target_out_FIMG = 0;
+
+TH1D* transmission_hist_e_PTBC_nTOF_Cuts = 0;
+
+std::vector<Double_t> norm_factors;
+
+// Double_t norm_factor_target_in = 0;
+// Double_t norm_factor_target_out = 0;
 
 // TH1D* trans_hist_fOut = 0;
 // TH1D* trans_hist_fIn = 0;
@@ -69,7 +81,7 @@ TH1D* endf_rf_trans_hist = 0;
 TH1D* endf_rf_xsec_hist = 0;
 
 Int_t evalFile_max_line_num = 0;
-const Double_t flight_path_length_PTB = 182.65 - 0.41; //m
+const Double_t flight_path_length_PTBC = 182.65 - 0.41; //m
 const Double_t flight_path_length_FIMG = 183.5 - 0.41; //m
 const Double_t neutron_mass = 939.56542052; //in MeV
 const Double_t speed_of_light = 299792458.0; //in m/s

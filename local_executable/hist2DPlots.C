@@ -28,7 +28,7 @@
 
 #include "MArEXStyle.C"
 
-const static Int_t num_hist = 8;
+const static Int_t num_hist = 2;
 TH2D* h[num_hist];
 Int_t histCounter = 0;
 
@@ -272,20 +272,21 @@ void hist2DPlots() {
     // retriveHistograms("../rootFiles/pkup.root", "delT_PTBC_beam_intensity_hist");
     // retriveHistograms("../rootFiles/pkup.root", "delT_FIMG_beam_intensity_hist");
 
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det2_afterCuts");       //
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det3_afterCuts");       //
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det4_afterCuts");       //
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det5_afterCuts");       //
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det6_afterCuts");       //
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det7_afterCuts");       //
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fOut_parasitic");           //
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_parasitic");            //
+    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det2");       //
+    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fOut_det2");       //
+    // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det3_afterCuts");       //
+    // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det4_afterCuts");       //
+    // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det5_afterCuts");       //
+    // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det6_afterCuts");       //
+    // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det7_afterCuts");       //
+    // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fOut_parasitic");           //
+    // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_parasitic");            //
 
     //Plotting
     SetMArEXStyle();
     gStyle->SetOptStat(1110);
 
-    TCanvas *c[6];
+    TCanvas *c[2];
 
     int i = 0;
 
@@ -304,68 +305,68 @@ void hist2DPlots() {
     h[i]->GetXaxis()->SetTitle("TOF (in ns)");
     h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
     h[i]->Draw("colz");
-    PTBC_tof_amp_cut_det3->Draw("same");
+    PTBC_tof_amp_cut_det2->Draw("same");
     gPad->SetLogx();
 
-    i++;
+    // i++;
 
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-    h[i]->GetXaxis()->SetTitle("TOF (in ns)");
-    h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    h[i]->Draw("colz");
-    PTBC_tof_amp_cut_det4->Draw("same");
-    gPad->SetLogx();
+    // c[i] = new TCanvas(Form("c%d", i)," ");
+    // c[i]->cd();
+    // h[i]->GetXaxis()->SetTitle("TOF (in ns)");
+    // h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    // h[i]->Draw("colz");
+    // PTBC_tof_amp_cut_det4->Draw("same");
+    // gPad->SetLogx();
 
-    i++;
+    // i++;
 
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-    h[i]->GetXaxis()->SetTitle("TOF (in ns)");
-    h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    h[i]->Draw("colz");
-    PTBC_tof_amp_cut_det5->Draw("same");
-    gPad->SetLogx();
+    // c[i] = new TCanvas(Form("c%d", i)," ");
+    // c[i]->cd();
+    // h[i]->GetXaxis()->SetTitle("TOF (in ns)");
+    // h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    // h[i]->Draw("colz");
+    // PTBC_tof_amp_cut_det5->Draw("same");
+    // gPad->SetLogx();
 
-    i++;
+    // i++;
 
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-    h[i]->GetXaxis()->SetTitle("TOF (in ns)");
-    h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    h[i]->Draw("colz");
-    PTBC_tof_amp_cut_det6->Draw("same");
-    gPad->SetLogx();
+    // c[i] = new TCanvas(Form("c%d", i)," ");
+    // c[i]->cd();
+    // h[i]->GetXaxis()->SetTitle("TOF (in ns)");
+    // h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    // h[i]->Draw("colz");
+    // PTBC_tof_amp_cut_det6->Draw("same");
+    // gPad->SetLogx();
 
-    i++;
+    // i++;
 
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-    h[i]->GetXaxis()->SetTitle("TOF (in ns)");
-    h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    h[i]->Draw("colz");
-    PTBC_tof_amp_cut_det7->Draw("same");
-    gPad->SetLogx();
+    // c[i] = new TCanvas(Form("c%d", i)," ");
+    // c[i]->cd();
+    // h[i]->GetXaxis()->SetTitle("TOF (in ns)");
+    // h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    // h[i]->Draw("colz");
+    // PTBC_tof_amp_cut_det7->Draw("same");
+    // gPad->SetLogx();
 
-    i++;
+    // i++;
 
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-    h[i]->GetXaxis()->SetTitle("TOF (in ns)");
-    h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    h[i]->Draw("colz");
-    PTBC_tof_amp_cut_para->Draw("same");
-    gPad->SetLogx();
+    // c[i] = new TCanvas(Form("c%d", i)," ");
+    // c[i]->cd();
+    // h[i]->GetXaxis()->SetTitle("TOF (in ns)");
+    // h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    // h[i]->Draw("colz");
+    // PTBC_tof_amp_cut_para->Draw("same");
+    // gPad->SetLogx();
 
-    i++;
+    // i++;
 
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-    h[i]->GetXaxis()->SetTitle("TOF (in ns)");
-    h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    h[i]->Draw("colz");
-    PTBC_tof_amp_cut_para->Draw("same");
-    gPad->SetLogx();
+    // c[i] = new TCanvas(Form("c%d", i)," ");
+    // c[i]->cd();
+    // h[i]->GetXaxis()->SetTitle("TOF (in ns)");
+    // h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    // h[i]->Draw("colz");
+    // PTBC_tof_amp_cut_para->Draw("same");
+    // gPad->SetLogx();
 
     // c[i] = new TCanvas(Form("c%d", i)," ");
     // c[i]->cd();
