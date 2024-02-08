@@ -80,6 +80,14 @@ TH1D* jendl_xsec_hist = 0;
 TH1D* endf_rf_trans_hist = 0;
 TH1D* endf_rf_xsec_hist = 0;
 
+std::vector<Double_t> endf_e;
+std::vector<Double_t> endf_xsec;
+std::vector<Double_t> endf_trans;
+
+std::vector<Double_t> jendl_e;
+std::vector<Double_t> jendl_xsec;
+std::vector<Double_t> jendl_trans;
+
 Int_t evalFile_max_line_num = 0;
 const Double_t flight_path_length_PTBC = 182.65 - 0.41; //m
 const Double_t flight_path_length_FIMG = 183.5 - 0.41; //m

@@ -28,8 +28,6 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
     Double_t val1, val2; //val1 -> Energy (eV); val2 -> Cross Section (barns)
     std::string line;
     Double_t line_count = 0;
-    std::vector<Double_t> energy;
-    std::vector<Double_t> xsec;
 
     while (std::getline(inputFile, line)) {
 
@@ -48,8 +46,9 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
         std::istringstream iss(line);
 
         if (iss >> val1 >> val2) {
-            energy.push_back(val1);
-            xsec.push_back(val2);
+            endf_e.push_back(val1);
+            endf_xsec.push_back(val2);
+            endf_trans.push_back(std::exp(- n * val2));
         } else {
             std::cerr << "Invalid data format.\n";
         }
@@ -57,34 +56,32 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
 
     //Filling the histograms
     Double_t xsec_sum = 0;
-    Double_t trans_sum = 0;
     Int_t sum_counter = 0;
     Int_t bin_counter = 1;
     
     Double_t xsec_sum_rf = 0;
-    Double_t trans_sum_rf = 0;
     Int_t sum_counter_rf = 0;
     Int_t bin_counter_rf = 1;
 
-    for (int i = 0; i < energy.size(); i++)
+    for (int i = 0; i < endf_e.size(); i++)
     {
         Double_t new_e = 0;
         if (fillENDFSmeared == true)
         {
             //Convoluting endf with rf
-            Int_t e_bin_num = rf_hist->GetXaxis()->FindBin(energy[i]);
-            std::string projection_name = "profile_" + std::to_string(energy[i]);
+            Int_t e_bin_num = rf_hist->GetXaxis()->FindBin(endf_e[i]);
+            std::string projection_name = "profile_" + std::to_string(endf_e[i]);
             TH1D* projection = (TH1D*)rf_hist->ProjectionY(
                 projection_name.c_str(),
                 e_bin_num, e_bin_num
             );
             // Double_t fwhm = FindFWHM(projection); //in cm
             Double_t rf_length = projection->GetMean(1) * 0.01; //projection->GetBinCenter( projection->GetMaximumBin() ) * 0.01; //converting to m
-            Double_t e_tof = EnergyToTOF(energy[i], flight_path_length_PTBC);
+            Double_t e_tof = EnergyToTOF(endf_e[i], flight_path_length_PTBC);
             new_e = TOFToEnergy(e_tof, flight_path_length_PTBC, rf_length); //in eV
         }
         
-        if (fillENDF == true && energy[i] > energy_bin_edges[bin_counter])
+        if (fillENDF == true && endf_e[i] > energy_bin_edges[bin_counter])
         {
             if (sum_counter == 0)
             {
@@ -95,8 +92,7 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
                 endf_trans_hist->SetBinContent(bin_counter, std::exp(- n * xsec_sum/sum_counter));
             }
             
-            xsec_sum = xsec[i];
-            // trans_sum = std::exp(- n * xsec[i]);
+            xsec_sum = endf_xsec[i];
             sum_counter = 1;
             bin_counter++;
             i--;
@@ -114,25 +110,22 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
                 endf_rf_trans_hist->SetBinContent(bin_counter_rf, std::exp(- n * xsec_sum_rf/sum_counter_rf));
             }
             
-            xsec_sum_rf = xsec[i];
-            // trans_sum_rf = std::exp(- n * xsec[i]);
+            xsec_sum_rf = endf_xsec[i];
             sum_counter_rf = 1;
             bin_counter_rf++;
             i--;
             continue;
         }
 
-        if (fillENDF == true && energy[i] < energy_bin_edges[bin_counter])
+        if (fillENDF == true && endf_e[i] < energy_bin_edges[bin_counter])
         {
-            xsec_sum += xsec[i];
-            // trans_sum += std::exp(- n * xsec[i]);
+            xsec_sum += endf_xsec[i];
             sum_counter++;
         }
 
         if (fillENDFSmeared == true && new_e < energy_bin_edges[bin_counter])
         {
-            xsec_sum_rf += xsec[i];
-            // trans_sum_rf += std::exp(- n * xsec[i]);
+            xsec_sum_rf += endf_xsec[i];
             sum_counter_rf++;
         }
     }
@@ -151,8 +144,6 @@ void jendl(Double_t n, Double_t energy_bin_edges[]){
     Double_t val1, val2; //val1 -> Energy (eV); val2 -> Cross Section (barns)
     std::string line;
     Double_t line_count = 0;
-    std::vector<Double_t> energy;
-    std::vector<Double_t> xsec;
 
     while (std::getline(inputFile, line)) {
 
@@ -171,8 +162,9 @@ void jendl(Double_t n, Double_t energy_bin_edges[]){
         std::istringstream iss(line);
 
         if (iss >> val1 >> val2) {
-            energy.push_back(val1);
-            xsec.push_back(val2);
+            jendl_e.push_back(val1);
+            jendl_xsec.push_back(val2);
+            jendl_trans.push_back(std::exp(- n * val2));
         } else {
             std::cerr << "Invalid data format.\n";
         }
@@ -180,14 +172,13 @@ void jendl(Double_t n, Double_t energy_bin_edges[]){
 
     //Filling the histograms
     Double_t xsec_sum = 0;
-    Double_t trans_sum = 0;
     Int_t sum_counter = 0;
     Int_t bin_counter = 1;
 
-    for (int i = 0; i < energy.size(); i++)
+    for (int i = 0; i < jendl_e.size(); i++)
     {
         
-        if (energy[i] > energy_bin_edges[bin_counter])
+        if (jendl_e[i] > energy_bin_edges[bin_counter])
         {
             if (sum_counter == 0)
             {
@@ -198,18 +189,16 @@ void jendl(Double_t n, Double_t energy_bin_edges[]){
                 jendl_trans_hist->SetBinContent(bin_counter, std::exp(- n * xsec_sum/sum_counter));
             }
             
-            xsec_sum = xsec[i];
-            // trans_sum = std::exp(- n * xsec[i]);
+            xsec_sum = jendl_xsec[i];
             sum_counter = 1;
             bin_counter++;
             i--;
             continue;
         }
 
-        if (energy[i] < energy_bin_edges[bin_counter])
+        if (jendl_e[i] < energy_bin_edges[bin_counter])
         {
-            xsec_sum += xsec[i];
-            // trans_sum += std::exp(- n * xsec[i]);
+            xsec_sum += jendl_xsec[i];
             sum_counter++;
         }
     }
@@ -286,29 +275,19 @@ TH1D* retriveHistogramsChangeBPD(const char *fname, const char *hist_name, Int_t
     return hist_new;
 }
 
-void retriveHistograms(const char *fname){
+TH1D* retriveHistograms(const char *fname, const char *hist_name){
     
     TFile* hist_file = TFile::Open(fname, "READ");
-    if (!hist_file || hist_file->IsZombie()) {
-        cout << "Unable to open " << fname << " for reading..." <<endl;
-        return;
-    }
+    // if (!hist_file || hist_file->IsZombie()) {
+    //     cout << "Unable to open " << fname << " for reading..." <<endl;
+    //     return;
+    // }
 
-    // tof_hist_filter_in = (TH1D*)hist_file->Get("tof_hist_filter_in");
-    // energy_hist_filter_in = (TH1D*)hist_file->Get("energy_hist_filter_in");
-    // tof_hist_filter_out = (TH1D*)hist_file->Get("tof_hist_filter_out");
-    // energy_hist_filter_out = (TH1D*)hist_file->Get("energy_hist_filter_out");
+    TH1D* hist_new = (TH1D*)hist_file->Get(hist_name);
 
-    // trans_hist_fOut = (TH1D*)hist_file->Get("trans_hist_fOut");
-    // trans_hist_fIn = (TH1D*)hist_file->Get("trans_hist_fIn");
-    // trans_hist_fOut_endf = (TH1D*)hist_file->Get("trans_hist_fOut_endf");
-    // trans_hist_fIn_endf = (TH1D*)hist_file->Get("trans_hist_fIn_endf");
-    transmission_hist_e_PTBC = (TH1D*)hist_file->Get("transmission_hist_e_PTBC");
-    transmission_hist_e_FIMG = (TH1D*)hist_file->Get("transmission_hist_e_FIMG");
-    cross_section_hist_e_PTBC = (TH1D*)hist_file->Get("cross_section_hist_e_PTBC");
-    cross_section_hist_e_FIMG = (TH1D*)hist_file->Get("cross_section_hist_e_FIMG");
+    hist_file->Close();
 
-    // hist_file->Close();
+    return hist_new;
 }
 
 void changeHistBPD(TH1D* hist_new, TH1D* hist_old, Int_t num_bins_new, Double_t bin_edges_new[]){
@@ -631,11 +610,48 @@ void crossSectionPlots(){
         // jendl_trans_hist->GetXaxis()->SetRange(1e-2,2e7);
         jendl_trans_hist->Draw("SAME");
     }
+
+    // auto endf_xsec_graph = new TGraph();
+    // auto jendl_xsec_graph = new TGraph();
+
+    // if (fillENDF){
+    //     auto endf_trans_graph = new TGraph();
+    //     for (Int_t i = 0; i < endf_e.size(); i++)
+    //     {
+    //         endf_trans_graph->SetPoint(i+1, endf_e.at(i), endf_trans.at(i));
+    //     }
+    //     l[i]->AddEntry(endf_trans_graph,"ENDF","l");
+    //     endf_trans_graph->SetLineColor(2);
+    //     endf_trans_graph->SetLineWidth(2);
+    //     // endf_trans_graph->GetXaxis()->SetRange(1e-2,2e7);
+    //     endf_trans_graph->Draw("SAME");
+    // }
+
+    // if (fillENDFSmeared){
+    //     l[i]->AddEntry(endf_rf_trans_hist,"ENDF smeared","l");
+    //     endf_rf_trans_hist->SetLineColor(7);
+    //     endf_rf_trans_hist->SetLineWidth(2);
+    //     endf_rf_trans_hist->Draw("SAME");
+    // }
+
+    // if (fillJENDL)
+    // {
+    //     auto jendl_trans_graph = new TGraph();
+    //     for (Int_t i = 0; i < jendl_e.size(); i++)
+    //     {
+    //         jendl_trans_graph->SetPoint(i+1, jendl_e.at(i), jendl_trans.at(i));
+    //     }
+    //     l[i]->AddEntry(jendl_trans_graph,"JENDL-5","l");
+    //     jendl_trans_graph->SetLineColor(1);
+    //     jendl_trans_graph->SetLineWidth(2);
+    //     // jendl_trans_graph->GetXaxis()->SetRange(1e-2,2e7);
+    //     jendl_trans_graph->Draw("SAME");
+    // }
     
 
     l[i]->SetMargin(0.4);
     l[i]->Draw();
-    // c[i]->Print(Form("../plots/h_trans_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
+    c[i]->Print(Form("../plots/h_trans_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
 
     i++;
 
@@ -677,9 +693,18 @@ void crossSectionPlots(){
         endf_rf_xsec_hist->Draw("SAME");
     }
 
+    if (fillJENDL)
+    {
+        l[i]->AddEntry(jendl_xsec_hist,"JENDL-5","l");
+        jendl_xsec_hist->SetLineColor(1);
+        jendl_xsec_hist->SetLineWidth(2);
+        // jendl_xsec_hist->GetXaxis()->SetRange(1e-2,2e7);
+        jendl_xsec_hist->Draw("SAME");
+    }
+
     l[i]->SetMargin(0.4);
     l[i]->Draw();
-    // c[i]->Print(Form("../plots/h_xsec_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
+    c[i]->Print(Form("../plots/h_xsec_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
 
     // i++;
 
