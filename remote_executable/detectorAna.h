@@ -42,10 +42,22 @@ TFile *outputRootFile = 0;
 // TH1D* trans_hist_fIn = 0;
 // TH1D* trans_hist_fOut_endf = 0;
 // TH1D* trans_hist_fIn_endf = 0;
-TH1D* transmission_hist_e_PTB = 0;
-TH1D* cross_section_hist_e_PTB = 0;
-TH1D* transmission_hist_e_FIMG = 0;
-TH1D* cross_section_hist_e_FIMG = 0;
+// TH1D* transmission_hist_e_PTB = 0;
+// TH1D* cross_section_hist_e_PTB = 0;
+// TH1D* transmission_hist_e_FIMG = 0;
+// TH1D* cross_section_hist_e_FIMG = 0;
+
+TH1D* energy_hist_target_in_PTB = 0;
+TH1D* energy_hist_target_in_FIMG = 0;
+TH1D* energy_hist_target_out_PTB = 0;
+TH1D* energy_hist_target_out_FIMG = 0;
+
+TH1D* tof_hist_target_in_PTB = 0;
+TH1D* tof_hist_target_in_FIMG = 0;
+TH1D* tof_hist_target_out_PTB = 0;
+TH1D* tof_hist_target_out_FIMG = 0;
+
+std::vector<Double_t> norm_factors;
 
 Int_t bins_per_decade = 1000;
 Double_t flight_path_length_PTB = 182.65 - 0.41; //m
@@ -188,7 +200,8 @@ std::vector<Int_t> f_out_t_emptyBotRot_ts = {117623, 117624, 117627, 117628, 117
 std::vector<Int_t> f_out_t_emptyBotRotBack_ts = {117642, 117645, 117646, 117647, 117648, 117649};
 
 //Argon Bottle
-std::vector<Int_t> f_out_t_arBot_ts = {117665, 117680, 117684, 117685, 117686, 117687, 117688, 117692, 117693, 117710, 117711, 117712, 117713, 117714, 117716, 117717, 117718, 117719, 117724, 117725, 117726, 117727, 117728, 117729, 117730, 117731, 117732, 117733, 117734, 117735, 117736, 117737, 117738};
+std::vector<Int_t> f_out_t_arBot_ts = {117665, 117680, 117684, 117685, 117688, 117692, 117693, 117710, 117711, 117712, 117713, 117716, 117717, 117718, 117719, 117724, 117725, 117726, 117727, 117728, 117729, 117730, 117731, 117732, 117733, 117734, 117735, 117736, 117737, 117738}; //117714, 117686, 
+//117687, 
 
 //Argon Bottle (Argon Out)
 std::vector<Int_t> f_out_t_arBotEmpty_ts = {117746, 117747, 117748, 117749, 117750, 117751, 117752, 117753, 117754, 117755, 117756, 117757, 117761, 117762, 117763, 117764, 117765, 117766}; //
