@@ -26,20 +26,45 @@
 #include "TRandom3.h"
 
 //////// Run variables
-const std::string target_name("c1p2_ts"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
-const std::string target_out_name("none_ts"); //none, none_ts, ar_bottle
+const std::string target_name("no_filter"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
+const std::string target_out_name("none"); //none, none_ts, ar_bottle
+const std::string target_name_title("No target");
+//Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
+//Argon Tank
+
 // const std::string mode("run");
 // bi1, al3, al5, al8 - none
 
 //Root file
 TFile *outputRootFile = 0;
 
-TH1D* trans_loose_cut_det_1 = 0;
-TH1D* trans_mid_cut_det_1 = 0;
-TH1D* trans_tight_cut_det_1 = 0;
-TH1D* trans_loose_cut_det_2 = 0;
-TH1D* trans_mid_cut_det_2 = 0;
-TH1D* trans_tight_cut_det_2 = 0;
+// TH1D* trans_loose_cut_det_1 = 0;
+// TH1D* trans_mid_cut_det_1 = 0;
+// TH1D* trans_tight_cut_det_1 = 0;
+// TH1D* trans_loose_cut_det_2 = 0;
+// TH1D* trans_mid_cut_det_2 = 0;
+// TH1D* trans_tight_cut_det_2 = 0;
+
+TH2D* FIMG_tof_amp_total = 0;
+TH2D* FIMG_tof_amp_dedi_det1 = 0;
+TH2D* FIMG_tof_amp_dedi_det2 = 0;
+TH2D* FIMG_tof_amp_para_det1 = 0;
+TH2D* FIMG_tof_amp_para_det2 = 0;
+
+TH2D* FIMG_tof_amp_det1_afterCuts = 0;
+TH2D* FIMG_tof_amp_det2_afterCuts = 0;
+
+//cut plots
+TCutG* FIMG_tof_amp_cut_dedi_det1;
+TCutG* FIMG_tof_amp_cut_dedi_det2;
+TCutG* FIMG_tof_amp_cut_para_det1;
+TCutG* FIMG_tof_amp_cut_para_det2;
+
+Double_t tof_min = 1e2;
+Double_t tof_max = 1e8;
+Double_t amp_min = 0.;
+Double_t amp_max = 50000.;
+Int_t num_bins_amp = 5000;
 
 Int_t bins_per_decade = 1000;
 Double_t flight_path_length_PTB = 182.65 - 0.41; //m
@@ -273,58 +298,130 @@ Double_t TOFToEnergy(Double_t t, Double_t flight_path_length, Double_t rf_length
     return energy * 1e6;  //e in eV
 }
 
-Double_t fimgCutFunction(Double_t x, Int_t det_num, std::string cut_type){
+// Double_t fimgCutFunction(Double_t x, Int_t det_num, std::string cut_type){
 
-    Double_t A = 0;
-    Double_t B = 0;
-    Double_t C = 0;
+//     Double_t A = 0;
+//     Double_t B = 0;
+//     Double_t C = 0;
 
-    if(det_num == 1) {
-        // A / ( TMath::Log(x) + B )
-        if (!cut_type.compare("loose"))
-        {
-            A = 4000;
-            B = -TMath::Log(7750);
-            C = 600;
-        }
-        if (!cut_type.compare("mid"))
-        {
-            A = 4500;
-            B = -TMath::Log(7750);
-            C = 600;
-        }
-        if (!cut_type.compare("tight"))
-        {
-            A = 7000;
-            B = -TMath::Log(7750);
-            C = 600;
-        }
+//     if(det_num == 1) {
+//         // A / ( TMath::Log(x) + B )
+//         if (!cut_type.compare("loose"))
+//         {
+//             A = 4000;
+//             B = -TMath::Log(7750);
+//             C = 600;
+//         }
+//         if (!cut_type.compare("mid"))
+//         {
+//             A = 4500;
+//             B = -TMath::Log(7750);
+//             C = 600;
+//         }
+//         if (!cut_type.compare("tight"))
+//         {
+//             A = 7000;
+//             B = -TMath::Log(7750);
+//             C = 600;
+//         }
         
-        return (A / (TMath::Log(x) + B));
-    }
-    if(det_num == 2) {
-        // A / ( TMath::Log(x) + B )
-        if (!cut_type.compare("loose"))
-        {
-            A = 3000;
-            B = -TMath::Log(7080);
-            C = 400;
-        }
-        if (!cut_type.compare("mid"))
-        {
-            A = 5000;
-            B = -TMath::Log(7080);
-            C = 400;
-        }
-        if (!cut_type.compare("tight"))
-        {
-            A = 6500;
-            B = -TMath::Log(7080);
-            C = 400;
-        }
+//         return (A / (TMath::Log(x) + B));
+//     }
+//     if(det_num == 2) {
+//         // A / ( TMath::Log(x) + B )
+//         if (!cut_type.compare("loose"))
+//         {
+//             A = 3000;
+//             B = -TMath::Log(7080);
+//             C = 400;
+//         }
+//         if (!cut_type.compare("mid"))
+//         {
+//             A = 5000;
+//             B = -TMath::Log(7080);
+//             C = 400;
+//         }
+//         if (!cut_type.compare("tight"))
+//         {
+//             A = 6500;
+//             B = -TMath::Log(7080);
+//             C = 400;
+//         }
         
-        return ((A / (TMath::Log(x) + B)) + C);
+//         return ((A / (TMath::Log(x) + B)) + C);
+//     }
+// }
+
+Double_t fimgCutFunction(Double_t tof, Int_t det_num, std::string cut_type, Float_t PulseIntensity){
+
+    if (!cut_type.compare("ntof"))
+    {
+        if (det_num == 1)
+        {
+            if (tof >= 1e5)
+            {
+                return 500;
+            }
+            if (tof >= 1e4 && tof < 1e5)
+            {
+                return ((500 - 2350)*(tof - 1e4)/(1e5 - 1e4) + 2350);
+            }
+        }
+        if (det_num == 2)
+        {
+            if (tof >= 1e5)
+            {
+                return 500;
+            }
+            if (tof >= 1e4 && tof < 1e5)
+            {
+                return ((500 - 3000)*(tof - 1e4)/(1e5 - 1e4) + 3000);
+            }
+        }
     }
+}
+
+void fill_nTOF_cuts(){
+
+    FIMG_tof_amp_cut_dedi_det1 = new TCutG("FIMG_tof_amp_cut_dedi_det1",3);
+    FIMG_tof_amp_cut_dedi_det1->SetLineColor(2);
+    FIMG_tof_amp_cut_dedi_det1->SetLineWidth(2);
+    FIMG_tof_amp_cut_dedi_det1->SetVarX("x");
+    FIMG_tof_amp_cut_dedi_det1->SetVarY("y");
+    FIMG_tof_amp_cut_dedi_det1->SetPoint(0, 1e4, 70000.);
+    FIMG_tof_amp_cut_dedi_det1->SetPoint(1, 1e4, 2350.);
+    FIMG_tof_amp_cut_dedi_det1->SetPoint(2, 1e5, 500.);
+    FIMG_tof_amp_cut_dedi_det1->SetPoint(3, 1e8, 500.);
+
+    FIMG_tof_amp_cut_para_det1 = new TCutG("FIMG_tof_amp_cut_para_det1",3);
+    FIMG_tof_amp_cut_para_det1->SetLineColor(2);
+    FIMG_tof_amp_cut_para_det1->SetLineWidth(2);
+    FIMG_tof_amp_cut_para_det1->SetVarX("x");
+    FIMG_tof_amp_cut_para_det1->SetVarY("y");
+    FIMG_tof_amp_cut_para_det1->SetPoint(0, 1e4, 70000.);
+    FIMG_tof_amp_cut_para_det1->SetPoint(1, 1e4, 2350.);
+    FIMG_tof_amp_cut_para_det1->SetPoint(2, 1e5, 500.);
+    FIMG_tof_amp_cut_para_det1->SetPoint(3, 1e8, 500.);
+    
+    FIMG_tof_amp_cut_dedi_det2 = new TCutG("FIMG_tof_amp_cut_dedi_det2",3);
+    FIMG_tof_amp_cut_dedi_det2->SetLineColor(2);
+    FIMG_tof_amp_cut_dedi_det2->SetLineWidth(2);
+    FIMG_tof_amp_cut_dedi_det2->SetVarX("x");
+    FIMG_tof_amp_cut_dedi_det2->SetVarY("y");
+    FIMG_tof_amp_cut_dedi_det2->SetPoint(0, 1e4, 70000.);
+    FIMG_tof_amp_cut_dedi_det2->SetPoint(1, 1e4, 3000.);
+    FIMG_tof_amp_cut_dedi_det2->SetPoint(2, 1e5, 500.);
+    FIMG_tof_amp_cut_dedi_det2->SetPoint(3, 1e8, 500.);
+
+    FIMG_tof_amp_cut_para_det2 = new TCutG("FIMG_tof_amp_cut_para_det2",3);
+    FIMG_tof_amp_cut_para_det2->SetLineColor(2);
+    FIMG_tof_amp_cut_para_det2->SetLineWidth(2);
+    FIMG_tof_amp_cut_para_det2->SetVarX("x");
+    FIMG_tof_amp_cut_para_det2->SetVarY("y");
+    FIMG_tof_amp_cut_para_det2->SetPoint(0, 1e4, 70000.);
+    FIMG_tof_amp_cut_para_det2->SetPoint(1, 1e4, 3000.);
+    FIMG_tof_amp_cut_para_det2->SetPoint(2, 1e5, 500.);
+    FIMG_tof_amp_cut_para_det2->SetPoint(3, 1e8, 500.);
 }
 
 Int_t FindDecadePower(Double_t num){
