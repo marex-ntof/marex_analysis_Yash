@@ -235,24 +235,28 @@ Double_t fimgCutFunction(Double_t x, Int_t det_num){
 
 void fillCutsPTBC(){
     //Det 2
+    //End points of cut line 1
     t_det2[0][0] = 800.0;
     a_det2[0][0] = 8000.0;
 
     t_det2[0][1] = 2605.0;
     a_det2[0][1] = 8000.0;
 
+    //End points of cut line 2
     t_det2[1][0] = 2600.0;
     a_det2[1][0] = 9500.0;
 
     t_det2[1][1] = 2800.0;
     a_det2[1][1] = 9500.0;
 
+    //End points of cut line 3
     t_det2[2][0] = 2800.0;
     a_det2[2][0] = 8000.0;
 
     t_det2[2][1] = 5000.0;
     a_det2[2][1] = 8000.0;
 
+    //End points of cut line 4
     t_det2[3][0] = 5000.0;
     a_det2[3][0] = 4000.0; 
 
@@ -337,6 +341,68 @@ void fillCutsPTBC(){
     t_para[1][1] = 1e8;
     a_para[1][1] = 4000.0;
 }
+
+//My FIMG Cuts
+//det number, cut line number, end points of the line
+Double_t tof_cut_FIMG[2][5][2];
+Double_t amp_cut_FIMG[2][5][2];
+
+void fillCutsFIMG(){
+    //Det 1
+    tof_cut_FIMG[0][0][0] = 7e3;
+    amp_cut_FIMG[0][0][0] = 4600.;
+    tof_cut_FIMG[0][0][1] = 1e4;
+    amp_cut_FIMG[0][0][1] = 3000.;
+
+    tof_cut_FIMG[0][1][0] = 1e4;
+    amp_cut_FIMG[0][1][0] = 3000.;
+    tof_cut_FIMG[0][1][1] = 2e4;
+    amp_cut_FIMG[0][1][1] = 1525.;
+
+    tof_cut_FIMG[0][2][0] = 2e4;
+    amp_cut_FIMG[0][2][0] = 1525.;
+    tof_cut_FIMG[0][2][1] = 45090.;
+    amp_cut_FIMG[0][2][1] = 1525.;
+
+    tof_cut_FIMG[0][3][0] = 45090.;
+    amp_cut_FIMG[0][3][0] = 1525.;
+    tof_cut_FIMG[0][3][1] = 1e5;
+    amp_cut_FIMG[0][3][1] = 500.;
+
+    tof_cut_FIMG[0][4][0] = 1e5;
+    amp_cut_FIMG[0][4][0] = 500.;
+    tof_cut_FIMG[0][4][1] = 1e8;
+    amp_cut_FIMG[0][4][1] = 500.;
+
+    //Det 2
+    tof_cut_FIMG[1][0][0] = 7e3;
+    amp_cut_FIMG[1][0][0] = 4000.;
+    tof_cut_FIMG[1][0][1] = 8e3;
+    amp_cut_FIMG[1][0][1] = 3200.;
+
+    tof_cut_FIMG[1][1][0] = 8e3;
+    amp_cut_FIMG[1][1][0] = 3200.;
+    tof_cut_FIMG[1][1][1] = 2e4;
+    amp_cut_FIMG[1][1][1] = 2250.;
+
+    tof_cut_FIMG[1][2][0] = 2e4;
+    amp_cut_FIMG[1][2][0] = 2250.;
+    tof_cut_FIMG[1][2][1] = 31800.;
+    amp_cut_FIMG[1][2][1] = 2250.;
+
+    tof_cut_FIMG[1][3][0] = 31800.;
+    amp_cut_FIMG[1][3][0] = 2250.;
+    tof_cut_FIMG[1][3][1] = 7e4;
+    amp_cut_FIMG[1][3][1] = 500.;
+
+    tof_cut_FIMG[1][4][0] = 7e4;
+    amp_cut_FIMG[1][4][0] = 500.;
+    tof_cut_FIMG[1][4][1] = 1e8;
+    amp_cut_FIMG[1][4][1] = 500.;
+}
+
+
+/////////////////////////////////////////////////////
 
 //nTOF - PTBC cuts
 //det_num, cut num, x or y
@@ -590,7 +656,7 @@ void fillRuns(){
     f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_c_f_out_t_out.begin(), c_c_f_out_t_out.end() );
 }
 
-Double_t yOnTheCutLinePTBC(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t x3){
+Double_t yOnTheCutLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t x3){
     if(y1 == y2){
         return y1;
     }

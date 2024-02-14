@@ -21,7 +21,7 @@ void applynTOFCuts_FIMG(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t
         {
             if ( (Double_t) amp >= fimgCutFunction(tof, det_num, "ntof", pulseIntensity) )
             {
-                FIMG_tof_amp_det1_afterCuts->Fill(tof, (Double_t) amp);
+                FIMG_tof_amp_det1_after_nTOFCuts->Fill(tof, (Double_t) amp);
             }
         }
 
@@ -29,10 +29,41 @@ void applynTOFCuts_FIMG(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t
         {
             if ( (Double_t) amp >= fimgCutFunction(tof, det_num, "ntof", pulseIntensity) )
             {
-                FIMG_tof_amp_det2_afterCuts->Fill(tof, (Double_t) amp);
+                FIMG_tof_amp_det2_after_nTOFCuts->Fill(tof, (Double_t) amp);
             }
         }
     }
+    return;
+}
+
+void applyMyCuts_FIMG(Double_t tof, Float_t amp, Int_t det_num){
+    //Filling the histograms
+    if (tof < 7e3)
+    {
+        return;
+    }
+
+    for (int k = 0; k < 5; k++)
+    {
+        if (tof >= tof_cut_FIMG[det_num-1][k][0] && tof < tof_cut_FIMG[det_num-1][k][1])
+        {
+            if ( (Double_t) amp > yOnTheCutLine(tof_cut_FIMG[det_num-1][k][0], amp_cut_FIMG[det_num-1][k][0], tof_cut_FIMG[det_num-1][k][1], amp_cut_FIMG[det_num-1][k][1], tof) )
+            {
+                if (det_num == 1)
+                {
+                    FIMG_tof_amp_det1_after_MyCuts->Fill(tof, (Double_t) amp);
+                }
+
+                if (det_num == 2)
+                {
+                    FIMG_tof_amp_det2_after_MyCuts->Fill(tof, (Double_t) amp);
+                }
+                
+                break;    
+            }
+        }
+    }
+    
     return;
 }
 
@@ -154,6 +185,7 @@ void fillEnergyHist(std::vector<Int_t> run_list){
             }
 
             applynTOFCuts_FIMG(corrected_tof, amp, PulseIntensity, det_num);
+            applyMyCuts_FIMG(corrected_tof, amp, det_num);
         }
 
         file_ntof->Close();
@@ -266,6 +298,7 @@ void calcTransmission(TH1D* e_hist_in, TH1D* e_hist_out, TH1D* trans_hist, Doubl
 void cutoffAnalysis_FIMG() {
     
     fillRuns();
+    fillCutsFIMG();
 
     //Calculating Energy bin edges
     // Double_t tof_min = 1e3; //ns
@@ -316,9 +349,10 @@ void cutoffAnalysis_FIMG() {
     FIMG_tof_amp_para_det1 = new TH2D("FIMG_tof_amp_para_det1",Form("ToF vs Amp - FIMG Det 1 - Parasitic - %s", target_name_title.c_str()), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
     FIMG_tof_amp_para_det2 = new TH2D("FIMG_tof_amp_para_det2",Form("ToF vs Amp - FIMG Det 2 - Parasitic - %s", target_name_title.c_str()), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
 
-    FIMG_tof_amp_det1_afterCuts = new TH2D("FIMG_tof_amp_det1_afterCuts",Form("ToF vs Amp - FIMG Det 1 - After Cuts - %s", target_name_title.c_str()), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
-    FIMG_tof_amp_det2_afterCuts = new TH2D("FIMG_tof_amp_det2_afterCuts",Form("ToF vs Amp - FIMG Det 2 - After Cuts - %s", target_name_title.c_str()), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
-
+    FIMG_tof_amp_det1_after_nTOFCuts = new TH2D("FIMG_tof_amp_det1_after_nTOFCuts",Form("ToF vs Amp - FIMG Det 1 - n_TOF Cuts - %s", target_name_title.c_str()), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
+    FIMG_tof_amp_det2_after_nTOFCuts = new TH2D("FIMG_tof_amp_det2_after_nTOFCuts",Form("ToF vs Amp - FIMG Det 2 - n_TOF Cuts - %s", target_name_title.c_str()), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
+    FIMG_tof_amp_det1_after_MyCuts = new TH2D("FIMG_tof_amp_det1_after_MyCuts",Form("ToF vs Amp - FIMG Det 1 - My Cuts - %s", target_name_title.c_str()), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
+    FIMG_tof_amp_det2_after_MyCuts = new TH2D("FIMG_tof_amp_det2_after_MyCuts",Form("ToF vs Amp - FIMG Det 2 - My Cuts - %s", target_name_title.c_str()), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
     //transmission histogram
     // trans_loose_cut_det_1 = new TH1D("trans_loose_cut_det_1","Transmission Hist",num_bins_e,bin_edges_e);
     // trans_mid_cut_det_1 = new TH1D("trans_mid_cut_det_1","Transmission Hist",num_bins_e,bin_edges_e);
@@ -335,24 +369,35 @@ void cutoffAnalysis_FIMG() {
     }
 
     fill_nTOF_cuts();
+    fill_my_cuts();
 
     //Writing to the output file
-    outputRootFile = new TFile(Form("../rootFiles/cutoffAnalysis_FIMG_%s_nTOF_cuts.root", target_name.c_str()),"recreate");
+    outputRootFile = new TFile(Form("../rootFiles/cutoffAnalysis_FIMG_%s.root", target_name.c_str()),"recreate");
     FIMG_tof_amp_total->Write();
     FIMG_tof_amp_dedi_det1->Write();
     FIMG_tof_amp_dedi_det2->Write();
     FIMG_tof_amp_para_det1->Write();
     FIMG_tof_amp_para_det2->Write();
-    FIMG_tof_amp_det1_afterCuts->Write();
-    FIMG_tof_amp_det2_afterCuts->Write();
 
-    FIMG_tof_amp_cut_dedi_det1->Write();
-    FIMG_tof_amp_cut_dedi_det2->Write();
-    FIMG_tof_amp_cut_para_det1->Write();
-    FIMG_tof_amp_cut_para_det2->Write();
+    FIMG_tof_amp_det1_after_nTOFCuts->Write();
+    FIMG_tof_amp_det2_after_nTOFCuts->Write();
+    FIMG_tof_amp_det1_after_MyCuts->Write();
+    FIMG_tof_amp_det2_after_MyCuts->Write();
+
+    //nTOF cut plots
+    FIMG_nTOF_tof_amp_cut_dedi_det1->Write();
+    FIMG_nTOF_tof_amp_cut_dedi_det2->Write();
+    FIMG_nTOF_tof_amp_cut_para_det1->Write();
+    FIMG_nTOF_tof_amp_cut_para_det2->Write();
+
+    //My cut plots
+    FIMG_my_tof_amp_cut_dedi_det1->Write();
+    FIMG_my_tof_amp_cut_dedi_det2->Write();
+    FIMG_my_tof_amp_cut_para_det1->Write();
+    FIMG_my_tof_amp_cut_para_det2->Write();
 
     outputRootFile->Close();
 
-    std::cout << Form("Created output file 'cutoffAnalysis_FIMG_%s_nTOF_cuts.root'", target_name.c_str()) << std::endl;
+    std::cout << Form("Created output file 'cutoffAnalysis_FIMG_%s.root'", target_name.c_str()) << std::endl;
     
 }

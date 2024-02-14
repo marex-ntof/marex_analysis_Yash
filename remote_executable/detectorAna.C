@@ -16,7 +16,7 @@ void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t d
         {
             if (tof >= t_para[k][0] && tof < t_para[k][1])
             {
-                if ( (Double_t) amp > yOnTheCutLinePTBC(t_para[k][0], a_para[k][0], t_para[k][1], a_para[k][1], tof) )
+                if ( (Double_t) amp > yOnTheCutLine(t_para[k][0], a_para[k][0], t_para[k][1], a_para[k][1], tof) )
                 {
                     hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
                     break;    
@@ -31,7 +31,7 @@ void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t d
         {
             if (tof >= t_det2[k][0] && tof < t_det2[k][1])
             {
-                if ( (Double_t) amp > yOnTheCutLinePTBC(t_det2[k][0], a_det2[k][0], t_det2[k][1], a_det2[k][1], tof) )
+                if ( (Double_t) amp > yOnTheCutLine(t_det2[k][0], a_det2[k][0], t_det2[k][1], a_det2[k][1], tof) )
                 {
                     hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
                     break;    
@@ -43,7 +43,7 @@ void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t d
         {
             if (tof >= t_det3to7[det_num-3][k][0] && tof < t_det3to7[det_num-3][k][1])
             {
-                if ( (Double_t) amp > yOnTheCutLinePTBC(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
+                if ( (Double_t) amp > yOnTheCutLine(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
                 {
                     hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
                     break;    
@@ -72,7 +72,7 @@ void applynTOFCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t
         {
             if (tof >= t_det2to4_nTOF[det_num-2][k][0] && tof < t_det2to4_nTOF[det_num-2][k][1])
             {
-                if ( (Double_t) amp > yOnTheCutLinePTBC(t_det2to4_nTOF[det_num-2][k][0], a_det2to4_nTOF[det_num-2][k][0], t_det2to4_nTOF[det_num-2][k][1], a_det2to4_nTOF[det_num-2][k][1], tof) )
+                if ( (Double_t) amp > yOnTheCutLine(t_det2to4_nTOF[det_num-2][k][0], a_det2to4_nTOF[det_num-2][k][0], t_det2to4_nTOF[det_num-2][k][1], a_det2to4_nTOF[det_num-2][k][1], tof) )
                 {
                     hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
                     break;    
@@ -84,7 +84,7 @@ void applynTOFCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t
         {
             if (tof >= t_det5to7_nTOF[det_num-5][k][0] && tof < t_det5to7_nTOF[det_num-5][k][1])
             {
-                if ( (Double_t) amp > yOnTheCutLinePTBC(t_det5to7_nTOF[det_num-5][k][0], a_det5to7_nTOF[det_num-5][k][0], t_det5to7_nTOF[det_num-5][k][1], a_det5to7_nTOF[det_num-5][k][1], tof) )
+                if ( (Double_t) amp > yOnTheCutLine(t_det5to7_nTOF[det_num-5][k][0], a_det5to7_nTOF[det_num-5][k][0], t_det5to7_nTOF[det_num-5][k][1], a_det5to7_nTOF[det_num-5][k][1], tof) )
                 {
                     hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
                     break;    
@@ -92,6 +92,28 @@ void applynTOFCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t
             }
         }
     }
+}
+
+void applyMyCuts_FIMG(Double_t tof, Float_t amp, Int_t det_num, TH1D* hist){
+    //Filling the histograms
+    if (tof < 7e3)
+    {
+        return;
+    }
+    
+    for (int k = 0; k < 5; k++)
+    {
+        if (tof >= tof_cut_FIMG[det_num-1][k][0] && tof < tof_cut_FIMG[det_num-1][k][1])
+        {
+            if ( (Double_t) amp > yOnTheCutLine(tof_cut_FIMG[det_num-1][k][0], amp_cut_FIMG[det_num-1][k][0], tof_cut_FIMG[det_num-1][k][1], amp_cut_FIMG[det_num-1][k][1], tof) )
+            {
+                hist->Fill(tof);
+                break;    
+            }
+        }
+    }
+
+    return;
 }
 
 Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D* energy_hist_FIMG, TH1D* tof_hist_PTB, TH1D* tof_hist_FIMG){
@@ -165,15 +187,15 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
         //FIMG ---------------------------------------------
         TTree* FIMG;
         Double_t tof_FIMG = 0; //tof is in ns
-        Float_t amp = 0;
-        Int_t det_num = 0;
+        Float_t amp_FIMG = 0;
+        Int_t det_num_FIMG = 0;
         Int_t BunchNumber_FIMG = 0;
 
         file_ntof->GetObject("FIMG", FIMG);
         FIMG->SetBranchAddress("BunchNumber", &BunchNumber_FIMG);
         FIMG->SetBranchAddress("tof", &tof_FIMG);
-        FIMG->SetBranchAddress("amp", &amp);
-        FIMG->SetBranchAddress("detn", &det_num);
+        FIMG->SetBranchAddress("amp", &amp_FIMG);
+        FIMG->SetBranchAddress("detn", &det_num_FIMG);
 
         Long64_t Events_FIMG = FIMG->GetEntriesFast();
         std::cout << "Number of entries - FIMG = " << Events_FIMG << std::endl;
@@ -185,42 +207,44 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
             Double_t t_pkup = BNum_tpkup_map[BunchNumber_FIMG];
             Double_t corrected_tof = tof_FIMG - t_pkup + delT_pkup_fimg + t_gamma_FIMG;
 
-            Double_t tof_cut_low = 0;
-            Double_t tof_cut_up = 0;
-            Double_t min_amp_cut = 0;
+            // Double_t tof_cut_low = 0;
+            // Double_t tof_cut_up = 0;
+            // Double_t min_amp_cut = 0;
 
-            if (det_num == 1){
-                tof_cut_low = FIMG_tof_cut_low_det1;
-                tof_cut_up = FIMG_tof_cut_up_det1;
-                min_amp_cut = FIMG_min_amp_cut_det1;
-            }
-            else if (det_num == 2){
-                tof_cut_low = FIMG_tof_cut_low_det2;
-                tof_cut_up = FIMG_tof_cut_up_det2;
-                min_amp_cut = FIMG_min_amp_cut_det2;
-            }
+            // if (det_num == 1){
+            //     tof_cut_low = FIMG_tof_cut_low_det1;
+            //     tof_cut_up = FIMG_tof_cut_up_det1;
+            //     min_amp_cut = FIMG_min_amp_cut_det1;
+            // }
+            // else if (det_num == 2){
+            //     tof_cut_low = FIMG_tof_cut_low_det2;
+            //     tof_cut_up = FIMG_tof_cut_up_det2;
+            //     min_amp_cut = FIMG_min_amp_cut_det2;
+            // }
 
-            //Filling the histograms after cuts
-            if (corrected_tof < tof_cut_low)
-            {
-                continue;
-            }
+            // //Filling the histograms after cuts
+            // if (corrected_tof < tof_cut_low)
+            // {
+            //     continue;
+            // }
 
-            if ((Double_t) amp < min_amp_cut)
-            {
-                continue;
-            }
+            // if ((Double_t) amp < min_amp_cut)
+            // {
+            //     continue;
+            // }
 
-            if (corrected_tof > tof_cut_up)
-            {
-                tof_hist_FIMG->Fill(corrected_tof); //TOFToEnergy(corrected_tof * 1e-9, flight_path_length_FIMG)
-                continue;
-            }
+            // if (corrected_tof > tof_cut_up)
+            // {
+            //     tof_hist_FIMG->Fill(corrected_tof); //TOFToEnergy(corrected_tof * 1e-9, flight_path_length_FIMG)
+            //     continue;
+            // }
 
-            if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num))
-            {
-                tof_hist_FIMG->Fill(corrected_tof); //TOFToEnergy(corrected_tof * 1e-9, flight_path_length_FIMG)
-            }
+            // if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num))
+            // {
+            //     tof_hist_FIMG->Fill(corrected_tof); //TOFToEnergy(corrected_tof * 1e-9, flight_path_length_FIMG)
+            // }
+
+            applyMyCuts_FIMG(corrected_tof, amp_FIMG, det_num_FIMG, tof_hist_FIMG);
         }
 
         file_ntof->Close();
@@ -361,6 +385,7 @@ void fillRunHists(Int_t num_bins_e, Double_t bin_edges_e[]){
 void detectorAna(){
 
     fillCutsPTBC();
+    fillCutsFIMG();
     
     // fillCutsPTBC_para_nTOF();
     // fillCutsPTBC_nTOF();
@@ -436,4 +461,6 @@ void detectorAna(){
     outputRootFile->WriteObject(&norm_factors, "norm_factors");
 
     outputRootFile->Close();
+
+    std::cout << Form("Created output file 'crossSectionAna_%s.root'", target_name.c_str()) << std::endl;
 }

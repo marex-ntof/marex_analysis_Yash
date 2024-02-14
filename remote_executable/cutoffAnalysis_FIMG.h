@@ -26,11 +26,11 @@
 #include "TRandom3.h"
 
 //////// Run variables
-const std::string target_name("no_filter"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
-const std::string target_out_name("none"); //none, none_ts, ar_bottle
-const std::string target_name_title("No target");
+const std::string target_name("ar_bottle_full"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
+const std::string target_out_name("ar_bottle"); //none, none_ts, ar_bottle
+const std::string target_name_title("Argon Tank");
 //Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
-//Argon Tank
+//Argon Tank, No target
 
 // const std::string mode("run");
 // bi1, al3, al5, al8 - none
@@ -51,14 +51,23 @@ TH2D* FIMG_tof_amp_dedi_det2 = 0;
 TH2D* FIMG_tof_amp_para_det1 = 0;
 TH2D* FIMG_tof_amp_para_det2 = 0;
 
-TH2D* FIMG_tof_amp_det1_afterCuts = 0;
-TH2D* FIMG_tof_amp_det2_afterCuts = 0;
+//nTOF cut plots
+TCutG* FIMG_nTOF_tof_amp_cut_dedi_det1;
+TCutG* FIMG_nTOF_tof_amp_cut_dedi_det2;
+TCutG* FIMG_nTOF_tof_amp_cut_para_det1;
+TCutG* FIMG_nTOF_tof_amp_cut_para_det2;
 
-//cut plots
-TCutG* FIMG_tof_amp_cut_dedi_det1;
-TCutG* FIMG_tof_amp_cut_dedi_det2;
-TCutG* FIMG_tof_amp_cut_para_det1;
-TCutG* FIMG_tof_amp_cut_para_det2;
+//My cut plots
+TCutG* FIMG_my_tof_amp_cut_dedi_det1;
+TCutG* FIMG_my_tof_amp_cut_dedi_det2;
+TCutG* FIMG_my_tof_amp_cut_para_det1;
+TCutG* FIMG_my_tof_amp_cut_para_det2;
+
+//Plots after cuts
+TH2D* FIMG_tof_amp_det1_after_nTOFCuts = 0;
+TH2D* FIMG_tof_amp_det2_after_nTOFCuts = 0;
+TH2D* FIMG_tof_amp_det1_after_MyCuts = 0;
+TH2D* FIMG_tof_amp_det2_after_MyCuts = 0;
 
 Double_t tof_min = 1e2;
 Double_t tof_max = 1e8;
@@ -352,8 +361,68 @@ Double_t TOFToEnergy(Double_t t, Double_t flight_path_length, Double_t rf_length
 //     }
 // }
 
+//My FIMG Cuts
+//det number, cut line number, end points of the line
+Double_t tof_cut_FIMG[2][5][2];
+Double_t amp_cut_FIMG[2][5][2];
+
+void fillCutsFIMG(){
+    //Det 1
+    tof_cut_FIMG[0][0][0] = 7e3;
+    amp_cut_FIMG[0][0][0] = 4600.;
+    tof_cut_FIMG[0][0][1] = 1e4;
+    amp_cut_FIMG[0][0][1] = 3000.;
+
+    tof_cut_FIMG[0][1][0] = 1e4;
+    amp_cut_FIMG[0][1][0] = 3000.;
+    tof_cut_FIMG[0][1][1] = 2e4;
+    amp_cut_FIMG[0][1][1] = 1525.;
+
+    tof_cut_FIMG[0][2][0] = 2e4;
+    amp_cut_FIMG[0][2][0] = 1525.;
+    tof_cut_FIMG[0][2][1] = 45090.;
+    amp_cut_FIMG[0][2][1] = 1525.;
+
+    tof_cut_FIMG[0][3][0] = 45090.;
+    amp_cut_FIMG[0][3][0] = 1525.;
+    tof_cut_FIMG[0][3][1] = 1e5;
+    amp_cut_FIMG[0][3][1] = 500.;
+
+    tof_cut_FIMG[0][4][0] = 1e5;
+    amp_cut_FIMG[0][4][0] = 500.;
+    tof_cut_FIMG[0][4][1] = 1e8;
+    amp_cut_FIMG[0][4][1] = 500.;
+
+    //Det 2
+    tof_cut_FIMG[1][0][0] = 7e3;
+    amp_cut_FIMG[1][0][0] = 4000.;
+    tof_cut_FIMG[1][0][1] = 8e3;
+    amp_cut_FIMG[1][0][1] = 3200.;
+
+    tof_cut_FIMG[1][1][0] = 8e3;
+    amp_cut_FIMG[1][1][0] = 3200.;
+    tof_cut_FIMG[1][1][1] = 2e4;
+    amp_cut_FIMG[1][1][1] = 2250.;
+
+    tof_cut_FIMG[1][2][0] = 2e4;
+    amp_cut_FIMG[1][2][0] = 2250.;
+    tof_cut_FIMG[1][2][1] = 31800.;
+    amp_cut_FIMG[1][2][1] = 2250.;
+
+    tof_cut_FIMG[1][3][0] = 31800.;
+    amp_cut_FIMG[1][3][0] = 2250.;
+    tof_cut_FIMG[1][3][1] = 7e4;
+    amp_cut_FIMG[1][3][1] = 500.;
+
+    tof_cut_FIMG[1][4][0] = 7e4;
+    amp_cut_FIMG[1][4][0] = 500.;
+    tof_cut_FIMG[1][4][1] = 1e8;
+    amp_cut_FIMG[1][4][1] = 500.;
+}
+
 Double_t fimgCutFunction(Double_t tof, Int_t det_num, std::string cut_type, Float_t PulseIntensity){
 
+    /////// n_TOF Cuts
     if (!cut_type.compare("ntof"))
     {
         if (det_num == 1)
@@ -381,47 +450,110 @@ Double_t fimgCutFunction(Double_t tof, Int_t det_num, std::string cut_type, Floa
     }
 }
 
+Double_t yOnTheCutLine(Double_t x1, Double_t y1, Double_t x2, Double_t y2, Double_t x3){
+    if(y1 == y2){
+        return y1;
+    }
+    return ((y2 - y1)*(x3 - x1)/(x2 - x1) + y1);
+}
+
 void fill_nTOF_cuts(){
 
-    FIMG_tof_amp_cut_dedi_det1 = new TCutG("FIMG_tof_amp_cut_dedi_det1",3);
-    FIMG_tof_amp_cut_dedi_det1->SetLineColor(2);
-    FIMG_tof_amp_cut_dedi_det1->SetLineWidth(2);
-    FIMG_tof_amp_cut_dedi_det1->SetVarX("x");
-    FIMG_tof_amp_cut_dedi_det1->SetVarY("y");
-    FIMG_tof_amp_cut_dedi_det1->SetPoint(0, 1e4, 70000.);
-    FIMG_tof_amp_cut_dedi_det1->SetPoint(1, 1e4, 2350.);
-    FIMG_tof_amp_cut_dedi_det1->SetPoint(2, 1e5, 500.);
-    FIMG_tof_amp_cut_dedi_det1->SetPoint(3, 1e8, 500.);
+    FIMG_nTOF_tof_amp_cut_dedi_det1 = new TCutG("FIMG_nTOF_tof_amp_cut_dedi_det1",3);
+    FIMG_nTOF_tof_amp_cut_dedi_det1->SetLineColor(1);
+    FIMG_nTOF_tof_amp_cut_dedi_det1->SetLineWidth(2);
+    FIMG_nTOF_tof_amp_cut_dedi_det1->SetVarX("x");
+    FIMG_nTOF_tof_amp_cut_dedi_det1->SetVarY("y");
+    FIMG_nTOF_tof_amp_cut_dedi_det1->SetPoint(0, 1e4, amp_max);
+    FIMG_nTOF_tof_amp_cut_dedi_det1->SetPoint(1, 1e4, 2350.);
+    FIMG_nTOF_tof_amp_cut_dedi_det1->SetPoint(2, 1e5, 500.);
+    FIMG_nTOF_tof_amp_cut_dedi_det1->SetPoint(3, 1e8, 500.);
 
-    FIMG_tof_amp_cut_para_det1 = new TCutG("FIMG_tof_amp_cut_para_det1",3);
-    FIMG_tof_amp_cut_para_det1->SetLineColor(2);
-    FIMG_tof_amp_cut_para_det1->SetLineWidth(2);
-    FIMG_tof_amp_cut_para_det1->SetVarX("x");
-    FIMG_tof_amp_cut_para_det1->SetVarY("y");
-    FIMG_tof_amp_cut_para_det1->SetPoint(0, 1e4, 70000.);
-    FIMG_tof_amp_cut_para_det1->SetPoint(1, 1e4, 2350.);
-    FIMG_tof_amp_cut_para_det1->SetPoint(2, 1e5, 500.);
-    FIMG_tof_amp_cut_para_det1->SetPoint(3, 1e8, 500.);
+    FIMG_nTOF_tof_amp_cut_para_det1 = new TCutG("FIMG_nTOF_tof_amp_cut_para_det1",3);
+    FIMG_nTOF_tof_amp_cut_para_det1->SetLineColor(1);
+    FIMG_nTOF_tof_amp_cut_para_det1->SetLineWidth(2);
+    FIMG_nTOF_tof_amp_cut_para_det1->SetVarX("x");
+    FIMG_nTOF_tof_amp_cut_para_det1->SetVarY("y");
+    FIMG_nTOF_tof_amp_cut_para_det1->SetPoint(0, 1e4, amp_max);
+    FIMG_nTOF_tof_amp_cut_para_det1->SetPoint(1, 1e4, 2350.);
+    FIMG_nTOF_tof_amp_cut_para_det1->SetPoint(2, 1e5, 500.);
+    FIMG_nTOF_tof_amp_cut_para_det1->SetPoint(3, 1e8, 500.);
     
-    FIMG_tof_amp_cut_dedi_det2 = new TCutG("FIMG_tof_amp_cut_dedi_det2",3);
-    FIMG_tof_amp_cut_dedi_det2->SetLineColor(2);
-    FIMG_tof_amp_cut_dedi_det2->SetLineWidth(2);
-    FIMG_tof_amp_cut_dedi_det2->SetVarX("x");
-    FIMG_tof_amp_cut_dedi_det2->SetVarY("y");
-    FIMG_tof_amp_cut_dedi_det2->SetPoint(0, 1e4, 70000.);
-    FIMG_tof_amp_cut_dedi_det2->SetPoint(1, 1e4, 3000.);
-    FIMG_tof_amp_cut_dedi_det2->SetPoint(2, 1e5, 500.);
-    FIMG_tof_amp_cut_dedi_det2->SetPoint(3, 1e8, 500.);
+    FIMG_nTOF_tof_amp_cut_dedi_det2 = new TCutG("FIMG_nTOF_tof_amp_cut_dedi_det2",3);
+    FIMG_nTOF_tof_amp_cut_dedi_det2->SetLineColor(1);
+    FIMG_nTOF_tof_amp_cut_dedi_det2->SetLineWidth(2);
+    FIMG_nTOF_tof_amp_cut_dedi_det2->SetVarX("x");
+    FIMG_nTOF_tof_amp_cut_dedi_det2->SetVarY("y");
+    FIMG_nTOF_tof_amp_cut_dedi_det2->SetPoint(0, 1e4, amp_max);
+    FIMG_nTOF_tof_amp_cut_dedi_det2->SetPoint(1, 1e4, 3000.);
+    FIMG_nTOF_tof_amp_cut_dedi_det2->SetPoint(2, 1e5, 500.);
+    FIMG_nTOF_tof_amp_cut_dedi_det2->SetPoint(3, 1e8, 500.);
 
-    FIMG_tof_amp_cut_para_det2 = new TCutG("FIMG_tof_amp_cut_para_det2",3);
-    FIMG_tof_amp_cut_para_det2->SetLineColor(2);
-    FIMG_tof_amp_cut_para_det2->SetLineWidth(2);
-    FIMG_tof_amp_cut_para_det2->SetVarX("x");
-    FIMG_tof_amp_cut_para_det2->SetVarY("y");
-    FIMG_tof_amp_cut_para_det2->SetPoint(0, 1e4, 70000.);
-    FIMG_tof_amp_cut_para_det2->SetPoint(1, 1e4, 3000.);
-    FIMG_tof_amp_cut_para_det2->SetPoint(2, 1e5, 500.);
-    FIMG_tof_amp_cut_para_det2->SetPoint(3, 1e8, 500.);
+    FIMG_nTOF_tof_amp_cut_para_det2 = new TCutG("FIMG_nTOF_tof_amp_cut_para_det2",3);
+    FIMG_nTOF_tof_amp_cut_para_det2->SetLineColor(1);
+    FIMG_nTOF_tof_amp_cut_para_det2->SetLineWidth(2);
+    FIMG_nTOF_tof_amp_cut_para_det2->SetVarX("x");
+    FIMG_nTOF_tof_amp_cut_para_det2->SetVarY("y");
+    FIMG_nTOF_tof_amp_cut_para_det2->SetPoint(0, 1e4, amp_max);
+    FIMG_nTOF_tof_amp_cut_para_det2->SetPoint(1, 1e4, 3000.);
+    FIMG_nTOF_tof_amp_cut_para_det2->SetPoint(2, 1e5, 500.);
+    FIMG_nTOF_tof_amp_cut_para_det2->SetPoint(3, 1e8, 500.);
+}
+
+void fill_my_cuts(){
+
+    FIMG_my_tof_amp_cut_dedi_det1 = new TCutG("FIMG_my_tof_amp_cut_dedi_det1",6);
+    FIMG_my_tof_amp_cut_dedi_det1->SetLineColor(2);
+    FIMG_my_tof_amp_cut_dedi_det1->SetLineWidth(2);
+    FIMG_my_tof_amp_cut_dedi_det1->SetVarX("x");
+    FIMG_my_tof_amp_cut_dedi_det1->SetVarY("y");
+    FIMG_my_tof_amp_cut_dedi_det1->SetPoint(0, tof_cut_FIMG[0][0][0], amp_max);
+    FIMG_my_tof_amp_cut_dedi_det1->SetPoint(1, tof_cut_FIMG[0][0][0], amp_cut_FIMG[0][0][0]);
+    FIMG_my_tof_amp_cut_dedi_det1->SetPoint(2, tof_cut_FIMG[0][1][0], amp_cut_FIMG[0][1][0]);
+    FIMG_my_tof_amp_cut_dedi_det1->SetPoint(3, tof_cut_FIMG[0][2][0], amp_cut_FIMG[0][2][0]);
+    FIMG_my_tof_amp_cut_dedi_det1->SetPoint(4, tof_cut_FIMG[0][3][0], amp_cut_FIMG[0][3][0]);
+    FIMG_my_tof_amp_cut_dedi_det1->SetPoint(5, tof_cut_FIMG[0][4][0], amp_cut_FIMG[0][4][0]);
+    FIMG_my_tof_amp_cut_dedi_det1->SetPoint(6, tof_cut_FIMG[0][4][1], amp_cut_FIMG[0][4][1]);
+
+    FIMG_my_tof_amp_cut_dedi_det2 = new TCutG("FIMG_my_tof_amp_cut_dedi_det2",6);
+    FIMG_my_tof_amp_cut_dedi_det2->SetLineColor(2);
+    FIMG_my_tof_amp_cut_dedi_det2->SetLineWidth(2);
+    FIMG_my_tof_amp_cut_dedi_det2->SetVarX("x");
+    FIMG_my_tof_amp_cut_dedi_det2->SetVarY("y");
+    FIMG_my_tof_amp_cut_dedi_det2->SetPoint(0, tof_cut_FIMG[1][0][0], amp_max);
+    FIMG_my_tof_amp_cut_dedi_det2->SetPoint(1, tof_cut_FIMG[1][0][0], amp_cut_FIMG[1][0][0]);
+    FIMG_my_tof_amp_cut_dedi_det2->SetPoint(2, tof_cut_FIMG[1][1][0], amp_cut_FIMG[1][1][0]);
+    FIMG_my_tof_amp_cut_dedi_det2->SetPoint(3, tof_cut_FIMG[1][2][0], amp_cut_FIMG[1][2][0]);
+    FIMG_my_tof_amp_cut_dedi_det2->SetPoint(4, tof_cut_FIMG[1][3][0], amp_cut_FIMG[1][3][0]);
+    FIMG_my_tof_amp_cut_dedi_det2->SetPoint(5, tof_cut_FIMG[1][4][0], amp_cut_FIMG[1][4][0]);
+    FIMG_my_tof_amp_cut_dedi_det2->SetPoint(6, tof_cut_FIMG[1][4][1], amp_cut_FIMG[1][4][1]);
+
+    FIMG_my_tof_amp_cut_para_det1 = new TCutG("FIMG_my_tof_amp_cut_para_det1",6);
+    FIMG_my_tof_amp_cut_para_det1->SetLineColor(2);
+    FIMG_my_tof_amp_cut_para_det1->SetLineWidth(2);
+    FIMG_my_tof_amp_cut_para_det1->SetVarX("x");
+    FIMG_my_tof_amp_cut_para_det1->SetVarY("y");
+    FIMG_my_tof_amp_cut_para_det1->SetPoint(0, tof_cut_FIMG[0][0][0], amp_max);
+    FIMG_my_tof_amp_cut_para_det1->SetPoint(1, tof_cut_FIMG[0][0][0], amp_cut_FIMG[0][0][0]);
+    FIMG_my_tof_amp_cut_para_det1->SetPoint(2, tof_cut_FIMG[0][1][0], amp_cut_FIMG[0][1][0]);
+    FIMG_my_tof_amp_cut_para_det1->SetPoint(3, tof_cut_FIMG[0][2][0], amp_cut_FIMG[0][2][0]);
+    FIMG_my_tof_amp_cut_para_det1->SetPoint(4, tof_cut_FIMG[0][3][0], amp_cut_FIMG[0][3][0]);
+    FIMG_my_tof_amp_cut_para_det1->SetPoint(5, tof_cut_FIMG[0][4][0], amp_cut_FIMG[0][4][0]);
+    FIMG_my_tof_amp_cut_para_det1->SetPoint(6, tof_cut_FIMG[0][4][1], amp_cut_FIMG[0][4][1]);
+
+    FIMG_my_tof_amp_cut_para_det2 = new TCutG("FIMG_my_tof_amp_cut_para_det2",6);
+    FIMG_my_tof_amp_cut_para_det2->SetLineColor(2);
+    FIMG_my_tof_amp_cut_para_det2->SetLineWidth(2);
+    FIMG_my_tof_amp_cut_para_det2->SetVarX("x");
+    FIMG_my_tof_amp_cut_para_det2->SetVarY("y");
+    FIMG_my_tof_amp_cut_para_det2->SetPoint(0, tof_cut_FIMG[1][0][0], amp_max);
+    FIMG_my_tof_amp_cut_para_det2->SetPoint(1, tof_cut_FIMG[1][0][0], amp_cut_FIMG[1][0][0]);
+    FIMG_my_tof_amp_cut_para_det2->SetPoint(2, tof_cut_FIMG[1][1][0], amp_cut_FIMG[1][1][0]);
+    FIMG_my_tof_amp_cut_para_det2->SetPoint(3, tof_cut_FIMG[1][2][0], amp_cut_FIMG[1][2][0]);
+    FIMG_my_tof_amp_cut_para_det2->SetPoint(4, tof_cut_FIMG[1][3][0], amp_cut_FIMG[1][3][0]);
+    FIMG_my_tof_amp_cut_para_det2->SetPoint(5, tof_cut_FIMG[1][4][0], amp_cut_FIMG[1][4][0]);
+    FIMG_my_tof_amp_cut_para_det2->SetPoint(6, tof_cut_FIMG[1][4][1], amp_cut_FIMG[1][4][1]);
+
 }
 
 Int_t FindDecadePower(Double_t num){
