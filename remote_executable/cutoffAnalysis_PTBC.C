@@ -277,13 +277,13 @@ void StoreHist(){
 
     // PTBC_tof_amp_in->Write();
     // PTBC_tof_amp_out->Write();
-    PTBC_tof_amp_fOut_total->Write();
-    PTBC_tof_amp_fOut_det2->Write();
-    PTBC_tof_amp_fOut_det3->Write();
-    PTBC_tof_amp_fOut_det4->Write();
-    PTBC_tof_amp_fOut_det5->Write();
-    PTBC_tof_amp_fOut_det6->Write();
-    PTBC_tof_amp_fOut_det7->Write();
+    // PTBC_tof_amp_fOut_total->Write();
+    // PTBC_tof_amp_fOut_det2->Write();
+    // PTBC_tof_amp_fOut_det3->Write();
+    // PTBC_tof_amp_fOut_det4->Write();
+    // PTBC_tof_amp_fOut_det5->Write();
+    // PTBC_tof_amp_fOut_det6->Write();
+    // PTBC_tof_amp_fOut_det7->Write();
 
     PTBC_tof_amp_fIn_total->Write();
     PTBC_tof_amp_fIn_det2->Write();
@@ -346,7 +346,6 @@ void cutoffAnalysis_PTBC(){
     }
 
     // Calculating amplitude (y) bin edges
-    int num_bins_amp = 500;
     Double_t bin_edges_amp[num_bins_amp+1];
     Double_t step_amp = (Double_t) ((amp_max-amp_min)/num_bins_amp);
     // std::cout << "step_amp = " << step_amp << std::endl;
@@ -393,7 +392,7 @@ void cutoffAnalysis_PTBC(){
 
     
     FilterIn();
-    FilterOut();
+    // FilterOut();
 
     StoreHist();
 }

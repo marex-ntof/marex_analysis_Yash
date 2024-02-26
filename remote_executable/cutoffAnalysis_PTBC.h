@@ -102,7 +102,8 @@ Double_t delT_pkup_fimg = 630.0; //in ns
 Double_t tof_min = 1e2;
 Double_t tof_max = 1e8;
 Double_t amp_min = 0.;
-Double_t amp_max = 70000.;
+Double_t amp_max = 50000.;
+Int_t num_bins_amp = 5000;
 
 Double_t t_gamma_PTBC = (flight_path_length_PTBC / speed_of_light) * 1e9; //converting into ns
 Double_t t_gamma_FIMG = (flight_path_length_FIMG / speed_of_light) * 1e9; //converting into ns
@@ -124,10 +125,10 @@ void fillCutsPTBC(){
     a_det2[0][1] = 8000.0;
 
     t_det2[1][0] = 2600.0;
-    a_det2[1][0] = 9500.0;
+    a_det2[1][0] = 10000.0;
 
     t_det2[1][1] = 2800.0;
-    a_det2[1][1] = 9500.0;
+    a_det2[1][1] = 10000.0;
 
     t_det2[2][0] = 2800.0;
     a_det2[2][0] = 8000.0;
