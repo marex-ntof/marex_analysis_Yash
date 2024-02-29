@@ -466,7 +466,7 @@ void crossSectionPlots(){
 
     bool fillENDF = true;
     bool fillENDFSmeared = false;
-    bool fillJENDL = true;
+    bool fillJENDL = false;
 
     // //Getting energy bin edges
     // Int_t num_bins_e = transmission_hist_e_PTBC->GetNbinsX();
@@ -545,13 +545,13 @@ void crossSectionPlots(){
     c[i] = new TCanvas(Form("c%d", i)," ");
     c[i]->cd();
 
-    l[i] = new TLegend(0.77,0.7,0.86,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i] = new TLegend(0.77,0.7,0.86,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
     l[i]->AddEntry(transmission_hist_e_PTBC,"PTBC","l");
     
     transmission_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
     transmission_hist_e_PTBC->GetYaxis()->SetTitle("Transmission");
     transmission_hist_e_PTBC->SetTitle(Form("Transmission Histogram - %s", filter_name_title.c_str()));
-    transmission_hist_e_PTBC->SetLineWidth(2);
+    transmission_hist_e_PTBC->SetLineWidth(1);
     transmission_hist_e_PTBC->Draw(); //"HISTE"
     transmission_hist_e_PTBC->SetStats(0);
     // transmission_hist_e_PTBC->SetMarkerStyle(6);
@@ -562,13 +562,13 @@ void crossSectionPlots(){
 
     l[i]->AddEntry(transmission_hist_e_FIMG,"FIMG","l");
     transmission_hist_e_FIMG->SetLineColor(3);
-    transmission_hist_e_FIMG->SetLineWidth(2);
+    transmission_hist_e_FIMG->SetLineWidth(1);
     // transmission_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-2,1e3);
     transmission_hist_e_FIMG->Draw("SAME");
 
     // l[i]->AddEntry(transmission_hist_e_PTBC_nTOF_Cuts,"PTBC - nTOF Cuts","l");
     // transmission_hist_e_PTBC_nTOF_Cuts->SetLineColor(6);
-    // transmission_hist_e_PTBC_nTOF_Cuts->SetLineWidth(2);
+    // transmission_hist_e_PTBC_nTOF_Cuts->SetLineWidth(1);
     // transmission_hist_e_PTBC_nTOF_Cuts->Draw("SAME");
 
     // l[i]->AddEntry(trans_hist_fOut,"No Al5","l");
@@ -590,7 +590,7 @@ void crossSectionPlots(){
     if (fillENDF){
         l[i]->AddEntry(endf_trans_hist,"ENDF","l");
         endf_trans_hist->SetLineColor(2);
-        endf_trans_hist->SetLineWidth(2);
+        endf_trans_hist->SetLineWidth(1);
         // endf_trans_hist->GetXaxis()->SetRange(1e-2,2e7);
         endf_trans_hist->Draw("SAME");
     }
@@ -598,7 +598,7 @@ void crossSectionPlots(){
     if (fillENDFSmeared){
         l[i]->AddEntry(endf_rf_trans_hist,"ENDF smeared","l");
         endf_rf_trans_hist->SetLineColor(7);
-        endf_rf_trans_hist->SetLineWidth(2);
+        endf_rf_trans_hist->SetLineWidth(1);
         endf_rf_trans_hist->Draw("SAME");
     }
 
@@ -606,7 +606,7 @@ void crossSectionPlots(){
     {
         l[i]->AddEntry(jendl_trans_hist,"JENDL-5","l");
         jendl_trans_hist->SetLineColor(1);
-        jendl_trans_hist->SetLineWidth(2);
+        jendl_trans_hist->SetLineWidth(1);
         // jendl_trans_hist->GetXaxis()->SetRange(1e-2,2e7);
         jendl_trans_hist->Draw("SAME");
     }
@@ -622,7 +622,7 @@ void crossSectionPlots(){
     //     }
     //     l[i]->AddEntry(endf_trans_graph,"ENDF","l");
     //     endf_trans_graph->SetLineColor(2);
-    //     endf_trans_graph->SetLineWidth(2);
+    //     endf_trans_graph->SetLineWidth(1);
     //     // endf_trans_graph->GetXaxis()->SetRange(1e-2,2e7);
     //     endf_trans_graph->Draw("SAME");
     // }
@@ -630,7 +630,7 @@ void crossSectionPlots(){
     // if (fillENDFSmeared){
     //     l[i]->AddEntry(endf_rf_trans_hist,"ENDF smeared","l");
     //     endf_rf_trans_hist->SetLineColor(7);
-    //     endf_rf_trans_hist->SetLineWidth(2);
+    //     endf_rf_trans_hist->SetLineWidth(1);
     //     endf_rf_trans_hist->Draw("SAME");
     // }
 
@@ -643,7 +643,7 @@ void crossSectionPlots(){
     //     }
     //     l[i]->AddEntry(jendl_trans_graph,"JENDL-5","l");
     //     jendl_trans_graph->SetLineColor(1);
-    //     jendl_trans_graph->SetLineWidth(2);
+    //     jendl_trans_graph->SetLineWidth(1);
     //     // jendl_trans_graph->GetXaxis()->SetRange(1e-2,2e7);
     //     jendl_trans_graph->Draw("SAME");
     // }
@@ -658,13 +658,13 @@ void crossSectionPlots(){
     c[i] = new TCanvas(Form("c%d", i)," ");
     c[i]->cd();
 
-    l[i] = new TLegend(0.80,0.7,0.86,0.8);
+    l[i] = new TLegend(0.77,0.7,0.86,0.85);
     l[i]->AddEntry(cross_section_hist_e_PTBC,"PTBC","l");
 
     cross_section_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
     cross_section_hist_e_PTBC->GetYaxis()->SetTitle("Cross Section (in barns)");
     cross_section_hist_e_PTBC->SetTitle(Form("Cross Section Histogram - %s", filter_name_title.c_str()));
-    cross_section_hist_e_PTBC->SetLineWidth(2);
+    cross_section_hist_e_PTBC->SetLineWidth(1);
     cross_section_hist_e_PTBC->Draw(); //"HISTE"
     cross_section_hist_e_PTBC->SetStats(0);
     // cross_section_hist_e_PTBC->SetMarkerStyle(6);
@@ -675,13 +675,13 @@ void crossSectionPlots(){
 
     l[i]->AddEntry(cross_section_hist_e_FIMG,"FIMG","l");
     cross_section_hist_e_FIMG->SetLineColor(3);
-    cross_section_hist_e_FIMG->SetLineWidth(2);
+    cross_section_hist_e_FIMG->SetLineWidth(1);
     cross_section_hist_e_FIMG->Draw("SAME");
 
     if (fillENDF){
         l[i]->AddEntry(endf_xsec_hist,"ENDF","l");
         endf_xsec_hist->SetLineColor(2);
-        endf_xsec_hist->SetLineWidth(2);
+        endf_xsec_hist->SetLineWidth(1);
         // endf_xsec_hist->GetXaxis()->SetRange(1e-2,2e7);
         endf_xsec_hist->Draw("SAME");
     }
@@ -689,7 +689,7 @@ void crossSectionPlots(){
     if (fillENDFSmeared){
         l[i]->AddEntry(endf_rf_xsec_hist,"ENDF smeared","l");
         endf_rf_xsec_hist->SetLineColor(7);
-        endf_rf_xsec_hist->SetLineWidth(2);
+        endf_rf_xsec_hist->SetLineWidth(1);
         endf_rf_xsec_hist->Draw("SAME");
     }
 
@@ -697,7 +697,7 @@ void crossSectionPlots(){
     {
         l[i]->AddEntry(jendl_xsec_hist,"JENDL-5","l");
         jendl_xsec_hist->SetLineColor(1);
-        jendl_xsec_hist->SetLineWidth(2);
+        jendl_xsec_hist->SetLineWidth(1);
         // jendl_xsec_hist->GetXaxis()->SetRange(1e-2,2e7);
         jendl_xsec_hist->Draw("SAME");
     }

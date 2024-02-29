@@ -42,8 +42,8 @@ TStyle* MArEXStyle()
   marexStyle->SetCanvasBorderMode(0);
   marexStyle->SetCanvasBorderSize(0);   
   marexStyle->SetPadBorderMode(0); 
-  marexStyle->SetPadBottomMargin(0.09); //0.18 //margins...
-  marexStyle->SetPadTopMargin(0.12);
+  marexStyle->SetPadBottomMargin(0.09); //0.09 //0.18 //margins...
+  marexStyle->SetPadTopMargin(0.12); //0.12
   marexStyle->SetPadLeftMargin(0.10); //0.18
   marexStyle->SetPadRightMargin(0.09);
   marexStyle->SetPadGridX(1); // grids, tickmarks

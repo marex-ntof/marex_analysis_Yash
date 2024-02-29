@@ -64,6 +64,7 @@
         "fimgCutsAna.C": "cpp",
         "data_stability.C": "cpp",
         "Mo_TTOFSort_EAR1.C": "cpp",
-        "cutoffAnalysis_PTBC.C": "cpp"
+        "cutoffAnalysis_PTBC.C": "cpp",
+        "data_stability_plots.C": "cpp"
     }
 }
