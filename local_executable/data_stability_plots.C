@@ -59,26 +59,12 @@ TH1D* norm_counts_emptyTank_oct16_FIMG = 0;
 TH1D* norm_counts_ArgonFull_oct18_FIMG = 0;
 TH1D* norm_counts_ArgonFull_oct22_FIMG = 0;
 
-//////////// PTBC - day-night plots
-TH1D* day_night_Bi_sep18_PTBC = 0;
-TH1D* day_night_Al5_sep27_PTBC = 0;
-TH1D* day_night_emptyTS_oct05_PTBC = 0;
-TH1D* day_night_emptyTank_oct15_PTBC = 0;
-TH1D* day_night_Argon_oct22_PTBC = 0;
-
-//////////// FIMG - day-night plots
-TH1D* day_night_Bi_sep18_FIMG = 0;
-TH1D* day_night_Al5_sep27_FIMG = 0;
-TH1D* day_night_emptyTS_oct05_FIMG = 0;
-TH1D* day_night_emptyTank_oct15_FIMG = 0;
-TH1D* day_night_Argon_oct22_FIMG = 0;
-
 ////////////                     
 TCanvas *c[10];
 TLegend *l[10];
 TPad *p[10][2];
 TH1D *residual_plot[10];
-int plot_index = 0;
+Int_t plot_index = 0;
 
 void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* norm_count_plot_2, const char* date_2, const char* plot_title, const char* output_file_name){
 
@@ -149,9 +135,7 @@ void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* n
 TH1D* retriveHistograms(const char *file_name, const char *hist_name){
     
     TFile* hist_file = TFile::Open(file_name, "READ");
-
     TH1D* hist_new = (TH1D*)hist_file->Get(hist_name);
-
     // hist_file->Close();
 
     return hist_new;
@@ -181,18 +165,6 @@ void data_stability_plots(){
     norm_counts_ArgonFull_oct18_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct18_FIMG");
     norm_counts_ArgonFull_oct22_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct22_FIMG");
 
-    day_night_Bi_sep18_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_Bi_sep18_PTBC");
-    day_night_Al5_sep27_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_Al5_sep27_PTBC");
-    day_night_emptyTS_oct05_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_emptyTS_oct05_PTBC");
-    day_night_emptyTank_oct15_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_emptyTank_oct15_PTBC");
-    day_night_Argon_oct22_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_Argon_oct22_PTBC");
-
-    day_night_Bi_sep18_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_Bi_sep18_FIMG");
-    day_night_Al5_sep27_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_Al5_sep27_FIMG");
-    day_night_emptyTS_oct05_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_emptyTS_oct05_FIMG");
-    day_night_emptyTank_oct15_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_emptyTank_oct15_FIMG");
-    day_night_Argon_oct22_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_Argon_oct22_FIMG");
-
     //Plotting
     SetMArEXStyle();
     
@@ -215,88 +187,4 @@ void data_stability_plots(){
     plot_norm_counts_plots(norm_counts_emptyTank_oct12_FIMG, "Oct 12", norm_counts_emptyTank_oct16_FIMG, "Oct 16", "Normalized Counts - Empty CF Tank - FIMG", "norm_counts_emptyTank_Oct12_Oct16_FIMG");
     plot_norm_counts_plots(norm_counts_ArgonFull_oct18_FIMG, "Oct 18", norm_counts_ArgonFull_oct22_FIMG, "Oct 22", "Normalized Counts - Argon Tank - FIMG", "norm_counts_argonTank_Oct18_Oct22_FIMG");
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    TCanvas *c_dn[2];
-    TLegend *l_dn[2];
-    Int_t j = 0;
-
-    c_dn[j] = new TCanvas(Form("c_dn%d", j)," ");
-    c_dn[j]->cd();
-    c_dn[j]->Draw();
-
-    day_night_Bi_sep18_PTBC->GetXaxis()->SetTitle("Seconds in a day");
-    day_night_Bi_sep18_PTBC->GetYaxis()->SetTitle("Normalized Counts");
-    day_night_Bi_sep18_PTBC->SetTitle("Day-Night Variation in Counts - PTBC");
-    day_night_Bi_sep18_PTBC->SetLineWidth(2);
-    day_night_Bi_sep18_PTBC->GetYaxis()->SetRangeUser(9e-13,7e-12);
-    day_night_Bi_sep18_PTBC->Draw();
-    day_night_Bi_sep18_PTBC->SetStats(0);
-    gPad->SetGrid();
-    // gPad->SetLogy();
-
-    day_night_Al5_sep27_PTBC->SetLineWidth(2);
-    day_night_Al5_sep27_PTBC->SetLineColor(40);
-    day_night_Al5_sep27_PTBC->Draw("SAME");
-
-    day_night_emptyTS_oct05_PTBC->SetLineWidth(2);
-    day_night_emptyTS_oct05_PTBC->SetLineColor(2);
-    day_night_emptyTS_oct05_PTBC->Draw("SAME");
-
-    day_night_emptyTank_oct15_PTBC->SetLineWidth(2);
-    day_night_emptyTank_oct15_PTBC->SetLineColor(3);
-    day_night_emptyTank_oct15_PTBC->Draw("SAME");
-
-    day_night_Argon_oct22_PTBC->SetLineWidth(2);
-    day_night_Argon_oct22_PTBC->SetLineColor(7);
-    day_night_Argon_oct22_PTBC->Draw("SAME");
-
-    l_dn[j] = new TLegend(0.72,0.65,0.90,0.8);
-    l_dn[j]->AddEntry(day_night_Bi_sep18_PTBC,"Bi (1cm) Sep 18","l");
-    l_dn[j]->AddEntry(day_night_Al5_sep27_PTBC,"Al (5cm) Sep 27","l");
-    l_dn[j]->AddEntry(day_night_emptyTS_oct05_PTBC,"Empty (TS) Oct 05","l");
-    l_dn[j]->AddEntry(day_night_emptyTank_oct15_PTBC,"Empty Tank Oct 15","l");
-    l_dn[j]->AddEntry(day_night_Argon_oct22_PTBC,"Argon Tank Oct 22","l");
-    l_dn[j]->Draw();
-    c_dn[j]->Print("../plots/stability_plots/day_night_vaiation_PTBC.png");
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    j++;
-    c_dn[j] = new TCanvas(Form("c_dn%d", j)," ");
-    c_dn[j]->cd();
-    c_dn[j]->Draw();
-
-    day_night_Bi_sep18_FIMG->GetXaxis()->SetTitle("Seconds in a day");
-    day_night_Bi_sep18_FIMG->GetYaxis()->SetTitle("Normalized Counts");
-    day_night_Bi_sep18_FIMG->SetTitle("Day-Night Variation in Counts - FIMG");
-    day_night_Bi_sep18_FIMG->SetLineWidth(2);
-    day_night_Bi_sep18_FIMG->GetYaxis()->SetRangeUser(1e-12,9e-12);
-    day_night_Bi_sep18_FIMG->Draw();
-    day_night_Bi_sep18_FIMG->SetStats(0);
-    gPad->SetGrid();
-    // gPad->SetLogy();
-
-    day_night_Al5_sep27_FIMG->SetLineWidth(2);
-    day_night_Al5_sep27_FIMG->SetLineColor(40);
-    day_night_Al5_sep27_FIMG->Draw("SAME");
-
-    day_night_emptyTS_oct05_FIMG->SetLineWidth(2);
-    day_night_emptyTS_oct05_FIMG->SetLineColor(2);
-    day_night_emptyTS_oct05_FIMG->Draw("SAME");
-
-    day_night_emptyTank_oct15_FIMG->SetLineWidth(2);
-    day_night_emptyTank_oct15_FIMG->SetLineColor(3);
-    day_night_emptyTank_oct15_FIMG->Draw("SAME");
-
-    day_night_Argon_oct22_FIMG->SetLineWidth(2);
-    day_night_Argon_oct22_FIMG->SetLineColor(7);
-    day_night_Argon_oct22_FIMG->Draw("SAME");
-
-    l_dn[j] = new TLegend(0.72,0.65,0.90,0.8);
-    l_dn[j]->AddEntry(day_night_Bi_sep18_FIMG,"Bi (1cm) Sep 18","l");
-    l_dn[j]->AddEntry(day_night_Al5_sep27_FIMG,"Al (5cm) Sep 27","l");
-    l_dn[j]->AddEntry(day_night_emptyTS_oct05_FIMG,"Empty (TS) Oct 05","l");
-    l_dn[j]->AddEntry(day_night_emptyTank_oct15_FIMG,"Empty Tank Oct 15","l");
-    l_dn[j]->AddEntry(day_night_Argon_oct22_FIMG,"Argon Tank Oct 22","l");
-    l_dn[j]->Draw();
-    c_dn[j]->Print("../plots/stability_plots/day_night_vaiation_FIMG.png");
 }
