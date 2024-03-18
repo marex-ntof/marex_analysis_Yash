@@ -72,15 +72,19 @@ void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* n
     c[plot_index]->cd();
     c[plot_index]->Draw();
 
-    p[plot_index][0] = new TPad(Form("p%d", plot_index), Form("p%d", plot_index), 0., 0.35, 1., 1.);
+    p[plot_index][0] = new TPad(Form("p_0_%d", plot_index), Form("p_0_%d", plot_index), 0., 0.35, 1., 1.);
     p[plot_index][0]->SetFillColor(kWhite);
     p[plot_index][0]->SetBottomMargin(0.00001);
     p[plot_index][0]->SetBorderMode(0);
     p[plot_index][0]->Draw();
     p[plot_index][0]->cd();
-    // norm_count_plot_1->GetXaxis()->SetTitle("Energy (in eV)");   
+    // norm_count_plot_1->GetXaxis()->SetTitle("Energy (in eV)");
+    // Y Axis
     norm_count_plot_1->GetYaxis()->SetTitle("Normalized Counts");
     norm_count_plot_1->GetYaxis()->SetLabelSize(0.05);
+    norm_count_plot_1->GetYaxis()->SetTitleSize(0.06);
+    norm_count_plot_1->GetYaxis()->SetTitleOffset(0.65);
+    // X Axis
     norm_count_plot_1->GetXaxis()->SetLabelOffset(999);
     norm_count_plot_1->GetXaxis()->SetLabelSize(0);
     norm_count_plot_1->SetTitle(plot_title);
@@ -101,7 +105,7 @@ void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* n
     l[plot_index]->Draw();
 
     c[plot_index]->cd(0);
-    p[plot_index][1] = new TPad(Form("p%d", plot_index), Form("p%d", plot_index), 0., 0., 1., 0.35);
+    p[plot_index][1] = new TPad(Form("p_1_%d", plot_index), Form("p_1_%d", plot_index), 0., 0., 1., 0.35);
     p[plot_index][1]->SetFillColor(kWhite);
     p[plot_index][1]->SetTopMargin(0.00001);
     p[plot_index][1]->SetBottomMargin(0.2);
@@ -113,14 +117,14 @@ void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* n
     residual_plot[plot_index]->SetTitle("");
     // X Axis
     residual_plot[plot_index]->GetXaxis()->SetTitle("Energy (in eV)");
-    residual_plot[plot_index]->GetXaxis()->SetTitleSize(0.07);
+    residual_plot[plot_index]->GetXaxis()->SetTitleSize(0.1);
     residual_plot[plot_index]->GetXaxis()->SetLabelOffset(0.01);
-    residual_plot[plot_index]->GetXaxis()->SetTitleOffset(1.2);
+    residual_plot[plot_index]->GetXaxis()->SetTitleOffset(0.85); //decrease to move up
     residual_plot[plot_index]->GetXaxis()->SetLabelSize(0.07);
     // Y Axis
-    residual_plot[plot_index]->GetYaxis()->SetTitle("Subtracted Counts");
-    residual_plot[plot_index]->GetYaxis()->SetTitleSize(0.07);
-    residual_plot[plot_index]->GetYaxis()->SetTitleOffset(0.5);
+    residual_plot[plot_index]->GetYaxis()->SetTitle("Residuals");
+    residual_plot[plot_index]->GetYaxis()->SetTitleSize(0.1);
+    residual_plot[plot_index]->GetYaxis()->SetTitleOffset(0.38);
     residual_plot[plot_index]->GetYaxis()->SetLabelSize(0.07);
     TGaxis::SetExponentOffset(-0.06, -0.8, "y"); // X and Y offset for Y axis
     residual_plot[plot_index]->Draw();

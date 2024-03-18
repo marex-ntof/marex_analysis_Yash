@@ -44,6 +44,11 @@ TH1D* day_night_Argon_oct22_FIMG = 0;
 TF1* dn_fits[10];
 TH1D* dn_resi_plots[10];
 TH1D* dn_pull_plots[10];
+TLine* dn_fit_lines[10];
+TCanvas* dn_canvas[10];
+TLegend* dn_legends[10];
+TPad* dn_pads[10][3];
+TLine* zero_line;
 Int_t dn_plot_index = 0;
 
 TH1D* retriveHistograms(const char *file_name, const char *hist_name){
@@ -103,15 +108,127 @@ void compute_residuals(TH1D* dn_hist){
         }
     }
     
-    Int_t num_pull_bins = 11;
+    Int_t num_pull_bins = 15;
     dn_pull_plots[dn_plot_index] = new TH1D(Form("dn_pull_plots_%i", dn_plot_index), "", num_pull_bins, -5, 5);
     for (Int_t i = 0; i < num_bins; i++){
-        Double_t fill_content = dn_resi_plots[dn_plot_index]->GetBinContent(i+1) / dn_hist->GetBinError(i+1);
+        Double_t fill_content = dn_resi_plots[dn_plot_index]->GetBinContent(i+1) / dn_resi_plots[dn_plot_index]->GetBinError(i+1);
         dn_pull_plots[dn_plot_index]->Fill(fill_content);
     }
     dn_pull_plots[dn_plot_index]->SetLineColor(dn_hist->GetLineColor());
     
     dn_plot_index++;
+}
+
+void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* plot_title_1, const char* output_file_name){
+
+    dn_canvas[dn_plot_index] = new TCanvas(Form("dn_canvas_%d", dn_plot_index)," ");
+    dn_canvas[dn_plot_index]->cd();
+    dn_canvas[dn_plot_index]->Draw();
+
+    gStyle->SetTitleH(0.1);
+
+    // Pad 1
+    dn_canvas[dn_plot_index]->cd(0);
+    dn_pads[dn_plot_index][0] = new TPad(Form("dn_pads_0_%d", dn_plot_index), Form("dn_pads_0_%d", dn_plot_index), 0., 0.65, 1., 1.);
+    dn_pads[dn_plot_index][0]->SetFillColor(kWhite);
+    dn_pads[dn_plot_index][0]->SetBottomMargin(0.00001);
+    dn_pads[dn_plot_index][0]->SetBorderMode(0);
+    dn_pads[dn_plot_index][0]->Draw();
+    dn_pads[dn_plot_index][0]->cd();
+    // X-Axis
+    dn_hist->GetXaxis()->SetLabelOffset(999);
+    dn_hist->GetXaxis()->SetLabelSize(0);
+    dn_hist->GetXaxis()->SetTitle("");
+    // Y-Axis
+    dn_hist->GetYaxis()->SetTitle("Normalized Counts");
+    dn_hist->GetYaxis()->SetLabelSize(0.07);
+    dn_hist->GetYaxis()->SetTitleSize(0.09);
+    dn_hist->GetYaxis()->SetTitleOffset(0.4);
+    // Setting the y axis range
+    Double_t y_range_min = dn_fits[dn_plot_index]->GetParameter(0) - 0.3e-12;
+    Double_t y_range_max = dn_fits[dn_plot_index]->GetParameter(0) + 0.3e-12;
+    dn_hist->SetMaximum(y_range_max);
+    dn_hist->SetMinimum(y_range_min);
+    TGaxis::SetExponentOffset(-0.06, -0.8, "y"); // X and Y offset for Y axis
+    dn_hist->SetTitle(plot_title_1);
+    dn_hist->SetLineWidth(2);
+    dn_hist->SetLineColor(2);
+    // dn_hist->GetYaxis()->SetRangeUser(3e-12, 4e-12);
+    dn_hist->Draw();
+    dn_hist->SetStats(0);
+    gPad->SetGrid();
+
+    dn_fit_lines[dn_plot_index] = new TLine(0., dn_fits[dn_plot_index]->GetParameter(0), 86400., dn_fits[dn_plot_index]->GetParameter(0));
+    dn_fit_lines[dn_plot_index]->SetLineWidth(2);
+    dn_fit_lines[dn_plot_index]->SetLineColor(4);
+    dn_fit_lines[dn_plot_index]->SetLineStyle(9);
+    dn_fit_lines[dn_plot_index]->Draw("SAME");
+
+    dn_legends[dn_plot_index] = new TLegend(0.80, 0.60, 0.85, 0.80);
+    dn_legends[dn_plot_index]->AddEntry(dn_hist, " data", "l");
+    dn_legends[dn_plot_index]->AddEntry(dn_fit_lines[dn_plot_index], " fit", "l");
+    dn_legends[dn_plot_index]->Draw();
+
+    // Pad 2
+    dn_canvas[dn_plot_index]->cd(0);
+    dn_pads[dn_plot_index][1] = new TPad(Form("dn_pads_1_%d", dn_plot_index), Form("dn_pads_1_%d", dn_plot_index), 0., 0.3, 1., 0.65);
+    dn_pads[dn_plot_index][1]->SetFillColor(kWhite);
+    dn_pads[dn_plot_index][1]->SetTopMargin(0.00001);
+    dn_pads[dn_plot_index][1]->SetBottomMargin(0.15);
+    dn_pads[dn_plot_index][1]->SetBorderMode(0);
+    dn_pads[dn_plot_index][1]->Draw();
+    dn_pads[dn_plot_index][1]->cd();
+    
+    resi_hist->SetTitle("");
+    // X-Axis
+    resi_hist->GetXaxis()->SetTitle("Seconds in a day");
+    resi_hist->GetXaxis()->SetTitleOffset(0.75);
+    resi_hist->GetXaxis()->SetLabelSize(0.07);
+    resi_hist->GetXaxis()->SetTitleSize(0.09);
+    // Y-Axis
+    resi_hist->GetYaxis()->SetTitle("Residuals");
+    resi_hist->GetYaxis()->SetLabelSize(0.07);
+    resi_hist->GetYaxis()->SetTitleSize(0.09);
+    resi_hist->GetYaxis()->SetTitleOffset(0.4);
+    resi_hist->SetLineColor(2);
+    resi_hist->SetLineWidth(2);
+    resi_hist->GetYaxis()->SetRangeUser(-0.3e-12, 0.3e-12);
+    resi_hist->Draw("E");
+    resi_hist->SetStats(0);
+
+    zero_line->Draw("SAME");
+
+    // Pad 3
+    dn_canvas[dn_plot_index]->cd(0);
+    dn_pads[dn_plot_index][2] = new TPad(Form("dn_pads_2_%d", dn_plot_index), Form("dn_pads_2_%d", dn_plot_index), 0., 0., 1., 0.3);
+    dn_pads[dn_plot_index][2]->SetFillColor(kWhite);
+    dn_pads[dn_plot_index][2]->SetBottomMargin(0.2);
+    dn_pads[dn_plot_index][2]->SetBorderMode(0);
+    dn_pads[dn_plot_index][2]->Draw();
+    dn_pads[dn_plot_index][2]->cd();
+    // X-Axis
+    pull_hist->GetXaxis()->SetTitle("(data - fit) / #Delta data");
+    pull_hist->GetXaxis()->SetTitleSize(0.1);
+    // pull_hist->GetXaxis()->SetLabelOffset(0.01);
+    pull_hist->GetXaxis()->SetTitleOffset(0.8);
+    pull_hist->GetXaxis()->SetLabelSize(0.09);
+    // Y-Axis
+    pull_hist->GetYaxis()->SetTitle("Counts");
+    pull_hist->GetYaxis()->SetTitleSize(0.1);
+    pull_hist->GetYaxis()->SetTitleOffset(0.36);
+    pull_hist->GetYaxis()->SetLabelSize(0.09);
+
+    pull_hist->SetTitle("Pull Distribution");
+    pull_hist->SetLineColor(2);
+    pull_hist->SetLineWidth(2);
+    pull_hist->Draw();
+    pull_hist->SetStats(0);
+    gPad->SetGrid();
+    
+    dn_canvas[dn_plot_index]->Print( Form("../plots/stability_plots/%s.png", output_file_name) );
+
+    dn_plot_index++;
+    return;
 }
 
 void pull_distributions(){
@@ -194,181 +311,23 @@ void pull_distributions(){
     compute_residuals(day_night_emptyTank_oct15_FIMG);
     compute_residuals(day_night_Argon_oct22_FIMG);
 
-    //////// Residual Plots
-    TCanvas *c_dn_resi[2];
-    TLegend *l_dn_resi[2];
-    Int_t j = 0;
+    dn_plot_index = 0;
+    plot_dn_plots(day_night_Bi_sep18_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Bi (1cm) Sep 18 - PTBC", "dn_vaiation_bi_sep18_PTBC");
+    plot_dn_plots(day_night_Al5_sep27_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Al (5cm) Sep 27 - PTBC", "dn_vaiation_al5_sep27_PTBC");
+    plot_dn_plots(day_night_emptyTS_oct05_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty (TS) Oct 05 - PTBC", "dn_vaiation_emptyTS_oct05_PTBC");
+    plot_dn_plots(day_night_emptyTank_oct15_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Tank Oct 15 - PTBC", "dn_vaiation_emptyTank_oct15_PTBC");
+    plot_dn_plots(day_night_Argon_oct22_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Argon Tank Oct 22 - PTBC", "dn_vaiation_argon_oct22_PTBC");
+    plot_dn_plots(day_night_Bi_sep18_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Bi (1cm) Sep 18 - FIMG", "dn_vaiation_bi_sep18_FIMG");
+    plot_dn_plots(day_night_Al5_sep27_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Al (5cm) Sep 27 - FIMG", "dn_vaiation_al5_sep27_FIMG");
+    plot_dn_plots(day_night_emptyTS_oct05_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty (TS) Oct 05 - FIMG", "dn_vaiation_emptyTS_oct05_FIMG");
+    plot_dn_plots(day_night_emptyTank_oct15_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Tank Oct 15 - FIMG", "dn_vaiation_emptyTank_oct15_FIMG");
+    plot_dn_plots(day_night_Argon_oct22_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Argon Tank Oct 22 - FIMG", "dn_vaiation_argon_oct22_FIMG");
 
-    c_dn_resi[0] = new TCanvas(Form("c_dn_resi_%d", 0)," ");
-    c_dn_resi[0]->cd();
-    c_dn_resi[0]->Draw();
-    // TGaxis::SetExponentOffset(0, 0, "y"); // X and Y offset for Y axis
-
-    dn_resi_plots[j]->GetXaxis()->SetTitle("Seconds in a day");
-    dn_resi_plots[j]->GetYaxis()->SetTitle("Residuals from the fit");
-    dn_resi_plots[j]->SetTitle("Day-Night Residuals after fit - PTBC");
-    dn_resi_plots[j]->SetLineWidth(2);
-    dn_resi_plots[j]->GetYaxis()->SetRangeUser(-1e-12,1e-12);
-    dn_resi_plots[j]->Draw("E");
-    dn_resi_plots[j]->SetStats(0);
-    gPad->SetGrid();
-    // gPad->SetLogy();
-
-    l_dn_resi[0] = new TLegend(0.72,0.30,0.90,0.45);
-    l_dn_resi[0]->AddEntry(dn_resi_plots[j],"Bi (1cm) Sep 18","l");
-    j++;
-
-    add_plot_to_canvas(c_dn_resi[0], dn_resi_plots[j], l_dn_resi[0], "Al (5cm) Sep 27", 40);
-    j++;
-    add_plot_to_canvas(c_dn_resi[0], dn_resi_plots[j], l_dn_resi[0], "Empty (TS) Oct 05", 2);
-    j++;
-    add_plot_to_canvas(c_dn_resi[0], dn_resi_plots[j], l_dn_resi[0], "Empty Tank Oct 15", 3);
-    j++;
-    add_plot_to_canvas(c_dn_resi[0], dn_resi_plots[j], l_dn_resi[0], "Argon Tank Oct 22", 7);
-    j++;
-
-    l_dn_resi[0]->Draw();
-    // c_dn_resi[0]->Print("../plots/stability_plots/day_night_residuals_PTBC.png");
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    c_dn_resi[1] = new TCanvas(Form("c_dn_resi_%d", 1)," ");
-    c_dn_resi[1]->cd();
-    c_dn_resi[1]->Draw();
-
-    dn_resi_plots[j]->GetXaxis()->SetTitle("Seconds in a day");
-    dn_resi_plots[j]->GetYaxis()->SetTitle("Residuals from the fit");
-    dn_resi_plots[j]->SetTitle("Day-Night Residuals after fit - FIMG");
-    dn_resi_plots[j]->SetLineWidth(2);
-    dn_resi_plots[j]->GetYaxis()->SetRangeUser(-1e-12,1e-12);
-    dn_resi_plots[j]->Draw("E");
-    dn_resi_plots[j]->SetStats(0);
-    gPad->SetGrid();
-    // gPad->SetLogy();
-
-    l_dn_resi[1] = new TLegend(0.72,0.30,0.90,0.45);
-    l_dn_resi[1]->AddEntry(dn_resi_plots[j],"Bi (1cm) Sep 18","l");
-    j++;
-
-    add_plot_to_canvas(c_dn_resi[1], dn_resi_plots[j], l_dn_resi[1], "Al (5cm) Sep 27", 40);
-    j++;
-    add_plot_to_canvas(c_dn_resi[1], dn_resi_plots[j], l_dn_resi[1], "Empty (TS) Oct 05", 2);
-    j++;
-    add_plot_to_canvas(c_dn_resi[1], dn_resi_plots[j], l_dn_resi[1], "Empty Tank Oct 15", 3);
-    j++;
-    add_plot_to_canvas(c_dn_resi[1], dn_resi_plots[j], l_dn_resi[1], "Argon Tank Oct 22", 7);
-    j++;
-
-    l_dn_resi[1]->Draw();
-    // c_dn_resi[1]->Print("../plots/stability_plots/day_night_residuals_FIMG.png");
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////// Pull Plots
-    TCanvas *c_dn_pull[2];
-    TLegend *l_dn_pull[2];
-    j = 0;
-
-    c_dn_pull[0] = new TCanvas(Form("c_dn_pull_%d", 0)," ");
-    c_dn_pull[0]->cd();
-    c_dn_pull[0]->Draw();
-    // TGaxis::SetExponentOffset(0, 0, "y"); // X and Y offset for Y axis
-
-    dn_pull_plots[j]->GetXaxis()->SetTitle("(data - fit) / $$/delta data$$");
-    dn_pull_plots[j]->GetYaxis()->SetTitle("counts");
-    dn_pull_plots[j]->SetTitle("Day-Night Pull Distributions - PTBC");
-    dn_pull_plots[j]->SetLineWidth(2);
-    // dn_pull_plots[j]->GetYaxis()->SetRangeUser(-1e-12,1e-12);
-    dn_pull_plots[j]->Draw();
-    dn_pull_plots[j]->SetStats(0);
-    gPad->SetGrid();
-    // gPad->SetLogy();
-
-    l_dn_pull[0] = new TLegend(0.72,0.30,0.90,0.45);
-    l_dn_pull[0]->AddEntry(dn_pull_plots[j],"Bi (1cm) Sep 18","l");
-    j++;
-
-    add_plot_to_canvas(c_dn_pull[0], dn_pull_plots[j], l_dn_pull[0], "Al (5cm) Sep 27", 40);
-    j++;
-    add_plot_to_canvas(c_dn_pull[0], dn_pull_plots[j], l_dn_pull[0], "Empty (TS) Oct 05", 2);
-    j++;
-    add_plot_to_canvas(c_dn_pull[0], dn_pull_plots[j], l_dn_pull[0], "Empty Tank Oct 15", 3);
-    j++;
-    add_plot_to_canvas(c_dn_pull[0], dn_pull_plots[j], l_dn_pull[0], "Argon Tank Oct 22", 7);
-    j++;
-
-    l_dn_pull[0]->Draw();
-    // c_dn_pull[0]->Print("../plots/stability_plots/day_night_pull_PTBC.png");
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    c_dn_pull[1] = new TCanvas(Form("c_dn_pull_%d", 1)," ");
-    c_dn_pull[1]->cd();
-    c_dn_pull[1]->Draw();
-    // TGaxis::SetExponentOffset(0, 0, "y"); // X and Y offset for Y axis
-
-    dn_pull_plots[j]->GetXaxis()->SetTitle("(data - fit) / $$/delta data$$");
-    dn_pull_plots[j]->GetYaxis()->SetTitle("counts");
-    dn_pull_plots[j]->SetTitle("Day-Night Pull Distributions - FIMG");
-    dn_pull_plots[j]->SetLineWidth(2);
-    // dn_pull_plots[j]->GetYaxis()->SetRangeUser(-1e-12,1e-12);
-    dn_pull_plots[j]->Draw();
-    dn_pull_plots[j]->SetStats(0);
-    gPad->SetGrid();
-    // gPad->SetLogy();
-
-    l_dn_pull[1] = new TLegend(0.72,0.30,0.90,0.45);
-    l_dn_pull[1]->AddEntry(dn_pull_plots[j],"Bi (1cm) Sep 18","l");
-    j++;
-
-    add_plot_to_canvas(c_dn_pull[1], dn_pull_plots[j], l_dn_pull[1], "Al (5cm) Sep 27", 40);
-    j++;
-    add_plot_to_canvas(c_dn_pull[1], dn_pull_plots[j], l_dn_pull[1], "Empty (TS) Oct 05", 2);
-    j++;
-    add_plot_to_canvas(c_dn_pull[1], dn_pull_plots[j], l_dn_pull[1], "Empty Tank Oct 15", 3);
-    j++;
-    add_plot_to_canvas(c_dn_pull[1], dn_pull_plots[j], l_dn_pull[1], "Argon Tank Oct 22", 7);
-    j++;
-
-    l_dn_pull[1]->Draw();
-    // c_dn_pull[1]->Print("../plots/stability_plots/day_night_pull_FIMG.png");
 
     return;
 }
 
-void day_night_plots(){
-
-    day_night_Bi_sep18_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_Bi_sep18_PTBC");
-    day_night_Al5_sep27_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_Al5_sep27_PTBC");
-    day_night_emptyTS_oct05_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_emptyTS_oct05_PTBC");
-    day_night_emptyTank_oct15_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_emptyTank_oct15_PTBC");
-    day_night_Argon_oct22_PTBC = retriveHistograms("../rootFiles/data_stability.root", "day_night_Argon_oct22_PTBC");
-
-    day_night_Bi_sep18_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_Bi_sep18_FIMG");
-    day_night_Al5_sep27_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_Al5_sep27_FIMG");
-    day_night_emptyTS_oct05_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_emptyTS_oct05_FIMG");
-    day_night_emptyTank_oct15_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_emptyTank_oct15_FIMG");
-    day_night_Argon_oct22_FIMG = retriveHistograms("../rootFiles/data_stability.root", "day_night_Argon_oct22_FIMG");
-
-    // day_night_Bi_sep18_PTBC->SetLineColor();
-    day_night_Al5_sep27_PTBC->SetLineColor(40);
-    day_night_emptyTS_oct05_PTBC->SetLineColor(2);
-    day_night_emptyTank_oct15_PTBC->SetLineColor(3);
-    day_night_Argon_oct22_PTBC->SetLineColor(7);
-    // day_night_Bi_sep18_FIMG->SetLineColor();
-    day_night_Al5_sep27_FIMG->SetLineColor(40);
-    day_night_emptyTS_oct05_FIMG->SetLineColor(2);
-    day_night_emptyTank_oct15_FIMG->SetLineColor(3);
-    day_night_Argon_oct22_FIMG->SetLineColor(7);
-
-
-    //Plotting
-    SetMArEXStyle();
-    
-    gStyle->SetStatX(0.27);
-    gStyle->SetStatY(0.9);
-    gStyle->SetStatH(0.1);
-    gStyle->SetStatW(0.17);
-
-    pull_distributions();
-
+void plot_all_dn_plots(){
     ///////////////////////////////////////////////////////////////////////////////////////////////
     TCanvas *c_dn[2];
     TLegend *l_dn[2];
@@ -450,6 +409,49 @@ void day_night_plots(){
 
     l_dn[j]->Draw();
     // c_dn[j]->Print("../plots/stability_plots/day_night_vaiation_FIMG.png");
+    return;
+}
+
+void day_night_plots(){
+
+    day_night_Bi_sep18_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Bi_sep18_PTBC");
+    day_night_Al5_sep27_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Al5_sep27_PTBC");
+    day_night_emptyTS_oct05_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_emptyTS_oct05_PTBC");
+    day_night_emptyTank_oct15_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_emptyTank_oct15_PTBC");
+    day_night_Argon_oct22_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Argon_oct22_PTBC");
+
+    day_night_Bi_sep18_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Bi_sep18_FIMG");
+    day_night_Al5_sep27_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Al5_sep27_FIMG");
+    day_night_emptyTS_oct05_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_emptyTS_oct05_FIMG");
+    day_night_emptyTank_oct15_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_emptyTank_oct15_FIMG");
+    day_night_Argon_oct22_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Argon_oct22_FIMG");
+
+    // day_night_Bi_sep18_PTBC->SetLineColor();
+    day_night_Al5_sep27_PTBC->SetLineColor(40);
+    day_night_emptyTS_oct05_PTBC->SetLineColor(2);
+    day_night_emptyTank_oct15_PTBC->SetLineColor(3);
+    day_night_Argon_oct22_PTBC->SetLineColor(7);
+    // day_night_Bi_sep18_FIMG->SetLineColor();
+    day_night_Al5_sep27_FIMG->SetLineColor(40);
+    day_night_emptyTS_oct05_FIMG->SetLineColor(2);
+    day_night_emptyTank_oct15_FIMG->SetLineColor(3);
+    day_night_Argon_oct22_FIMG->SetLineColor(7);
+
+    zero_line = new TLine(0., 0., 86400., 0.);
+    zero_line->SetLineWidth(2);
+    zero_line->SetLineColor(1);
+    zero_line->SetLineStyle(2);
+
+    //Plotting
+    SetMArEXStyle();
+    
+    gStyle->SetStatX(0.27);
+    gStyle->SetStatY(0.9);
+    gStyle->SetStatH(0.1);
+    gStyle->SetStatW(0.17);
+
+    pull_distributions();
+
 }
 
 // resi_Bi_sep18_PTBC
