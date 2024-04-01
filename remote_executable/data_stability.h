@@ -88,7 +88,7 @@ TH1D* day_night_emptyTS_oct05_FIMG = 0;
 TH1D* day_night_emptyTank_oct15_FIMG = 0;
 TH1D* day_night_Argon_oct22_FIMG = 0;
 
-Int_t bins_per_decade = 1000;
+Int_t bins_per_decade = 100;
 Double_t t_gamma_PTBC = (flight_path_length_PTB / speed_of_light) * 1e9; //converting into ns
 
 // Function to convert hhmmss format to seconds
@@ -204,4 +204,67 @@ void applyMyCuts_FIMG(Double_t tof, Float_t amp, Int_t det_num, TH1D* hist){
     }
 
     return;
+}
+
+bool select_hit_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num){
+    if (pulseIntensity <= 6e12)
+    {
+        for (int k = 0; k < 2; k++)
+        {
+            if (tof >= t_para[k][0] && tof < t_para[k][1])
+            {
+                if ( (Double_t) amp > yOnTheCutLine(t_para[k][0], a_para[k][0], t_para[k][1], a_para[k][1], tof) )
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+
+    if (det_num == 2) {
+        for (int k = 0; k < 4; k++)
+        {
+            if (tof >= t_det2[k][0] && tof < t_det2[k][1])
+            {
+                if ( (Double_t) amp > yOnTheCutLine(t_det2[k][0], a_det2[k][0], t_det2[k][1], a_det2[k][1], tof) )
+                {
+                    return 1;
+                }
+            }
+        }
+    } else {
+        for (int k = 0; k < 2; k++)
+        {
+            if (tof >= t_det3to7[det_num-3][k][0] && tof < t_det3to7[det_num-3][k][1])
+            {
+                if ( (Double_t) amp > yOnTheCutLine(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+bool select_hit_FIMG(Double_t tof, Float_t amp, Int_t det_num){
+    
+    if (tof < 7e3)
+    {
+        return 0;
+    }
+    
+    for (int k = 0; k < 5; k++)
+    {
+        if (tof >= tof_cut_FIMG[det_num-1][k][0] && tof < tof_cut_FIMG[det_num-1][k][1])
+        {
+            if ( (Double_t) amp > yOnTheCutLine(tof_cut_FIMG[det_num-1][k][0], amp_cut_FIMG[det_num-1][k][0], tof_cut_FIMG[det_num-1][k][1], amp_cut_FIMG[det_num-1][k][1], tof) )
+            {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
 }

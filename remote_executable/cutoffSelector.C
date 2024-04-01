@@ -207,7 +207,7 @@ void fillRuns(){
 // void beamOff(){
 //     for (int i = 0; i < beam_off.size(); i++)
 //     {
-//         TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", beam_off.at(i)),"read");
+//         TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/data/rootfiles/2023/ear1/run%d.root", beam_off.at(i)),"read");
 
 //         //PTBC ---------------------------------------------
 //         TTree* PTBC;
@@ -275,7 +275,7 @@ void FilterIn(){
 
     for (int i = 0; i < filter_in_runs.size(); i++)
     {
-        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", filter_in_runs.at(i)),"read");
+        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/data/rootfiles/2023/ear1/run%d.root", filter_in_runs.at(i)),"read");
         
         //PKUP ---------------------------------------------
         TTree* PKUP;
@@ -412,7 +412,7 @@ void FilterOut(){
 
     for (int i = 0; i < filter_out_runs.size(); i++)
     {
-        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", filter_out_runs.at(i)),"read");
+        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/data/rootfiles/2023/ear1/run%d.root", filter_out_runs.at(i)),"read");
         
         //PKUP ---------------------------------------------
         TTree* PKUP;

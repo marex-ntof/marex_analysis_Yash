@@ -73,7 +73,7 @@ Double_t GetNormFactor(std::vector<Int_t> run_list){
 
     for (int i = 0; i < run_list.size(); i++)
     {
-        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", run_list.at(i)),"read");
+        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/data/rootfiles/2023/ear1/run%d.root", run_list.at(i)),"read");
         cout << "Run Number = " << run_list.at(i) << endl;
 
         //FIMG ---------------------------------------------
@@ -110,7 +110,7 @@ void fillEnergyHist(std::vector<Int_t> run_list){
 
     for (int i = 0; i < run_list.size(); i++)
     {
-        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", run_list.at(i)),"read");
+        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/data/rootfiles/2023/ear1/run%d.root", run_list.at(i)),"read");
         cout << "Run Number = " << run_list.at(i) << endl;
 
         //PKUP ---------------------------------------------

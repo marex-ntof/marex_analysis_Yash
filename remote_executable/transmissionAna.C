@@ -63,7 +63,7 @@ Double_t FilterAl5(){
         Int_t BunchNumber = 0;
         Float_t PulseIntensity = 0;
 
-        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", filter_al5_runs.at(i)),"read");
+        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/data/rootfiles/2023/ear1/run%d.root", filter_al5_runs.at(i)),"read");
         file_ntof->GetObject("PTBC", PTBC);
 
         PTBC->SetBranchAddress("BunchNumber", &BunchNumber);
@@ -173,7 +173,7 @@ Double_t FilterAl8(){
         Int_t BunchNumber = 0;
         Float_t PulseIntensity = 0;
 
-        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", filter_al8_runs.at(i)),"read");
+        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/data/rootfiles/2023/ear1/run%d.root", filter_al8_runs.at(i)),"read");
 
         file_ntof->GetObject("PTBC", PTBC);
 

@@ -92,7 +92,7 @@ void pkup(){
 
     for (int i = 0; i < list_of_runs.size(); i++)
     {
-        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/processing/official/done/run%d.root", list_of_runs.at(i)),"read");
+        TFile *file_ntof = TFile::Open(Form("/eos/experiment/ntof/data/rootfiles/2023/ear1/run%d.root", list_of_runs.at(i)),"read");
         cout << "Run Number = " << list_of_runs.at(i) << endl;
 
         //PKUP ---------------------------------------------
