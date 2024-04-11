@@ -32,6 +32,10 @@ const static Int_t num_hist = 2;
 TH2D* h[num_hist];
 Int_t histCounter = 0;
 
+const static Int_t num_cuts = 2;
+TCutG* cut[num_cuts];
+Int_t cutCounter = 0;
+
 TCutG* PTBC_tof_amp_cut_det2;
 TCutG* PTBC_tof_amp_cut_det3;
 TCutG* PTBC_tof_amp_cut_det4;
@@ -253,6 +257,17 @@ void retriveHistograms(const char *file_name, const char *hist_name){
     histCounter++;
 }
 
+void retriveCuts(const char *file_name, const char *cut_name){
+    TFile *hist_file = TFile::Open(file_name, "READ");
+    if (!hist_file || hist_file->IsZombie()) {
+        cout << "Unable to open " << file_name << " for reading..." <<endl;
+        return;
+    }
+
+    cut[cutCounter] = (TCutG*)hist_file->Get(cut_name);
+    cutCounter++;
+}
+
 void hist2DPlots() {
 
     fillCutsPTBC_det2();
@@ -272,8 +287,10 @@ void hist2DPlots() {
     // retriveHistograms("../rootFiles/pkup.root", "delT_PTBC_beam_intensity_hist");
     // retriveHistograms("../rootFiles/pkup.root", "delT_FIMG_beam_intensity_hist");
 
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det2");       //
-    retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fOut_det2");       //
+    retriveHistograms("../rootFiles/cutoffAnalysis_FIMG_ar_bottle_full.root", "FIMG_tof_amp_dedi_det1");       
+    retriveCuts("../rootFiles/cutoffAnalysis_FIMG_ar_bottle_full.root", "FIMG_my_tof_amp_cut_dedi_det1");
+    retriveHistograms("../rootFiles/cutoffAnalysis_FIMG_ar_bottle_full.root", "FIMG_tof_amp_dedi_det2");       
+    retriveCuts("../rootFiles/cutoffAnalysis_FIMG_ar_bottle_full.root", "FIMG_my_tof_amp_cut_dedi_det2");
     // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det3_afterCuts");       //
     // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det4_afterCuts");       //
     // retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_full.root", "PTBC_tof_amp_fIn_det5_afterCuts");       //
@@ -284,7 +301,8 @@ void hist2DPlots() {
 
     //Plotting
     SetMArEXStyle();
-    gStyle->SetOptStat(1110);
+    // gStyle->SetOptStat(1110);
+    gStyle->SetPalette(57);
 
     TCanvas *c[2];
 
@@ -294,19 +312,23 @@ void hist2DPlots() {
     c[i]->cd();
     h[i]->GetXaxis()->SetTitle("TOF (in ns)");
     h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    // h[i]->GetXaxis()->SetRangeUser(3e2,2e3);
     h[i]->Draw("colz");
-    PTBC_tof_amp_cut_det2->Draw("same");
+    // PTBC_tof_amp_cut_det2->Draw("same");
+    cut[i]->Draw("same");
     gPad->SetLogx();
+    gPad->SetLogz();
 
-    i++;
+    // i++;
 
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-    h[i]->GetXaxis()->SetTitle("TOF (in ns)");
-    h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    h[i]->Draw("colz");
-    PTBC_tof_amp_cut_det2->Draw("same");
-    gPad->SetLogx();
+    // c[i] = new TCanvas(Form("c%d", i)," ");
+    // c[i]->cd();
+    // h[i]->GetXaxis()->SetTitle("TOF (in ns)");
+    // h[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    // h[i]->Draw("colz");
+    // // PTBC_tof_amp_cut_det3->Draw("same");
+    // cut[i]->Draw("same");
+    // gPad->SetLogx();
 
     // i++;
 

@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "hist2DPlots.C": "cpp",
+        "crossSectionPlots.C": "cpp",
+        "systematics.C": "cpp",
+        "plotsFromRootFile.C": "cpp",
+        "day_night_plots.C": "cpp",
+        "MArEXStyle.C": "cpp",
+        "data_stability.C": "cpp"
+    }
+}

@@ -8,3 +8,5 @@ plots/*
 remote_executable/Mo_TTOFSort_EAR1.C
 remote_executable/TTOFSort_nTOF.cxx
 remote_executable/TTOFSort_nTOF.h
+local_executable/concrete_systematics.csv
+local_executable/systematics.C

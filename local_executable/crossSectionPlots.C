@@ -92,8 +92,8 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
                 endf_trans_hist->SetBinContent(bin_counter, std::exp(- n * xsec_sum/sum_counter));
             }
             
-            xsec_sum = endf_xsec[i];
-            sum_counter = 1;
+            xsec_sum = 0; //endf_xsec[i];
+            sum_counter = 0; //1;
             bin_counter++;
             i--;
             continue;
@@ -551,7 +551,7 @@ void crossSectionPlots(){
     transmission_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
     transmission_hist_e_PTBC->GetYaxis()->SetTitle("Transmission");
     transmission_hist_e_PTBC->SetTitle(Form("Transmission Histogram - %s", filter_name_title.c_str()));
-    transmission_hist_e_PTBC->SetLineWidth(1);
+    transmission_hist_e_PTBC->SetLineWidth(2);
     transmission_hist_e_PTBC->Draw(); //"HISTE"
     transmission_hist_e_PTBC->SetStats(0);
     // transmission_hist_e_PTBC->SetMarkerStyle(6);
@@ -561,7 +561,7 @@ void crossSectionPlots(){
     // gStyle->SetPalette(57);
 
     l[i]->AddEntry(transmission_hist_e_FIMG,"FIMG","l");
-    transmission_hist_e_FIMG->SetLineColor(3);
+    transmission_hist_e_FIMG->SetLineColor(6);
     transmission_hist_e_FIMG->SetLineWidth(1);
     // transmission_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-2,1e3);
     transmission_hist_e_FIMG->Draw("SAME");
@@ -590,7 +590,7 @@ void crossSectionPlots(){
     if (fillENDF){
         l[i]->AddEntry(endf_trans_hist,"ENDF","l");
         endf_trans_hist->SetLineColor(2);
-        endf_trans_hist->SetLineWidth(1);
+        endf_trans_hist->SetLineWidth(2);
         // endf_trans_hist->GetXaxis()->SetRange(1e-2,2e7);
         endf_trans_hist->Draw("SAME");
     }
@@ -606,7 +606,7 @@ void crossSectionPlots(){
     {
         l[i]->AddEntry(jendl_trans_hist,"JENDL-5","l");
         jendl_trans_hist->SetLineColor(1);
-        jendl_trans_hist->SetLineWidth(1);
+        jendl_trans_hist->SetLineWidth(2);
         // jendl_trans_hist->GetXaxis()->SetRange(1e-2,2e7);
         jendl_trans_hist->Draw("SAME");
     }
@@ -651,7 +651,7 @@ void crossSectionPlots(){
 
     l[i]->SetMargin(0.4);
     l[i]->Draw();
-    c[i]->Print(Form("../plots/h_trans_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
+    // c[i]->Print(Form("../plots/h_trans_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
 
     i++;
 
@@ -704,7 +704,7 @@ void crossSectionPlots(){
 
     l[i]->SetMargin(0.4);
     l[i]->Draw();
-    c[i]->Print(Form("../plots/h_xsec_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
+    // c[i]->Print(Form("../plots/h_xsec_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
 
     // i++;
 
