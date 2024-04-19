@@ -27,6 +27,7 @@
 #include "TRandom3.h"
 
 Double_t flight_path_length_PTB = 182.65 - 0.41; //m
+Double_t flight_path_length_PTBC = 182.65 - 0.41; //m
 Double_t flight_path_length_FIMG = 183.5 - 0.41; //m
 Double_t neutron_mass = 939.56542052; //in MeV
 Double_t speed_of_light = 299792458.0; //in m/s
@@ -44,6 +45,9 @@ Double_t n_C_1p2cm = 0.105;// (1.2 /*cm*/) * (2.267 /*g/cm3*/) * (6.02214076e23 
 Double_t n_CFib_1cm = (1.0 /*cm*/) * (1.8 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (12.011 /*g/mole*/);
 Double_t n_Ar_bottle = (11.0 /*cm*/) * ((ar_bottle_pressure)/(8.31446261815324 * ar_bottle_temp * 1e6)) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/);
 Double_t n_Al_0p2cm = (0.2 /*cm*/) * (2.70 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (26.9815 /*g/mole*/);
+
+Double_t t_gamma_PTB = (flight_path_length_PTB / speed_of_light) * 1e9; //converting into ns
+Double_t t_gamma_FIMG = (flight_path_length_FIMG / speed_of_light) * 1e9; //converting into ns
 
 std::map<std::string, Double_t> num_density_map;
 void fillNumDensityMap(){
@@ -74,9 +78,6 @@ void fillEValFileNameMap(){
     eval_file_name_map.emplace("cf_bottle_rotBack", "C_tot_xsec.txt");
     eval_file_name_map.emplace("ar_bottle_full", "Ar_tot_xsec.txt");
 }
-
-Double_t t_gamma_PTB = (flight_path_length_PTB / speed_of_light) * 1e9; //converting into ns
-Double_t t_gamma_FIMG = (flight_path_length_FIMG / speed_of_light) * 1e9; //converting into ns
 
 //Filter In runs
 //Bi (1 cm) Filter
@@ -153,6 +154,9 @@ Double_t a_det3to7[5][2][2];
 Double_t t_para[4][2];
 Double_t a_para[4][2];
 
+Double_t t_det5_early_runs[4][2];
+Double_t a_det5_early_runs[4][2];
+
 void fillCutsPTBC(){
     //Det 2
     //End points of cut line 1
@@ -221,6 +225,35 @@ void fillCutsPTBC(){
 
     t_det3to7[2][1][1] = 1e8;
     a_det3to7[2][1][1] = 3500.0;
+
+    //Det 5 - from Run 117386 to 117390
+    //End points of cut line 1
+    t_det5_early_runs[0][0] = 800.0;
+    a_det5_early_runs[0][0] = 7000.0;
+
+    t_det5_early_runs[0][1] = 2300.0;
+    a_det5_early_runs[0][1] = 7000.0;
+
+    //End points of cut line 2
+    t_det5_early_runs[1][0] = 2300.0;
+    a_det5_early_runs[1][0] = 8500.0;
+
+    t_det5_early_runs[1][1] = 4000.0;
+    a_det5_early_runs[1][1] = 8500.0;
+
+    //End points of cut line 3
+    t_det5_early_runs[2][0] = 4000.0;
+    a_det5_early_runs[2][0] = 8500.0;
+
+    t_det5_early_runs[2][1] = 7000.0;
+    a_det5_early_runs[2][1] = 3500.0;
+
+    //End points of cut line 3
+    t_det5_early_runs[3][0] = 7000.0;
+    a_det5_early_runs[3][0] = 3500.0;
+
+    t_det5_early_runs[3][1] = 1e8;
+    a_det5_early_runs[3][1] = 3500.0;
 
     //Det 6
     t_det3to7[3][0][0] = 800.0;

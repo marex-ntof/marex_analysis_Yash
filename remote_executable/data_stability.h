@@ -28,12 +28,6 @@
 #include "parameters.h"
 #include "tools.h"
 
-//////// Run variables
-const std::string target_name("c1p2_ts"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
-const std::string target_out_name("none_ts"); //none, none_ts, ar_bottle
-// const std::string mode("run");
-// bi1, al3, al5, al8 - none
-
 //Root file
 TFile *outputRootFile = 0;
 
@@ -75,18 +69,18 @@ TH1D* norm_counts_ArgonFull_oct18_FIMG = 0;
 TH1D* norm_counts_ArgonFull_oct22_FIMG = 0;
 
 //////////// PTBC - day-night plots
-TH1D* day_night_Bi_sep18_PTBC = 0;
-TH1D* day_night_Al5_sep27_PTBC = 0;
-TH1D* day_night_emptyTS_oct05_PTBC = 0;
-TH1D* day_night_emptyTank_oct15_PTBC = 0;
-TH1D* day_night_Argon_oct22_PTBC = 0;
+// TH1D* day_night_Bi_sep18_PTBC = 0;
+// TH1D* day_night_Al5_sep27_PTBC = 0;
+// TH1D* day_night_emptyTS_oct05_PTBC = 0;
+// TH1D* day_night_emptyTank_oct15_PTBC = 0;
+// TH1D* day_night_Argon_oct22_PTBC = 0;
 
 //////////// FIMG - day-night plots
-TH1D* day_night_Bi_sep18_FIMG = 0;
-TH1D* day_night_Al5_sep27_FIMG = 0;
-TH1D* day_night_emptyTS_oct05_FIMG = 0;
-TH1D* day_night_emptyTank_oct15_FIMG = 0;
-TH1D* day_night_Argon_oct22_FIMG = 0;
+// TH1D* day_night_Bi_sep18_FIMG = 0;
+// TH1D* day_night_Al5_sep27_FIMG = 0;
+// TH1D* day_night_emptyTS_oct05_FIMG = 0;
+// TH1D* day_night_emptyTank_oct15_FIMG = 0;
+// TH1D* day_night_Argon_oct22_FIMG = 0;
 
 Int_t bins_per_decade = 100;
 Double_t t_gamma_PTBC = (flight_path_length_PTB / speed_of_light) * 1e9; //converting into ns
@@ -139,7 +133,7 @@ Int_t timeToSeconds(const std::string& timeStr) {
     }
 }
 
-void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num, TH1D* hist){
+void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num, TH1D* hist, Int_t run_number){
     //Filling the histograms
     if (pulseIntensity <= 6e12)
     {
@@ -169,19 +163,38 @@ void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t d
                 }
             }
         }
-    } else {
-        for (int k = 0; k < 2; k++)
-        {
-            if (tof >= t_det3to7[det_num-3][k][0] && tof < t_det3to7[det_num-3][k][1])
+        return;
+    }
+
+    if(run_number >= 117386 && run_number <= 117390) {
+        if (det_num == 5){
+            for (int k = 0; k < 4; k++)
             {
-                if ( (Double_t) amp > yOnTheCutLine(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
+                if (tof >= t_det5_early_runs[k][0] && tof < t_det5_early_runs[k][1])
                 {
-                    hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                    break;    
+                    if ( (Double_t) amp > yOnTheCutLine(t_det5_early_runs[k][0], a_det5_early_runs[k][0], t_det5_early_runs[k][1], a_det5_early_runs[k][1], tof) )
+                    {
+                        hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
+                        break;    
+                    }
                 }
+            }
+            return;
+        }
+    } 
+    
+    for (int k = 0; k < 2; k++)
+    {
+        if (tof >= t_det3to7[det_num-3][k][0] && tof < t_det3to7[det_num-3][k][1])
+        {
+            if ( (Double_t) amp > yOnTheCutLine(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
+            {
+                hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
+                break;    
             }
         }
     }
+    
 }
 
 void applyMyCuts_FIMG(Double_t tof, Float_t amp, Int_t det_num, TH1D* hist){

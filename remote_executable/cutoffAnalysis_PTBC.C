@@ -48,7 +48,7 @@ void FilterIn(){
         PTBC->SetBranchAddress("detn", &det_num_PTBC);
 
         Long64_t Events_PTBC = PTBC->GetEntriesFast();
-        std::cout << "Number of entries - PTBC = " << Events_PTBC << std::endl;
+        std::cout << Form("Number of entries - Run %i - PTBC = ", filter_in_runs.at(i)) << Events_PTBC << std::endl;
         
         int CurrentBunchNum = 0;
 
@@ -115,14 +115,28 @@ void FilterIn(){
                 }
             } else if (det_num_PTBC == 5) {
                 PTBC_tof_amp_fIn_det5->Fill(corrected_tof, (Double_t) amp_PTBC);
-                for (int k = 0; k < 2; k++)
-                {
-                    if (corrected_tof >= t_det3to7[det_num_PTBC-3][k][0] && corrected_tof < t_det3to7[det_num_PTBC-3][k][1])
+                if(filter_in_runs.at(i) >= 117386 && filter_in_runs.at(i) <= 117390) {
+                    for (int k = 0; k < 4; k++)
                     {
-                        if ( (Double_t) amp_PTBC > yOnTheCutLinePTBC(t_det3to7[det_num_PTBC-3][k][0], a_det3to7[det_num_PTBC-3][k][0], t_det3to7[det_num_PTBC-3][k][1], a_det3to7[det_num_PTBC-3][k][1], corrected_tof) )
+                        if (corrected_tof >= t_det5_early_runs[k][0] && corrected_tof < t_det5_early_runs[k][1])
                         {
-                            PTBC_tof_amp_fIn_det5_afterCuts->Fill(corrected_tof, (Double_t) amp_PTBC);
-                            break;    
+                            if ( (Double_t) amp_PTBC > yOnTheCutLinePTBC(t_det5_early_runs[k][0], a_det5_early_runs[k][0], t_det5_early_runs[k][1], a_det5_early_runs[k][1], corrected_tof) )
+                            {
+                                PTBC_tof_amp_fIn_det5_afterCuts->Fill(corrected_tof, (Double_t) amp_PTBC);
+                                break;    
+                            }
+                        }
+                    }
+                } else {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        if (corrected_tof >= t_det3to7[det_num_PTBC-3][k][0] && corrected_tof < t_det3to7[det_num_PTBC-3][k][1])
+                        {
+                            if ( (Double_t) amp_PTBC > yOnTheCutLinePTBC(t_det3to7[det_num_PTBC-3][k][0], a_det3to7[det_num_PTBC-3][k][0], t_det3to7[det_num_PTBC-3][k][1], a_det3to7[det_num_PTBC-3][k][1], corrected_tof) )
+                            {
+                                PTBC_tof_amp_fIn_det5_afterCuts->Fill(corrected_tof, (Double_t) amp_PTBC);
+                                break;    
+                            }
                         }
                     }
                 }
@@ -277,6 +291,7 @@ void StoreHist(){
 
     // PTBC_tof_amp_in->Write();
     // PTBC_tof_amp_out->Write();
+
     // PTBC_tof_amp_fOut_total->Write();
     // PTBC_tof_amp_fOut_det2->Write();
     // PTBC_tof_amp_fOut_det3->Write();
@@ -307,18 +322,21 @@ void StoreHist(){
 
     PTBC_tof_amp_fIn_dedicated->Write();
     PTBC_tof_amp_fIn_parasitic->Write();
-    PTBC_tof_amp_fOut_dedicated->Write();
-    PTBC_tof_amp_fOut_parasitic->Write();
+    // PTBC_tof_amp_fOut_dedicated->Write();
+    // PTBC_tof_amp_fOut_parasitic->Write();
 
     PTBC_tof_amp_cut_det2->Write();
     PTBC_tof_amp_cut_det3->Write();
     PTBC_tof_amp_cut_det4->Write();
     PTBC_tof_amp_cut_det5->Write();
+    PTBC_tof_amp_cut_det5_earlyruns->Write(); // from Run 117386 to 117390
     PTBC_tof_amp_cut_det6->Write();
     PTBC_tof_amp_cut_det7->Write();
     PTBC_tof_amp_cut_para->Write();
 
     f->Close();
+
+    std::cout << "Created output file '" << Form("cutoffAnalysis_PTBC_%s.root", target_name.c_str()) << "'" << std::endl;
 }
 
 void cutoffAnalysis_PTBC(){
