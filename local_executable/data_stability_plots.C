@@ -27,6 +27,8 @@
 
 #include "MArEXStyle.C"
 
+Int_t histCounter = 1;
+
 //////////// PTBC - counts plots
 TH1D* norm_counts_empty_sep19_PTBC = 0;
 TH1D* norm_counts_empty_oct01_PTBC = 0;
@@ -130,7 +132,7 @@ void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* n
     residual_plot[plot_index]->Draw();
     gPad->SetGrid();
     gPad->SetLogx();
-    c[plot_index]->Print( Form("../plots/stability_plots/%s.png", output_file_name) );
+    // c[plot_index]->Print( Form("../plots/stability_plots/%s.png", output_file_name) );
 
     plot_index++;
     return;
@@ -145,29 +147,82 @@ TH1D* retriveHistograms(const char *file_name, const char *hist_name){
     return hist_new;
 }
 
+TH1D* retriveHistogramsChangeBPD(const char *file_name, const char *hist_name, Int_t bpd_old, Int_t bpd_new){
+    
+    TFile* hist_file = TFile::Open(file_name, "READ");
+    TH1D* hist_old = (TH1D*)hist_file->Get(hist_name);
+    
+    Int_t num_bins_old = hist_old->GetNbinsX();
+    Int_t max_sum_bin_count = (bpd_old/bpd_new); // Number of old bins that need to be summed to make a new bin
+    Int_t num_bins_new = num_bins_old / max_sum_bin_count;
+
+    Double_t bin_edges_new[num_bins_new + 1];
+    Double_t bin_content[num_bins_new];
+    Double_t bin_error[num_bins_new];
+    Int_t sum_bin_count = 0;
+    Int_t new_bin_counter = 0;
+    for (int i = 1; i < num_bins_old + 1; i++)
+    {
+        if (i == 1)
+        {
+            bin_edges_new[new_bin_counter] = hist_old->GetXaxis()->GetBinLowEdge(i);
+            bin_content[new_bin_counter] = 0;
+            bin_error[new_bin_counter] = 0;
+        }
+        bin_content[new_bin_counter] += hist_old->GetBinContent(i);
+        bin_error[new_bin_counter] += hist_old->GetBinError(i) * hist_old->GetBinError(i);
+        sum_bin_count++;
+
+        if (i == num_bins_old)
+        {
+            // sum_bin_count = 0;
+            bin_error[new_bin_counter] = sqrt(bin_error[new_bin_counter]);
+            bin_edges_new[new_bin_counter+1] = hist_old->GetXaxis()->GetBinUpEdge(i);
+        }
+        else if (sum_bin_count == max_sum_bin_count)
+        {
+            sum_bin_count = 0;
+            bin_error[new_bin_counter] = sqrt(bin_error[new_bin_counter]);
+            new_bin_counter++;
+            bin_edges_new[new_bin_counter] = hist_old->GetXaxis()->GetBinUpEdge(i);
+            bin_content[new_bin_counter] = 0;
+            bin_error[new_bin_counter] = 0;
+        } 
+    }
+
+    TH1D* hist_new = new TH1D(Form("h_%i", histCounter),"Normalized Counts",num_bins_new,bin_edges_new);
+    for(int i = 0; i < num_bins_new; i++){
+        hist_new->SetBinContent(i+1, bin_content[i]);
+        hist_new->SetBinError(i+1, bin_error[i]);
+    }
+    histCounter++;
+
+    return hist_new;
+}
+
 void data_stability_plots(){
 
-    norm_counts_empty_sep19_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_empty_sep19_PTBC");
-    norm_counts_empty_oct01_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_empty_oct01_PTBC");
-    norm_counts_Bi_sep17_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_Bi_sep17_PTBC");
-    norm_counts_Bi_sep23_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_Bi_sep23_PTBC");
-    norm_counts_Al5_sep25_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_Al5_sep25_PTBC");
-    norm_counts_Al5_oct02_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_Al5_oct02_PTBC");
-    norm_counts_emptyTank_oct12_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_emptyTank_oct12_PTBC");
-    norm_counts_emptyTank_oct16_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_emptyTank_oct16_PTBC");
-    norm_counts_ArgonFull_oct18_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct18_PTBC");
-    norm_counts_ArgonFull_oct22_PTBC = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct22_PTBC");
+    norm_counts_empty_sep19_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_empty_sep19_PTBC", 100, 20);
+    norm_counts_empty_oct01_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_empty_oct01_PTBC", 100, 20);
+    norm_counts_Bi_sep17_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_Bi_sep17_PTBC", 100, 20);
+    norm_counts_Bi_sep23_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_Bi_sep23_PTBC", 100, 20);
+    norm_counts_Al5_sep25_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_Al5_sep25_PTBC", 100, 20);
+    norm_counts_Al5_oct02_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_Al5_oct02_PTBC", 100, 20);
+    norm_counts_emptyTank_oct12_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_emptyTank_oct12_PTBC", 100, 20);
+    norm_counts_emptyTank_oct16_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_emptyTank_oct16_PTBC", 100, 20);
+    norm_counts_ArgonFull_oct18_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct18_PTBC", 100, 20);
+    norm_counts_ArgonFull_oct22_PTBC = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct22_PTBC", 100, 20);
 
-    norm_counts_empty_sep19_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_empty_sep19_FIMG");
-    norm_counts_empty_oct01_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_empty_oct01_FIMG");
-    norm_counts_Bi_sep17_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_Bi_sep17_FIMG");
-    norm_counts_Bi_sep23_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_Bi_sep23_FIMG");
-    norm_counts_Al5_sep25_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_Al5_sep25_FIMG");
-    norm_counts_Al5_oct02_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_Al5_oct02_FIMG");
-    norm_counts_emptyTank_oct12_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_emptyTank_oct12_FIMG");
-    norm_counts_emptyTank_oct16_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_emptyTank_oct16_FIMG");
-    norm_counts_ArgonFull_oct18_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct18_FIMG");
-    norm_counts_ArgonFull_oct22_FIMG = retriveHistograms("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct22_FIMG");
+    norm_counts_empty_sep19_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_empty_sep19_FIMG", 100, 20);
+    norm_counts_empty_oct01_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_empty_oct01_FIMG", 100, 20);
+    norm_counts_Bi_sep17_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_Bi_sep17_FIMG", 100, 20);
+    norm_counts_Bi_sep23_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_Bi_sep23_FIMG", 100, 20);
+    norm_counts_Al5_sep25_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_Al5_sep25_FIMG", 100, 20);
+    norm_counts_Al5_oct02_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_Al5_oct02_FIMG", 100, 20);
+    norm_counts_emptyTank_oct12_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_emptyTank_oct12_FIMG", 100, 20);
+    norm_counts_emptyTank_oct16_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_emptyTank_oct16_FIMG", 100, 20);
+    norm_counts_ArgonFull_oct18_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct18_FIMG", 100, 20);
+    norm_counts_ArgonFull_oct22_FIMG = retriveHistogramsChangeBPD("../rootFiles/data_stability.root", "norm_counts_ArgonFull_oct22_FIMG", 100, 20);
 
     //Plotting
     SetMArEXStyle();

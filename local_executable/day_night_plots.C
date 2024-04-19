@@ -28,26 +28,30 @@
 #include "MArEXStyle.C"
 
 //////////// PTBC - day-night plots
-TH1D* day_night_Bi_sep18_PTBC = 0;
-TH1D* day_night_Al5_sep27_PTBC = 0;
-TH1D* day_night_emptyTS_oct05_PTBC = 0;
-TH1D* day_night_emptyTank_oct15_PTBC = 0;
-TH1D* day_night_Argon_oct22_PTBC = 0;
+TH1D* day_night_filterOut_PTBC = 0;
+TH1D* day_night_Bi_PTBC = 0;
+TH1D* day_night_Al5_PTBC = 0;
+TH1D* day_night_emptyTS_PTBC = 0;
+TH1D* day_night_emptyTank_PTBC = 0;
+TH1D* day_night_Argon_PTBC = 0;
+TH1D* day_night_EmptyArgon_PTBC = 0;
 
 //////////// FIMG - day-night plots
-TH1D* day_night_Bi_sep18_FIMG = 0;
-TH1D* day_night_Al5_sep27_FIMG = 0;
-TH1D* day_night_emptyTS_oct05_FIMG = 0;
-TH1D* day_night_emptyTank_oct15_FIMG = 0;
-TH1D* day_night_Argon_oct22_FIMG = 0;
+TH1D* day_night_filterOut_FIMG = 0;
+TH1D* day_night_Bi_FIMG = 0;
+TH1D* day_night_Al5_FIMG = 0;
+TH1D* day_night_emptyTS_FIMG = 0;
+TH1D* day_night_emptyTank_FIMG = 0;
+TH1D* day_night_Argon_FIMG = 0;
+TH1D* day_night_EmptyArgon_FIMG = 0;
 
-TF1* dn_fits[10];
-TH1D* dn_resi_plots[10];
-TH1D* dn_pull_plots[10];
-TLine* dn_fit_lines[10];
-TCanvas* dn_canvas[10];
-TLegend* dn_legends[10];
-TPad* dn_pads[10][3];
+TF1* dn_fits[14];
+TH1D* dn_resi_plots[14];
+TH1D* dn_pull_plots[14];
+TLine* dn_fit_lines[14];
+TCanvas* dn_canvas[14];
+TLegend* dn_legends[14];
+TPad* dn_pads[14][3];
 TLine* zero_line;
 Int_t dn_plot_index = 0;
 
@@ -91,6 +95,7 @@ void compute_residuals(TH1D* dn_hist){
     dn_hist->Fit(dn_fits[dn_plot_index], "0");
     std::cout << "" << std::endl;
 
+    // Residual ratio histograms // Dividing by the 
     dn_resi_plots[dn_plot_index] = (TH1D*)(dn_hist->Clone(Form("dn_resi_plot_%d", dn_plot_index)));
     Int_t num_bins = dn_hist->GetNbinsX();
     for (Int_t i = 0; i < num_bins; i++)
@@ -102,17 +107,17 @@ void compute_residuals(TH1D* dn_hist){
             Double_t fit_para = dn_fits[dn_plot_index]->GetParameter(0);
             Double_t fit_para_error = dn_fits[dn_plot_index]->GetParError(0);
 
-            dn_resi_plots[dn_plot_index]->SetBinContent(i+1, bin_content - fit_para);
-            Double_t new_error = std::sqrt(bin_error*bin_error + fit_para_error*fit_para_error);
+            dn_resi_plots[dn_plot_index]->SetBinContent(i+1, (bin_content - fit_para)/bin_error);
+            Double_t new_error = (std::sqrt(bin_error*bin_error + fit_para_error*fit_para_error))/bin_error;
             dn_resi_plots[dn_plot_index]->SetBinError(i+1, new_error);
         }
     }
     
+    // pull distributions
     Int_t num_pull_bins = 15;
     dn_pull_plots[dn_plot_index] = new TH1D(Form("dn_pull_plots_%i", dn_plot_index), "", num_pull_bins, -5, 5);
     for (Int_t i = 0; i < num_bins; i++){
-        Double_t fill_content = dn_resi_plots[dn_plot_index]->GetBinContent(i+1) / dn_resi_plots[dn_plot_index]->GetBinError(i+1);
-        dn_pull_plots[dn_plot_index]->Fill(fill_content);
+        dn_pull_plots[dn_plot_index]->Fill( dn_resi_plots[dn_plot_index]->GetBinContent(i+1) );
     }
     dn_pull_plots[dn_plot_index]->SetLineColor(dn_hist->GetLineColor());
     
@@ -145,8 +150,8 @@ void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* 
     dn_hist->GetYaxis()->SetTitleSize(0.09);
     dn_hist->GetYaxis()->SetTitleOffset(0.4);
     // Setting the y axis range
-    Double_t y_range_min = dn_fits[dn_plot_index]->GetParameter(0) - 0.3e-12;
-    Double_t y_range_max = dn_fits[dn_plot_index]->GetParameter(0) + 0.3e-12;
+    Double_t y_range_min = dn_fits[dn_plot_index]->GetParameter(0) - 2e-12; //0.3e-12
+    Double_t y_range_max = dn_fits[dn_plot_index]->GetParameter(0) + 2e-12; //0.3e-12
     dn_hist->SetMaximum(y_range_max);
     dn_hist->SetMinimum(y_range_min);
     TGaxis::SetExponentOffset(-0.06, -0.8, "y"); // X and Y offset for Y axis
@@ -186,13 +191,13 @@ void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* 
     resi_hist->GetXaxis()->SetLabelSize(0.07);
     resi_hist->GetXaxis()->SetTitleSize(0.09);
     // Y-Axis
-    resi_hist->GetYaxis()->SetTitle("Residuals");
+    resi_hist->GetYaxis()->SetTitle("(data - fit) / #sigma data");
     resi_hist->GetYaxis()->SetLabelSize(0.07);
     resi_hist->GetYaxis()->SetTitleSize(0.09);
     resi_hist->GetYaxis()->SetTitleOffset(0.4);
     resi_hist->SetLineColor(2);
     resi_hist->SetLineWidth(2);
-    resi_hist->GetYaxis()->SetRangeUser(-0.3e-12, 0.3e-12);
+    // resi_hist->GetYaxis()->SetRangeUser(-2e-12, 2e-12); // -0.3e-12, 0.3e-12
     resi_hist->Draw("E");
     resi_hist->SetStats(0);
 
@@ -207,7 +212,7 @@ void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* 
     dn_pads[dn_plot_index][2]->Draw();
     dn_pads[dn_plot_index][2]->cd();
     // X-Axis
-    pull_hist->GetXaxis()->SetTitle("(data - fit) / #Delta data");
+    pull_hist->GetXaxis()->SetTitle("(data - fit) / #sigma data");
     pull_hist->GetXaxis()->SetTitleSize(0.1);
     // pull_hist->GetXaxis()->SetLabelOffset(0.01);
     pull_hist->GetXaxis()->SetTitleOffset(0.8);
@@ -233,96 +238,104 @@ void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* 
 
 void pull_distributions(){
     
-    Int_t tot_bins = day_night_Bi_sep18_PTBC->GetNbinsX();
+    Int_t tot_bins = day_night_Bi_PTBC->GetNbinsX();
 
-    for (Int_t i = 0; i < tot_bins; i++)
-    {
-        ////////////////////////////////////////////// PTBC /////////////////////////////////////////////////
-        if (day_night_Bi_sep18_PTBC->GetBinContent(i+1) < 3e-12 || day_night_Bi_sep18_PTBC->GetBinContent(i+1) > 4e-12)
-        {
-            day_night_Bi_sep18_PTBC->SetBinContent(i+1, 0);
-            day_night_Bi_sep18_PTBC->SetBinError(i+1, 0);
-        }
+    // for (Int_t i = 0; i < tot_bins; i++)
+    // {
+    //     ////////////////////////////////////////////// PTBC /////////////////////////////////////////////////
+    //     if (day_night_Bi_PTBC->GetBinContent(i+1) < 3e-12 || day_night_Bi_PTBC->GetBinContent(i+1) > 4e-12)
+    //     {
+    //         day_night_Bi_PTBC->SetBinContent(i+1, 0);
+    //         day_night_Bi_PTBC->SetBinError(i+1, 0);
+    //     }
 
-        if (day_night_Al5_sep27_PTBC->GetBinContent(i+1) < 2.5e-12 || day_night_Al5_sep27_PTBC->GetBinContent(i+1) > 3.5e-12)
-        {
-            day_night_Al5_sep27_PTBC->SetBinContent(i+1, 0);
-            day_night_Al5_sep27_PTBC->SetBinError(i+1, 0);
-        }
+    //     if (day_night_Al5_PTBC->GetBinContent(i+1) < 2.5e-12 || day_night_Al5_PTBC->GetBinContent(i+1) > 3.5e-12)
+    //     {
+    //         day_night_Al5_PTBC->SetBinContent(i+1, 0);
+    //         day_night_Al5_PTBC->SetBinError(i+1, 0);
+    //     }
 
-        if (day_night_emptyTS_oct05_PTBC->GetBinContent(i+1) < 3.5e-12 || day_night_emptyTS_oct05_PTBC->GetBinContent(i+1) > 4.5e-12)
-        {
-            day_night_emptyTS_oct05_PTBC->SetBinContent(i+1, 0);
-            day_night_emptyTS_oct05_PTBC->SetBinError(i+1, 0);
-        }
+    //     if (day_night_emptyTS_PTBC->GetBinContent(i+1) < 3.5e-12 || day_night_emptyTS_PTBC->GetBinContent(i+1) > 4.5e-12)
+    //     {
+    //         day_night_emptyTS_PTBC->SetBinContent(i+1, 0);
+    //         day_night_emptyTS_PTBC->SetBinError(i+1, 0);
+    //     }
 
-        if (day_night_emptyTank_oct15_PTBC->GetBinContent(i+1) < 1e-12 || day_night_emptyTank_oct15_PTBC->GetBinContent(i+1) > 2e-12)
-        {
-            day_night_emptyTank_oct15_PTBC->SetBinContent(i+1, 0);
-            day_night_emptyTank_oct15_PTBC->SetBinError(i+1, 0);
-        }
+    //     if (day_night_emptyTank_PTBC->GetBinContent(i+1) < 1e-12 || day_night_emptyTank_PTBC->GetBinContent(i+1) > 2e-12)
+    //     {
+    //         day_night_emptyTank_PTBC->SetBinContent(i+1, 0);
+    //         day_night_emptyTank_PTBC->SetBinError(i+1, 0);
+    //     }
 
-        if (day_night_Argon_oct22_PTBC->GetBinContent(i+1) < 1e-12 || day_night_Argon_oct22_PTBC->GetBinContent(i+1) > 2e-12)
-        {
-            day_night_Argon_oct22_PTBC->SetBinContent(i+1, 0);
-            day_night_Argon_oct22_PTBC->SetBinError(i+1, 0);
-        }
+    //     if (day_night_Argon_PTBC->GetBinContent(i+1) < 1e-12 || day_night_Argon_PTBC->GetBinContent(i+1) > 2e-12)
+    //     {
+    //         day_night_Argon_PTBC->SetBinContent(i+1, 0);
+    //         day_night_Argon_PTBC->SetBinError(i+1, 0);
+    //     }
 
-        ////////////////////////////////////////////// FIMG /////////////////////////////////////////////////
-        if (day_night_Bi_sep18_FIMG->GetBinContent(i+1) < 5e-12 || day_night_Bi_sep18_FIMG->GetBinContent(i+1) > 7e-12)
-        {
-            day_night_Bi_sep18_FIMG->SetBinContent(i+1, 0);
-            day_night_Bi_sep18_FIMG->SetBinError(i+1, 0);
-        }
+    //     ////////////////////////////////////////////// FIMG /////////////////////////////////////////////////
+    //     if (day_night_Bi_FIMG->GetBinContent(i+1) < 5e-12 || day_night_Bi_FIMG->GetBinContent(i+1) > 7e-12)
+    //     {
+    //         day_night_Bi_FIMG->SetBinContent(i+1, 0);
+    //         day_night_Bi_FIMG->SetBinError(i+1, 0);
+    //     }
 
-        if (day_night_Al5_sep27_FIMG->GetBinContent(i+1) < 4e-12 || day_night_Al5_sep27_FIMG->GetBinContent(i+1) > 6e-12)
-        {
-            day_night_Al5_sep27_FIMG->SetBinContent(i+1, 0);
-            day_night_Al5_sep27_FIMG->SetBinError(i+1, 0);
-        }
+    //     if (day_night_Al5_FIMG->GetBinContent(i+1) < 4e-12 || day_night_Al5_FIMG->GetBinContent(i+1) > 6e-12)
+    //     {
+    //         day_night_Al5_FIMG->SetBinContent(i+1, 0);
+    //         day_night_Al5_FIMG->SetBinError(i+1, 0);
+    //     }
 
-        if (day_night_emptyTS_oct05_FIMG->GetBinContent(i+1) < 6e-12 || day_night_emptyTS_oct05_FIMG->GetBinContent(i+1) > 8e-12)
-        {
-            day_night_emptyTS_oct05_FIMG->SetBinContent(i+1, 0);
-            day_night_emptyTS_oct05_FIMG->SetBinError(i+1, 0);
-        }
+    //     if (day_night_emptyTS_FIMG->GetBinContent(i+1) < 6e-12 || day_night_emptyTS_FIMG->GetBinContent(i+1) > 8e-12)
+    //     {
+    //         day_night_emptyTS_FIMG->SetBinContent(i+1, 0);
+    //         day_night_emptyTS_FIMG->SetBinError(i+1, 0);
+    //     }
 
-        if (day_night_emptyTank_oct15_FIMG->GetBinContent(i+1) < 1e-12 || day_night_emptyTank_oct15_FIMG->GetBinContent(i+1) > 3e-12)
-        {
-            day_night_emptyTank_oct15_FIMG->SetBinContent(i+1, 0);
-            day_night_emptyTank_oct15_FIMG->SetBinError(i+1, 0);
-        }
+    //     if (day_night_emptyTank_FIMG->GetBinContent(i+1) < 1e-12 || day_night_emptyTank_FIMG->GetBinContent(i+1) > 3e-12)
+    //     {
+    //         day_night_emptyTank_FIMG->SetBinContent(i+1, 0);
+    //         day_night_emptyTank_FIMG->SetBinError(i+1, 0);
+    //     }
 
-        if (day_night_Argon_oct22_FIMG->GetBinContent(i+1) < 1e-12 || day_night_Argon_oct22_FIMG->GetBinContent(i+1) > 3e-12)
-        {
-            day_night_Argon_oct22_FIMG->SetBinContent(i+1, 0);
-            day_night_Argon_oct22_FIMG->SetBinError(i+1, 0);
-        }
-    }
+    //     if (day_night_Argon_FIMG->GetBinContent(i+1) < 1e-12 || day_night_Argon_FIMG->GetBinContent(i+1) > 3e-12)
+    //     {
+    //         day_night_Argon_FIMG->SetBinContent(i+1, 0);
+    //         day_night_Argon_FIMG->SetBinError(i+1, 0);
+    //     }
+    // }
 
-    compute_residuals(day_night_Bi_sep18_PTBC);
-    compute_residuals(day_night_Al5_sep27_PTBC);
-    compute_residuals(day_night_emptyTS_oct05_PTBC);
-    compute_residuals(day_night_emptyTank_oct15_PTBC);
-    compute_residuals(day_night_Argon_oct22_PTBC);
-    compute_residuals(day_night_Bi_sep18_FIMG);
-    compute_residuals(day_night_Al5_sep27_FIMG);
-    compute_residuals(day_night_emptyTS_oct05_FIMG);
-    compute_residuals(day_night_emptyTank_oct15_FIMG);
-    compute_residuals(day_night_Argon_oct22_FIMG);
+    compute_residuals(day_night_filterOut_PTBC);
+    compute_residuals(day_night_Bi_PTBC);
+    compute_residuals(day_night_Al5_PTBC);
+    compute_residuals(day_night_emptyTS_PTBC);
+    compute_residuals(day_night_emptyTank_PTBC);
+    compute_residuals(day_night_Argon_PTBC);
+    compute_residuals(day_night_EmptyArgon_PTBC);
+
+    compute_residuals(day_night_filterOut_FIMG);
+    compute_residuals(day_night_Bi_FIMG);
+    compute_residuals(day_night_Al5_FIMG);
+    compute_residuals(day_night_emptyTS_FIMG);
+    compute_residuals(day_night_emptyTank_FIMG);
+    compute_residuals(day_night_Argon_FIMG);
+    compute_residuals(day_night_EmptyArgon_FIMG);
 
     dn_plot_index = 0;
-    plot_dn_plots(day_night_Bi_sep18_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Bi (1cm) Sep 18 - PTBC", "dn_vaiation_bi_sep18_PTBC");
-    plot_dn_plots(day_night_Al5_sep27_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Al (5cm) Sep 27 - PTBC", "dn_vaiation_al5_sep27_PTBC");
-    plot_dn_plots(day_night_emptyTS_oct05_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty (TS) Oct 05 - PTBC", "dn_vaiation_emptyTS_oct05_PTBC");
-    plot_dn_plots(day_night_emptyTank_oct15_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Tank Oct 15 - PTBC", "dn_vaiation_emptyTank_oct15_PTBC");
-    plot_dn_plots(day_night_Argon_oct22_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Argon Tank Oct 22 - PTBC", "dn_vaiation_argon_oct22_PTBC");
-    plot_dn_plots(day_night_Bi_sep18_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Bi (1cm) Sep 18 - FIMG", "dn_vaiation_bi_sep18_FIMG");
-    plot_dn_plots(day_night_Al5_sep27_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Al (5cm) Sep 27 - FIMG", "dn_vaiation_al5_sep27_FIMG");
-    plot_dn_plots(day_night_emptyTS_oct05_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty (TS) Oct 05 - FIMG", "dn_vaiation_emptyTS_oct05_FIMG");
-    plot_dn_plots(day_night_emptyTank_oct15_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Tank Oct 15 - FIMG", "dn_vaiation_emptyTank_oct15_FIMG");
-    plot_dn_plots(day_night_Argon_oct22_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Argon Tank Oct 22 - FIMG", "dn_vaiation_argon_oct22_FIMG");
-
+    plot_dn_plots(day_night_filterOut_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Filter Out - PTBC", "dn_variation_filterOut_PTBC");
+    plot_dn_plots(day_night_Bi_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Bi (1cm) - PTBC", "dn_variation_bi_PTBC");
+    plot_dn_plots(day_night_Al5_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Al (5cm) - PTBC", "dn_variation_al5_PTBC");
+    plot_dn_plots(day_night_emptyTS_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty (TS) - PTBC", "dn_variation_emptyTS_PTBC");
+    plot_dn_plots(day_night_emptyTank_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Tank - PTBC", "dn_variation_emptyTank_PTBC");
+    plot_dn_plots(day_night_Argon_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Argon Tank - PTBC", "dn_variation_argon_PTBC");
+    plot_dn_plots(day_night_EmptyArgon_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Argon - PTBC", "dn_variation_argon_PTBC");
+    
+    plot_dn_plots(day_night_filterOut_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Filter Out - FIMG", "dn_variation_filterOut_FIMG");
+    plot_dn_plots(day_night_Bi_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Bi (1cm) - FIMG", "dn_variation_bi_FIMG");
+    plot_dn_plots(day_night_Al5_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Al (5cm) - FIMG", "dn_variation_al5_FIMG");
+    plot_dn_plots(day_night_emptyTS_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty (TS) - FIMG", "dn_variation_emptyTS_FIMG");
+    plot_dn_plots(day_night_emptyTank_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Tank - FIMG", "dn_variation_emptyTank_FIMG");
+    plot_dn_plots(day_night_Argon_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Argon Tank - FIMG", "dn_variation_argon_FIMG");
 
     return;
 }
@@ -331,7 +344,7 @@ void plot_all_dn_plots(){
     ///////////////////////////////////////////////////////////////////////////////////////////////
     TCanvas *c_dn[2];
     TLegend *l_dn[2];
-    TLine *fit_lines[10];
+    TLine *fit_lines[14];
     Int_t j = 0;
     Int_t fit_index = 0;
 
@@ -340,23 +353,23 @@ void plot_all_dn_plots(){
     c_dn[j]->Draw();
     // TGaxis::SetExponentOffset(0, 0, "y"); // X and Y offset for Y axis
 
-    day_night_Bi_sep18_PTBC->GetXaxis()->SetTitle("Seconds in a day");
-    day_night_Bi_sep18_PTBC->GetYaxis()->SetTitle("Normalized Counts");
-    day_night_Bi_sep18_PTBC->SetTitle("Day-Night Variation in Counts - PTBC");
-    day_night_Bi_sep18_PTBC->SetLineWidth(2);
-    day_night_Bi_sep18_PTBC->GetYaxis()->SetRangeUser(5e-13,5e-12);
-    day_night_Bi_sep18_PTBC->Draw();
-    day_night_Bi_sep18_PTBC->SetStats(0);
+    day_night_Bi_PTBC->GetXaxis()->SetTitle("Seconds in a day");
+    day_night_Bi_PTBC->GetYaxis()->SetTitle("Normalized Counts");
+    day_night_Bi_PTBC->SetTitle("Day-Night Variation in Counts - PTBC");
+    day_night_Bi_PTBC->SetLineWidth(2);
+    day_night_Bi_PTBC->GetYaxis()->SetRangeUser(5e-13,5e-12);
+    day_night_Bi_PTBC->Draw();
+    day_night_Bi_PTBC->SetStats(0);
     gPad->SetGrid();
     // gPad->SetLogy();
 
     l_dn[j] = new TLegend(0.72,0.30,0.90,0.45);
-    l_dn[j]->AddEntry(day_night_Bi_sep18_PTBC,"Bi (1cm) Sep 18","l");
+    l_dn[j]->AddEntry(day_night_Bi_PTBC,"Bi (1cm) Sep 18","l");
 
-    add_plot_to_canvas(c_dn[j], day_night_Al5_sep27_PTBC, l_dn[j], "Al (5cm) Sep 27", 40);
-    add_plot_to_canvas(c_dn[j], day_night_emptyTS_oct05_PTBC, l_dn[j], "Empty (TS) Oct 05", 2);
-    add_plot_to_canvas(c_dn[j], day_night_emptyTank_oct15_PTBC, l_dn[j], "Empty Tank Oct 15", 3);
-    add_plot_to_canvas(c_dn[j], day_night_Argon_oct22_PTBC, l_dn[j], "Argon Tank Oct 22", 7);
+    add_plot_to_canvas(c_dn[j], day_night_Al5_PTBC, l_dn[j], "Al (5cm) Sep 27", 40);
+    add_plot_to_canvas(c_dn[j], day_night_emptyTS_PTBC, l_dn[j], "Empty (TS) Oct 05", 2);
+    add_plot_to_canvas(c_dn[j], day_night_emptyTank_PTBC, l_dn[j], "Empty Tank Oct 15", 3);
+    add_plot_to_canvas(c_dn[j], day_night_Argon_PTBC, l_dn[j], "Argon Tank Oct 22", 7);
 
     add_fit_to_canvas(c_dn[j], fit_lines[fit_index], dn_fits[fit_index]->GetParameter(0), 4);
     fit_index++;
@@ -370,7 +383,7 @@ void plot_all_dn_plots(){
     fit_index++;
 
     l_dn[j]->Draw();
-    // c_dn[j]->Print("../plots/stability_plots/day_night_vaiation_PTBC.png");
+    // c_dn[j]->Print("../plots/stability_plots/day_night_variation_PTBC.png");
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     j++;
@@ -378,23 +391,23 @@ void plot_all_dn_plots(){
     c_dn[j]->cd();
     c_dn[j]->Draw();
 
-    day_night_Bi_sep18_FIMG->GetXaxis()->SetTitle("Seconds in a day");
-    day_night_Bi_sep18_FIMG->GetYaxis()->SetTitle("Normalized Counts");
-    day_night_Bi_sep18_FIMG->SetTitle("Day-Night Variation in Counts - FIMG");
-    day_night_Bi_sep18_FIMG->SetLineWidth(2);
-    day_night_Bi_sep18_FIMG->GetYaxis()->SetRangeUser(1e-12,9e-12);
-    day_night_Bi_sep18_FIMG->Draw();
-    day_night_Bi_sep18_FIMG->SetStats(0);
+    day_night_Bi_FIMG->GetXaxis()->SetTitle("Seconds in a day");
+    day_night_Bi_FIMG->GetYaxis()->SetTitle("Normalized Counts");
+    day_night_Bi_FIMG->SetTitle("Day-Night Variation in Counts - FIMG");
+    day_night_Bi_FIMG->SetLineWidth(2);
+    day_night_Bi_FIMG->GetYaxis()->SetRangeUser(1e-12,9e-12);
+    day_night_Bi_FIMG->Draw();
+    day_night_Bi_FIMG->SetStats(0);
     gPad->SetGrid();
     // gPad->SetLogy();
 
     l_dn[j] = new TLegend(0.72,0.30,0.90,0.45);
-    l_dn[j]->AddEntry(day_night_Bi_sep18_FIMG,"Bi (1cm) Sep 18","l");
+    l_dn[j]->AddEntry(day_night_Bi_FIMG,"Bi (1cm) Sep 18","l");
 
-    add_plot_to_canvas(c_dn[j], day_night_Al5_sep27_FIMG, l_dn[j], "Al (5cm) Sep 27", 40);
-    add_plot_to_canvas(c_dn[j], day_night_emptyTS_oct05_FIMG, l_dn[j], "Empty (TS) Oct 05", 2);
-    add_plot_to_canvas(c_dn[j], day_night_emptyTank_oct15_FIMG, l_dn[j], "Empty Tank Oct 15", 3);
-    add_plot_to_canvas(c_dn[j], day_night_Argon_oct22_FIMG, l_dn[j], "Argon Tank Oct 22", 7);
+    add_plot_to_canvas(c_dn[j], day_night_Al5_FIMG, l_dn[j], "Al (5cm) Sep 27", 40);
+    add_plot_to_canvas(c_dn[j], day_night_emptyTS_FIMG, l_dn[j], "Empty (TS) Oct 05", 2);
+    add_plot_to_canvas(c_dn[j], day_night_emptyTank_FIMG, l_dn[j], "Empty Tank Oct 15", 3);
+    add_plot_to_canvas(c_dn[j], day_night_Argon_FIMG, l_dn[j], "Argon Tank Oct 22", 7);
 
     add_fit_to_canvas(c_dn[j], fit_lines[fit_index], dn_fits[fit_index]->GetParameter(0), 4);
     fit_index++;
@@ -408,34 +421,38 @@ void plot_all_dn_plots(){
     fit_index++;
 
     l_dn[j]->Draw();
-    // c_dn[j]->Print("../plots/stability_plots/day_night_vaiation_FIMG.png");
+    // c_dn[j]->Print("../plots/stability_plots/day_night_variation_FIMG.png");
     return;
 }
 
 void day_night_plots(){
 
-    day_night_Bi_sep18_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Bi_sep18_PTBC");
-    day_night_Al5_sep27_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Al5_sep27_PTBC");
-    day_night_emptyTS_oct05_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_emptyTS_oct05_PTBC");
-    day_night_emptyTank_oct15_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_emptyTank_oct15_PTBC");
-    day_night_Argon_oct22_PTBC = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Argon_oct22_PTBC");
+    day_night_filterOut_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_filterOut_PTBC");
+    day_night_Bi_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Bi_PTBC");
+    day_night_Al5_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Al5_PTBC");
+    day_night_emptyTS_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_emptyTS_PTBC");
+    day_night_emptyTank_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_emptyTank_PTBC");
+    day_night_Argon_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Argon_PTBC");
+    day_night_EmptyArgon_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_EmptyArgon_PTBC");
 
-    day_night_Bi_sep18_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Bi_sep18_FIMG");
-    day_night_Al5_sep27_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Al5_sep27_FIMG");
-    day_night_emptyTS_oct05_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_emptyTS_oct05_FIMG");
-    day_night_emptyTank_oct15_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_emptyTank_oct15_FIMG");
-    day_night_Argon_oct22_FIMG = retriveHistograms("../rootFiles/data_stability_1hr_bins.root", "day_night_Argon_oct22_FIMG");
+    day_night_filterOut_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_filterOut_FIMG");
+    day_night_Bi_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Bi_FIMG");
+    day_night_Al5_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Al5_FIMG");
+    day_night_emptyTS_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_emptyTS_FIMG");
+    day_night_emptyTank_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_emptyTank_FIMG");
+    day_night_Argon_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Argon_FIMG");
+    day_night_EmptyArgon_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_EmptyArgon_FIMG");
 
-    // day_night_Bi_sep18_PTBC->SetLineColor();
-    day_night_Al5_sep27_PTBC->SetLineColor(40);
-    day_night_emptyTS_oct05_PTBC->SetLineColor(2);
-    day_night_emptyTank_oct15_PTBC->SetLineColor(3);
-    day_night_Argon_oct22_PTBC->SetLineColor(7);
-    // day_night_Bi_sep18_FIMG->SetLineColor();
-    day_night_Al5_sep27_FIMG->SetLineColor(40);
-    day_night_emptyTS_oct05_FIMG->SetLineColor(2);
-    day_night_emptyTank_oct15_FIMG->SetLineColor(3);
-    day_night_Argon_oct22_FIMG->SetLineColor(7);
+    // day_night_Bi_PTBC->SetLineColor();
+    day_night_Al5_PTBC->SetLineColor(40);
+    day_night_emptyTS_PTBC->SetLineColor(2);
+    day_night_emptyTank_PTBC->SetLineColor(3);
+    day_night_Argon_PTBC->SetLineColor(7);
+    // day_night_Bi_FIMG->SetLineColor();
+    day_night_Al5_FIMG->SetLineColor(40);
+    day_night_emptyTS_FIMG->SetLineColor(2);
+    day_night_emptyTank_FIMG->SetLineColor(3);
+    day_night_Argon_FIMG->SetLineColor(7);
 
     zero_line = new TLine(0., 0., 86400., 0.);
     zero_line->SetLineWidth(2);

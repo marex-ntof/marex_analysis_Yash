@@ -466,7 +466,7 @@ void crossSectionPlots(){
 
     bool fillENDF = true;
     bool fillENDFSmeared = false;
-    bool fillJENDL = false;
+    bool fillJENDL = true;
 
     // //Getting energy bin edges
     // Int_t num_bins_e = transmission_hist_e_PTBC->GetNbinsX();
@@ -664,7 +664,7 @@ void crossSectionPlots(){
     cross_section_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
     cross_section_hist_e_PTBC->GetYaxis()->SetTitle("Cross Section (in barns)");
     cross_section_hist_e_PTBC->SetTitle(Form("Cross Section Histogram - %s", filter_name_title.c_str()));
-    cross_section_hist_e_PTBC->SetLineWidth(1);
+    cross_section_hist_e_PTBC->SetLineWidth(2);
     cross_section_hist_e_PTBC->Draw(); //"HISTE"
     cross_section_hist_e_PTBC->SetStats(0);
     // cross_section_hist_e_PTBC->SetMarkerStyle(6);
@@ -674,14 +674,14 @@ void crossSectionPlots(){
     // gStyle->SetPalette(57);
 
     l[i]->AddEntry(cross_section_hist_e_FIMG,"FIMG","l");
-    cross_section_hist_e_FIMG->SetLineColor(3);
+    cross_section_hist_e_FIMG->SetLineColor(6);
     cross_section_hist_e_FIMG->SetLineWidth(1);
     cross_section_hist_e_FIMG->Draw("SAME");
 
     if (fillENDF){
         l[i]->AddEntry(endf_xsec_hist,"ENDF","l");
         endf_xsec_hist->SetLineColor(2);
-        endf_xsec_hist->SetLineWidth(1);
+        endf_xsec_hist->SetLineWidth(2);
         // endf_xsec_hist->GetXaxis()->SetRange(1e-2,2e7);
         endf_xsec_hist->Draw("SAME");
     }
@@ -697,7 +697,7 @@ void crossSectionPlots(){
     {
         l[i]->AddEntry(jendl_xsec_hist,"JENDL-5","l");
         jendl_xsec_hist->SetLineColor(1);
-        jendl_xsec_hist->SetLineWidth(1);
+        jendl_xsec_hist->SetLineWidth(2);
         // jendl_xsec_hist->GetXaxis()->SetRange(1e-2,2e7);
         jendl_xsec_hist->Draw("SAME");
     }

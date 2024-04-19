@@ -6,6 +6,9 @@
         "plotsFromRootFile.C": "cpp",
         "day_night_plots.C": "cpp",
         "MArEXStyle.C": "cpp",
-        "data_stability.C": "cpp"
+        "data_stability.C": "cpp",
+        "data_stability_plots.C": "cpp",
+        "cutoffAnalysis_PTBC.C": "cpp",
+        "ostream": "cpp"
     }
 }

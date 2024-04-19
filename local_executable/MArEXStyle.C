@@ -36,8 +36,8 @@ TStyle* MArEXStyle()
 //   marexStyle->SetStatColor(10);
 
   // set canvas options 
-  marexStyle->SetCanvasDefW(1000); //600
-  marexStyle->SetCanvasDefH(500); //500 
+  marexStyle->SetCanvasDefW(800); //600
+  marexStyle->SetCanvasDefH(600); //500 
   marexStyle->SetCanvasColor(0); // canvas...
   marexStyle->SetCanvasBorderMode(0);
   marexStyle->SetCanvasBorderSize(0);   
