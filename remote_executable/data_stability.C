@@ -78,7 +78,7 @@ void fillTOFHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTBC, TH1D* ener
                 NormFactor += (Double_t) PulseIntensity;
             }
 
-            applyMyCuts_PTBC(corrected_tof, amp_PTBC, PulseIntensity, det_num_PTBC, tof_hist_PTBC);
+            applyMyCuts_PTBC(corrected_tof, amp_PTBC, PulseIntensity, det_num_PTBC, tof_hist_PTBC, run_list.at(i));
             // applynTOFCuts_PTBC(corrected_tof, amp_PTBC, PulseIntensity, det_num_PTBC, tof_hist_PTBC);
         }
 
@@ -133,8 +133,8 @@ void fill_dn_hists(std::vector<Int_t> run_list, TH1D* dn_hist_PTBC, TH1D* dn_his
     Int_t num_bins_PTBC = dn_hist_PTBC->GetNbinsX();
     Int_t num_bins_FIMG = dn_hist_FIMG->GetNbinsX();
 
-    Float_t PTBC_PulseIntensity[24] = {}; // 96 for 15 min bins
-    Float_t FIMG_PulseIntensity[24] = {}; // 96 for 15 min bins
+    Float_t PTBC_PulseIntensity[96] = {}; // 96 for 15 min bins
+    Float_t FIMG_PulseIntensity[96] = {}; // 96 for 15 min bins
 
     for (int i = 0; i < run_list.size(); i++)
     {
@@ -182,12 +182,6 @@ void fill_dn_hists(std::vector<Int_t> run_list, TH1D* dn_hist_PTBC, TH1D* dn_his
         Int_t CurrentBunchNum = 0;
         Int_t hit_time = 0;
         Int_t entry_bin_num = 0;
-        bool record_data = false;
-
-        if (i != 0)
-        {
-            record_data = true;
-        }
         
         for (Int_t j = 0; j < Events_PTBC; j++)
         {
@@ -197,31 +191,6 @@ void fill_dn_hists(std::vector<Int_t> run_list, TH1D* dn_hist_PTBC, TH1D* dn_his
                 continue;
             }
 
-            if (i == 0 && record_data == false)
-            {
-                if (timeToSeconds(std::to_string(time_PTBC)) > 10000)
-                {
-                    continue;
-                } else {
-                    record_data = true;
-                    CurrentBunchNum = BunchNumber_PTBC;
-                }
-            }
-
-            if (record_data == false)
-            {
-                continue;
-            }
-
-            if (i == run_list.size()-1 && record_data == true)
-            {
-                if (timeToSeconds(std::to_string(time_PTBC)) < 3600)
-                {
-                    record_data = false;
-                    continue;
-                }
-            }
-
             Double_t t_pkup = BNum_tpkup_map[BunchNumber_PTBC];
             Double_t corrected_tof = tof_PTBC - t_pkup + delT_pkup_ptbc + t_gamma_PTBC;
 
@@ -229,18 +198,18 @@ void fill_dn_hists(std::vector<Int_t> run_list, TH1D* dn_hist_PTBC, TH1D* dn_his
             {
                 continue;
             }
+            
+            hit_time = timeToSeconds(std::to_string(time_PTBC));
 
             if (j == 0)
             {
                 CurrentBunchNum = BunchNumber_PTBC;
-                hit_time = timeToSeconds(std::to_string(time_PTBC));
                 dn_hist_PTBC->Fill( hit_time );
                 entry_bin_num = dn_hist_PTBC->FindBin( hit_time );
                 PTBC_PulseIntensity[entry_bin_num-1] += PulseIntensity_PTBC;
                 continue;
             }   
 
-            hit_time = timeToSeconds(std::to_string(time_PTBC));
             dn_hist_PTBC->Fill( hit_time );
 
             if (CurrentBunchNum != BunchNumber_PTBC)
@@ -275,41 +244,10 @@ void fill_dn_hists(std::vector<Int_t> run_list, TH1D* dn_hist_PTBC, TH1D* dn_his
         CurrentBunchNum = 0;
         hit_time = 0;
         entry_bin_num = 0;
-        record_data = false;
-
-        if (i != 0)
-        {
-            record_data = true;
-        }
 
         for (int j = 0; j < Events_FIMG; j++)
         {
             FIMG->GetEntry(j);
-
-            if (i == 0 && record_data == false)
-            {
-                if (timeToSeconds(std::to_string(time_FIMG)) > 10000)
-                {
-                    continue;
-                } else {
-                    record_data = true;
-                    CurrentBunchNum = BunchNumber_FIMG;
-                }
-            }
-
-            if (record_data == false)
-            {
-                continue;
-            }
-
-            if (i == run_list.size()-1 && record_data == true)
-            {
-                if (timeToSeconds(std::to_string(time_FIMG)) < 3600)
-                {
-                    record_data = false;
-                    continue;
-                }
-            }
 
             Double_t t_pkup = BNum_tpkup_map[BunchNumber_FIMG];
             Double_t corrected_tof = tof_FIMG - t_pkup + delT_pkup_fimg + t_gamma_FIMG;
@@ -319,17 +257,17 @@ void fill_dn_hists(std::vector<Int_t> run_list, TH1D* dn_hist_PTBC, TH1D* dn_his
                 continue;
             }
 
+            hit_time = timeToSeconds(std::to_string(time_FIMG));
+
             if (j == 0)
             {
                 CurrentBunchNum = BunchNumber_FIMG;
-                hit_time = timeToSeconds(std::to_string(time_FIMG));
                 dn_hist_FIMG->Fill( hit_time );
                 entry_bin_num = dn_hist_FIMG->FindBin( hit_time );
                 FIMG_PulseIntensity[entry_bin_num-1] += PulseIntensity_FIMG;
                 continue;
             }   
 
-            hit_time = timeToSeconds(std::to_string(time_FIMG));
             dn_hist_FIMG->Fill( hit_time );
             // std::cout << "FIMG - Filled a bin! (bin_num_FIMG = " << bin_num_FIMG << ", bin_content = " << bin_content << ")" << std::endl;
 
@@ -422,7 +360,7 @@ void data_stability(){
     }
 
     // Calculating day-night effect bins
-    Int_t num_bins_dn = 24; // 96 bins // 24 hours
+    Int_t num_bins_dn = 96; // 96 bins for 15 min bins // 24 hours
     Double_t x_min_dn = 0.; //in seconds
     Double_t x_max_dn = 86400.; //in seconds
     Double_t bin_edges_dn[num_bins_dn+1];
@@ -468,18 +406,18 @@ void data_stability(){
 
     // Initializing day night plots
     // PTBC
-    day_night_Bi_sep18_PTBC = new TH1D("day_night_Bi_sep18_PTBC","Day-Night Effect - Bi Sep 18 - PTBC", num_bins_dn, bin_edges_dn);
-    day_night_Al5_sep27_PTBC = new TH1D("day_night_Al5_sep27_PTBC","Day-Night Effect - Al (5 cm) Sep 27 - PTBC", num_bins_dn, bin_edges_dn);
-    day_night_emptyTS_oct05_PTBC = new TH1D("day_night_emptyTS_oct05_PTBC","Day-Night Effect - Empty (TS) Oct 05 - PTBC", num_bins_dn, bin_edges_dn);
-    day_night_emptyTank_oct15_PTBC = new TH1D("day_night_emptyTank_oct15_PTBC","Day-Night Effect - Empty Tank Oct 15 - PTBC", num_bins_dn, bin_edges_dn);
-    day_night_Argon_oct22_PTBC = new TH1D("day_night_Argon_oct22_PTBC","Day-Night Effect - Argon Oct 22 - PTBC", num_bins_dn, bin_edges_dn);
+    // day_night_Bi_sep18_PTBC = new TH1D("day_night_Bi_sep18_PTBC","Day-Night Effect - Bi Sep 18 - PTBC", num_bins_dn, bin_edges_dn);
+    // day_night_Al5_sep27_PTBC = new TH1D("day_night_Al5_sep27_PTBC","Day-Night Effect - Al (5 cm) Sep 27 - PTBC", num_bins_dn, bin_edges_dn);
+    // day_night_emptyTS_oct05_PTBC = new TH1D("day_night_emptyTS_oct05_PTBC","Day-Night Effect - Empty (TS) Oct 05 - PTBC", num_bins_dn, bin_edges_dn);
+    // day_night_emptyTank_oct15_PTBC = new TH1D("day_night_emptyTank_oct15_PTBC","Day-Night Effect - Empty Tank Oct 15 - PTBC", num_bins_dn, bin_edges_dn);
+    // day_night_Argon_oct22_PTBC = new TH1D("day_night_Argon_oct22_PTBC","Day-Night Effect - Argon Oct 22 - PTBC", num_bins_dn, bin_edges_dn);
 
     // FIMG
-    day_night_Bi_sep18_FIMG = new TH1D("day_night_Bi_sep18_FIMG","Day-Night Effect - Bi Sep 18 - FIMG", num_bins_dn, bin_edges_dn);
-    day_night_Al5_sep27_FIMG = new TH1D("day_night_Al5_sep27_FIMG","Day-Night Effect - Al (5 cm) Sep 27 - FIMG", num_bins_dn, bin_edges_dn);
-    day_night_emptyTS_oct05_FIMG = new TH1D("day_night_emptyTS_oct05_FIMG","Day-Night Effect - Empty (TS) Oct 05 - FIMG", num_bins_dn, bin_edges_dn);
-    day_night_emptyTank_oct15_FIMG = new TH1D("day_night_emptyTank_oct15_FIMG","Day-Night Effect - Empty Tank Oct 15 - FIMG", num_bins_dn, bin_edges_dn);
-    day_night_Argon_oct22_FIMG = new TH1D("day_night_Argon_oct22_FIMG","Day-Night Effect - Argon Oct 22 - FIMG", num_bins_dn, bin_edges_dn);
+    // day_night_Bi_sep18_FIMG = new TH1D("day_night_Bi_sep18_FIMG","Day-Night Effect - Bi Sep 18 - FIMG", num_bins_dn, bin_edges_dn);
+    // day_night_Al5_sep27_FIMG = new TH1D("day_night_Al5_sep27_FIMG","Day-Night Effect - Al (5 cm) Sep 27 - FIMG", num_bins_dn, bin_edges_dn);
+    // day_night_emptyTS_oct05_FIMG = new TH1D("day_night_emptyTS_oct05_FIMG","Day-Night Effect - Empty (TS) Oct 05 - FIMG", num_bins_dn, bin_edges_dn);
+    // day_night_emptyTank_oct15_FIMG = new TH1D("day_night_emptyTank_oct15_FIMG","Day-Night Effect - Empty Tank Oct 15 - FIMG", num_bins_dn, bin_edges_dn);
+    // day_night_Argon_oct22_FIMG = new TH1D("day_night_Argon_oct22_FIMG","Day-Night Effect - Argon Oct 22 - FIMG", num_bins_dn, bin_edges_dn);
 
     // Run Lists (FIMG starts from 117386)
     // Beam Stability
@@ -497,11 +435,11 @@ void data_stability(){
 
     // Day-Night effect
     // first and last runs also include previous and the next day runs. This has to be removed
-    std::vector<Int_t> run_list_Bi_sep18 = {117389, 117390, 117391, 117392, 117393, 117394};
-    std::vector<Int_t> run_list_Al5_sep27 = {117472, 117473, 117474, 117475, 117476, 117477, 117479, 117480, 117481};
-    std::vector<Int_t> run_list_emptyTS_oct05 = {117543, 117544, 117545, 117546, 117547, 117548, 117549, 117550};
-    std::vector<Int_t> run_list_emptyTank_oct15 = {117632, 117633, 117634, 117635, 117636, 117637, 117638, 117639};
-    std::vector<Int_t> run_list_Argon_oct22 = {117729, 117730, 117731, 117732, 117733, 117734, 117735, 117736};
+    // std::vector<Int_t> run_list_Bi_sep18 = {117389, 117390, 117391, 117392, 117393, 117394};
+    // std::vector<Int_t> run_list_Al5_sep27 = {117472, 117473, 117474, 117475, 117476, 117477, 117479, 117480, 117481};
+    // std::vector<Int_t> run_list_emptyTS_oct05 = {117543, 117544, 117545, 117546, 117547, 117548, 117549, 117550};
+    // std::vector<Int_t> run_list_emptyTank_oct15 = {117632, 117633, 117634, 117635, 117636, 117637, 117638, 117639};
+    // std::vector<Int_t> run_list_Argon_oct22 = {117729, 117730, 117731, 117732, 117733, 117734, 117735, 117736};
 
     // Filling the histograms
     // fillTOFHist(run_list_empty_sep16, norm_counts_empty_sep16_PTBC);
@@ -519,11 +457,11 @@ void data_stability(){
     fillTOFHist(run_list_ArgonFull_oct22, norm_counts_ArgonFull_oct22_PTBC, norm_counts_ArgonFull_oct22_FIMG, bin_edges_tof_PTBC, bin_edges_tof_FIMG);
 
     // Day Night hists
-    fill_dn_hists(run_list_Bi_sep18, day_night_Bi_sep18_PTBC, day_night_Bi_sep18_FIMG);
-    fill_dn_hists(run_list_Al5_sep27, day_night_Al5_sep27_PTBC, day_night_Al5_sep27_FIMG);
-    fill_dn_hists(run_list_emptyTS_oct05, day_night_emptyTS_oct05_PTBC, day_night_emptyTS_oct05_FIMG);
-    fill_dn_hists(run_list_emptyTank_oct15, day_night_emptyTank_oct15_PTBC, day_night_emptyTank_oct15_FIMG);
-    fill_dn_hists(run_list_Argon_oct22, day_night_Argon_oct22_PTBC, day_night_Argon_oct22_FIMG);
+    // fill_dn_hists(run_list_Bi_sep18, day_night_Bi_sep18_PTBC, day_night_Bi_sep18_FIMG);
+    // fill_dn_hists(run_list_Al5_sep27, day_night_Al5_sep27_PTBC, day_night_Al5_sep27_FIMG);
+    // fill_dn_hists(run_list_emptyTS_oct05, day_night_emptyTS_oct05_PTBC, day_night_emptyTS_oct05_FIMG);
+    // fill_dn_hists(run_list_emptyTank_oct15, day_night_emptyTank_oct15_PTBC, day_night_emptyTank_oct15_FIMG);
+    // fill_dn_hists(run_list_Argon_oct22, day_night_Argon_oct22_PTBC, day_night_Argon_oct22_FIMG);
 
     // Draw atributes
     norm_counts_empty_oct01_PTBC->SetLineColor(2);
@@ -539,7 +477,7 @@ void data_stability(){
     norm_counts_ArgonFull_oct22_FIMG->SetLineColor(2);
 
     //Writing to the output file
-    outputRootFile = new TFile("../rootFiles/data_stability_1hr_bins.root","recreate");
+    outputRootFile = new TFile("../rootFiles/data_stability.root","recreate");
 
     // norm_counts_empty_sep16_PTBC->Write();
 
@@ -565,19 +503,19 @@ void data_stability(){
     norm_counts_ArgonFull_oct18_FIMG->Write();
     norm_counts_ArgonFull_oct22_FIMG->Write();
 
-    day_night_Bi_sep18_PTBC->Write();
-    day_night_Al5_sep27_PTBC->Write();
-    day_night_emptyTS_oct05_PTBC->Write();
-    day_night_emptyTank_oct15_PTBC->Write();
-    day_night_Argon_oct22_PTBC->Write();
+    // day_night_Bi_sep18_PTBC->Write();
+    // day_night_Al5_sep27_PTBC->Write();
+    // day_night_emptyTS_oct05_PTBC->Write();
+    // day_night_emptyTank_oct15_PTBC->Write();
+    // day_night_Argon_oct22_PTBC->Write();
 
-    day_night_Bi_sep18_FIMG->Write();
-    day_night_Al5_sep27_FIMG->Write();
-    day_night_emptyTS_oct05_FIMG->Write();
-    day_night_emptyTank_oct15_FIMG->Write();
-    day_night_Argon_oct22_FIMG->Write();
+    // day_night_Bi_sep18_FIMG->Write();
+    // day_night_Al5_sep27_FIMG->Write();
+    // day_night_emptyTS_oct05_FIMG->Write();
+    // day_night_emptyTank_oct15_FIMG->Write();
+    // day_night_Argon_oct22_FIMG->Write();
 
     outputRootFile->Close();
 
-    std::cout << "Created output file 'data_stability_1hr_bins.root'" << std::endl;
+    std::cout << "Created output file 'data_stability.root'" << std::endl;
 }

@@ -8,7 +8,7 @@
 
 #include "detectorAna.h"
 
-void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num, TH1D* hist){
+void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num, TH1D* hist, Int_t run_number){
     //Filling the histograms
     if (pulseIntensity <= 6e12)
     {
@@ -38,19 +38,39 @@ void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t d
                 }
             }
         }
-    } else {
-        for (int k = 0; k < 2; k++)
-        {
-            if (tof >= t_det3to7[det_num-3][k][0] && tof < t_det3to7[det_num-3][k][1])
+        return;
+    }
+    
+    if(run_number >= 117386 && run_number <= 117390) {
+        if (det_num == 5){
+            for (int k = 0; k < 4; k++)
             {
-                if ( (Double_t) amp > yOnTheCutLine(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
+                if (tof >= t_det5_early_runs[k][0] && tof < t_det5_early_runs[k][1])
                 {
-                    hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                    break;    
+                    if ( (Double_t) amp > yOnTheCutLine(t_det5_early_runs[k][0], a_det5_early_runs[k][0], t_det5_early_runs[k][1], a_det5_early_runs[k][1], tof) )
+                    {
+                        hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
+                        break;    
+                    }
                 }
+            }
+            return;
+        }
+    }
+    
+    
+    for (int k = 0; k < 2; k++)
+    {
+        if (tof >= t_det3to7[det_num-3][k][0] && tof < t_det3to7[det_num-3][k][1])
+        {
+            if ( (Double_t) amp > yOnTheCutLine(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
+            {
+                hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
+                break;    
             }
         }
     }
+    
 }
 
 void applynTOFCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num, TH1D* hist){
@@ -180,7 +200,7 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
                 NormFactor += (Double_t) PulseIntensity;
             }
 
-            applyMyCuts_PTBC(corrected_tof, amp_PTB, PulseIntensity, det_num_PTB, tof_hist_PTB);
+            applyMyCuts_PTBC(corrected_tof, amp_PTB, PulseIntensity, det_num_PTB, tof_hist_PTB, run_list.at(i));
             // applynTOFCuts_PTBC(corrected_tof, amp_PTB, PulseIntensity, det_num_PTB, tof_hist_PTB);
         }
 
