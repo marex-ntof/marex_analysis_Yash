@@ -36,15 +36,19 @@ TH1D* rf_hist_peak = 0;
 TH1D* rf_hist_mean = 0;
 
 TH1D* transfer_func_PTBC_noRF = 0;
+TH1D* transfer_func_FIMG_noRF = 0;
 TH1D* transfer_func_mean_PTBC_5itr = 0;
-TH1D* transfer_func_mean_PTBC_10itr = 0;
+// TH1D* transfer_func_mean_PTBC_10itr = 0;
 // TH1D* transfer_func_mean_PTBC_15itr = 0;
+TH1D* transfer_func_mean_FIMG_5itr = 0;
+// TH1D* transfer_func_mean_FIMG_10itr = 0;
 
 TH1D* transfer_func_peak_PTBC_5itr = 0;
-TH1D* transfer_func_peak_PTBC_10itr = 0;
+// TH1D* transfer_func_peak_PTBC_10itr = 0;
 
 Double_t min_tof = 800.0;
 Double_t flight_path_length_PTBC = 182.65 - 0.41; //m
+Double_t flight_path_length_FIMG = 183.5 - 0.41; //m
 Double_t neutron_mass = 939.56542052; //in MeV
 Double_t speed_of_light = 299792458.0; //in m/s
 
@@ -64,8 +68,7 @@ Double_t get_rf_length_mean(Double_t n_energy){ // energy in eV;
         e_bin_num, e_bin_num
     );
     // Double_t fwhm = FindFWHM(projection); //in cm
-    Double_t rf_length; 
-    rf_length = projection->GetMean(1) * 0.01; //projection->GetBinCenter( projection->GetMaximumBin() ) * 0.01; //converting to m
+    Double_t rf_length = projection->GetMean(1) * 0.01; //converting to m
     
     return rf_length; //in m
 }
@@ -78,9 +81,8 @@ Double_t get_rf_length_peak(Double_t n_energy){ // energy in eV;
         e_bin_num, e_bin_num
     );
 
-    Double_t rf_length;
     Int_t peak_bin_num = projection->GetMaximumBin();
-    rf_length = projection->GetBinCenter(peak_bin_num) * 0.01; //converting to m
+    Double_t rf_length = projection->GetBinCenter(peak_bin_num) * 0.01; //converting to m
     
     return rf_length; //in m
 }
@@ -91,9 +93,13 @@ void store_hist(){
     TFile *output_file = TFile::Open("../inputFiles/transfer_function.root", "recreate");
 
     output_file->WriteObject(transfer_func_PTBC_noRF, "transfer_func_PTBC_noRF");
+    output_file->WriteObject(transfer_func_FIMG_noRF, "transfer_func_FIMG_noRF");
     output_file->WriteObject(transfer_func_mean_PTBC_5itr, "transfer_func_mean_PTBC_5itr");
-    output_file->WriteObject(transfer_func_mean_PTBC_10itr, "transfer_func_mean_PTBC_10itr");
+    // output_file->WriteObject(transfer_func_mean_PTBC_10itr, "transfer_func_mean_PTBC_10itr");
     // output_file->WriteObject(transfer_func_mean_PTBC_15itr, "transfer_func_mean_PTBC_15itr");
+    output_file->WriteObject(transfer_func_mean_FIMG_5itr, "transfer_func_mean_FIMG_5itr");
+    output_file->WriteObject(transfer_func_peak_PTBC_5itr, "transfer_func_peak_PTBC_5itr");
+    // output_file->WriteObject(transfer_func_peak_PTBC_10itr, "transfer_func_peak_PTBC_10itr");
     output_file->Close();
 
     std::cout << "Created output file 'transfer_function.root'" << std::endl;
@@ -109,8 +115,8 @@ void plot_hists(){
     gStyle->SetStatH(0.1);
     gStyle->SetStatW(0.17);
 
-    TCanvas *c[2];
-    TLegend *l[2];
+    TCanvas *c[3];
+    TLegend *l[3];
 
     int i = 0;
 
@@ -122,7 +128,7 @@ void plot_hists(){
     
     transfer_func_PTBC_noRF->GetXaxis()->SetTitle("ToF (in ns)");
     transfer_func_PTBC_noRF->GetYaxis()->SetTitle("Energy (in eV)");
-    transfer_func_PTBC_noRF->SetTitle("Transfer Function Histograms");
+    transfer_func_PTBC_noRF->SetTitle("Transfer Function Histograms - FIMG");
     transfer_func_PTBC_noRF->SetLineWidth(2);
     transfer_func_PTBC_noRF->Draw(); //"HISTE"
     transfer_func_PTBC_noRF->SetStats(0);
@@ -134,10 +140,10 @@ void plot_hists(){
     transfer_func_mean_PTBC_5itr->SetLineWidth(2);
     transfer_func_mean_PTBC_5itr->Draw("SAME");
 
-    l[i]->AddEntry(transfer_func_mean_PTBC_10itr,"10 Itr (Mean)","l");
-    transfer_func_mean_PTBC_10itr->SetLineColor(2);
-    transfer_func_mean_PTBC_10itr->SetLineWidth(2);
-    transfer_func_mean_PTBC_10itr->Draw("SAME");
+    // l[i]->AddEntry(transfer_func_mean_PTBC_10itr,"10 Itr (Mean)","l");
+    // transfer_func_mean_PTBC_10itr->SetLineColor(2);
+    // transfer_func_mean_PTBC_10itr->SetLineWidth(2);
+    // transfer_func_mean_PTBC_10itr->Draw("SAME");
 
     // l[i]->AddEntry(transfer_func_mean_PTBC_15itr,"15 Itr (Mean)","l");
     // transfer_func_mean_PTBC_15itr->SetLineColor(3);
@@ -149,10 +155,10 @@ void plot_hists(){
     transfer_func_peak_PTBC_5itr->SetLineWidth(2);
     transfer_func_peak_PTBC_5itr->Draw("SAME");
 
-    l[i]->AddEntry(transfer_func_peak_PTBC_10itr,"10 Itr (Peak)","l");
-    transfer_func_peak_PTBC_10itr->SetLineColor(3);
-    transfer_func_peak_PTBC_10itr->SetLineWidth(2);
-    transfer_func_peak_PTBC_10itr->Draw("SAME");
+    // l[i]->AddEntry(transfer_func_peak_PTBC_10itr,"10 Itr (Peak)","l");
+    // transfer_func_peak_PTBC_10itr->SetLineColor(3);
+    // transfer_func_peak_PTBC_10itr->SetLineWidth(2);
+    // transfer_func_peak_PTBC_10itr->Draw("SAME");
 
     l[i]->SetMargin(0.4);
     l[i]->Draw();
@@ -179,6 +185,31 @@ void plot_hists(){
     rf_hist_mean->SetLineColor(1);
     rf_hist_mean->SetLineWidth(2);
     rf_hist_mean->Draw("SAME");
+
+    l[i]->SetMargin(0.4);
+    l[i]->Draw();
+
+    i++;
+
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+
+    l[i] = new TLegend(0.77,0.7,0.86,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i]->AddEntry(transfer_func_FIMG_noRF,"no RF","l");
+    
+    transfer_func_FIMG_noRF->GetXaxis()->SetTitle("ToF (in ns)");
+    transfer_func_FIMG_noRF->GetYaxis()->SetTitle("Energy (in eV)");
+    transfer_func_FIMG_noRF->SetTitle("Transfer Function Histograms - FIMG");
+    transfer_func_FIMG_noRF->SetLineWidth(2);
+    transfer_func_FIMG_noRF->Draw(); //"HISTE"
+    transfer_func_FIMG_noRF->SetStats(0);
+    gPad->SetLogx();
+    gPad->SetLogy();
+
+    l[i]->AddEntry(transfer_func_mean_FIMG_5itr,"5 Itr (Mean)","l");
+    transfer_func_mean_FIMG_5itr->SetLineColor(2);
+    transfer_func_mean_FIMG_5itr->SetLineWidth(2);
+    transfer_func_mean_FIMG_5itr->Draw("SAME");
 
     l[i]->SetMargin(0.4);
     l[i]->Draw();
@@ -229,12 +260,15 @@ void transfer_function(){
 
     // Initializing histograms
     transfer_func_PTBC_noRF = new TH1D("transfer_func_PTBC_noRF","ToF vs Energy - Transfer Function - PTBC - no RF",num_bins_tof,bin_edges_tof);
+    transfer_func_FIMG_noRF = new TH1D("transfer_func_FIMG_noRF","ToF vs Energy - Transfer Function - FIMG - no RF",num_bins_tof,bin_edges_tof);
     transfer_func_mean_PTBC_5itr = new TH1D("transfer_func_mean_PTBC_5itr","ToF vs Energy - Transfer Function (Mean) - PTBC - 5 Itr",num_bins_tof,bin_edges_tof);
-    transfer_func_mean_PTBC_10itr = new TH1D("transfer_func_mean_PTBC_10itr","ToF vs Energy - Transfer Function (Mean) - PTBC - 10 Itr",num_bins_tof,bin_edges_tof);
+    // transfer_func_mean_PTBC_10itr = new TH1D("transfer_func_mean_PTBC_10itr","ToF vs Energy - Transfer Function (Mean) - PTBC - 10 Itr",num_bins_tof,bin_edges_tof);
     // transfer_func_mean_PTBC_15itr = new TH1D("transfer_func_mean_PTBC_15itr","ToF vs Energy - Transfer Function (Mean) - PTBC - 15 Itr",num_bins_tof,bin_edges_tof);
-
+    transfer_func_mean_FIMG_5itr = new TH1D("transfer_func_mean_FIMG_5itr","ToF vs Energy - Transfer Function (Mean) - FIMG - 5 Itr",num_bins_tof,bin_edges_tof);
+    // transfer_func_mean_FIMG_10itr = new TH1D("transfer_func_mean_FIMG_10itr","ToF vs Energy - Transfer Function (Mean) - FIMG - 10 Itr",num_bins_tof,bin_edges_tof);
+    
     transfer_func_peak_PTBC_5itr = new TH1D("transfer_func_peak_PTBC_5itr","ToF vs Energy - Transfer Function (Peak) - PTBC - 5 Itr",num_bins_tof,bin_edges_tof);
-    transfer_func_peak_PTBC_10itr = new TH1D("transfer_func_peak_PTBC_10itr","ToF vs Energy - Transfer Function (Peak) - PTBC - 10 Itr",num_bins_tof,bin_edges_tof);
+    // transfer_func_peak_PTBC_10itr = new TH1D("transfer_func_peak_PTBC_10itr","ToF vs Energy - Transfer Function (Peak) - PTBC - 10 Itr",num_bins_tof,bin_edges_tof);
 
     for(Int_t i = 0; i < num_bins_tof; i++)
     {
@@ -242,40 +276,49 @@ void transfer_function(){
         if (tof < 800.)
         {
             transfer_func_PTBC_noRF->SetBinContent(i+1, 0);
+            transfer_func_FIMG_noRF->SetBinContent(i+1, 0);
             transfer_func_mean_PTBC_5itr->SetBinContent(i+1, 0);
-            transfer_func_mean_PTBC_10itr->SetBinContent(i+1, 0);
+            // transfer_func_mean_PTBC_10itr->SetBinContent(i+1, 0);
             // transfer_func_mean_PTBC_15itr->SetBinContent(i+1, 0);
+            transfer_func_mean_FIMG_5itr->SetBinContent(i+1, 0);
+            // transfer_func_mean_FIMG_10itr->SetBinContent(i+1, 0);
 
             transfer_func_peak_PTBC_5itr->SetBinContent(i+1, 0);
-            transfer_func_peak_PTBC_10itr->SetBinContent(i+1, 0);
+            // transfer_func_peak_PTBC_10itr->SetBinContent(i+1, 0);
             continue;
         }
 
-        Double_t rf_len_mean = 0.;
-        Double_t rf_len_peak = 0.;
-        Double_t neutron_e_mean = TOFToEnergy(tof * 1e-9, flight_path_length_PTBC, rf_len_mean);
-        Double_t neutron_e_peak = neutron_e_mean;
-        transfer_func_PTBC_noRF->SetBinContent(i+1, neutron_e_mean);
-        for (Int_t j = 0; j < 10; j++)
+        Double_t rf_len_mean_PTBC = 0.;
+        Double_t rf_len_peak_PTBC = 0.;
+        Double_t neutron_e_mean_PTBC = TOFToEnergy(tof * 1e-9, flight_path_length_PTBC, rf_len_mean_PTBC);
+        Double_t neutron_e_peak_PTBC = neutron_e_mean_PTBC;
+        Double_t rf_len_mean_FIMG = 0.;
+        Double_t neutron_e_mean_FIMG = TOFToEnergy(tof * 1e-9, flight_path_length_FIMG, rf_len_mean_FIMG);
+        transfer_func_PTBC_noRF->SetBinContent(i+1, neutron_e_mean_PTBC);
+        transfer_func_FIMG_noRF->SetBinContent(i+1, neutron_e_mean_FIMG);
+        for (Int_t j = 0; j < 5; j++)
         {
-            if (j == 5)
-            {
-                transfer_func_mean_PTBC_5itr->SetBinContent(i+1, neutron_e_mean);
-                // cout << "(" << transfer_func_mean_PTBC_5itr->GetBinContent(i+1) << ", " << neutron_e_mean << ")";
-                transfer_func_peak_PTBC_5itr->SetBinContent(i+1, neutron_e_peak);
-            }
             
-            rf_len_mean = get_rf_length_mean(neutron_e_mean);
-            neutron_e_mean = TOFToEnergy(tof * 1e-9, flight_path_length_PTBC, rf_len_mean);
+            rf_len_mean_PTBC = get_rf_length_mean(neutron_e_mean_PTBC);
+            neutron_e_mean_PTBC = TOFToEnergy(tof * 1e-9, flight_path_length_PTBC, rf_len_mean_PTBC);
+            rf_len_peak_PTBC = get_rf_length_peak(neutron_e_peak_PTBC);
+            neutron_e_peak_PTBC = TOFToEnergy(tof * 1e-9, flight_path_length_PTBC, rf_len_peak_PTBC);
 
-            rf_len_peak = get_rf_length_peak(neutron_e_peak);
-            neutron_e_peak = TOFToEnergy(tof * 1e-9, flight_path_length_PTBC, rf_len_peak);
+            rf_len_mean_FIMG = get_rf_length_mean(neutron_e_mean_FIMG);
+            neutron_e_mean_FIMG = TOFToEnergy(tof * 1e-9, flight_path_length_FIMG, rf_len_mean_FIMG);
 
-            if (j == 9)
+            if (j == 4)
             {
-                transfer_func_mean_PTBC_10itr->SetBinContent(i+1, neutron_e_mean);
-                transfer_func_peak_PTBC_10itr->SetBinContent(i+1, neutron_e_peak);
+                transfer_func_mean_PTBC_5itr->SetBinContent(i+1, neutron_e_mean_PTBC);
+                transfer_func_mean_FIMG_5itr->SetBinContent(i+1, neutron_e_mean_FIMG);
+                transfer_func_peak_PTBC_5itr->SetBinContent(i+1, neutron_e_peak_PTBC);
             }
+
+            // if (j == 9)
+            // {
+            //     transfer_func_mean_PTBC_10itr->SetBinContent(i+1, neutron_e_mean);
+            //     transfer_func_peak_PTBC_10itr->SetBinContent(i+1, neutron_e_peak);
+            // }
             
             // if (j == 14)
             // {
@@ -284,6 +327,6 @@ void transfer_function(){
         }  
     }
 
-    // store_hist();
+    store_hist();
     plot_hists();
 }

@@ -464,9 +464,9 @@ void crossSectionPlots(){
 
     // transmission_hist_e_PTBC_nTOF_Cuts = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s_nTOF_cuts.root", filter_name.c_str()),"transmission_hist_e_PTBC", 1000, bins_per_decade);
 
-    bool fillENDF = true;
+    bool fillENDF = false;
     bool fillENDFSmeared = false;
-    bool fillJENDL = true;
+    bool fillJENDL = false;
 
     // //Getting energy bin edges
     // Int_t num_bins_e = transmission_hist_e_PTBC->GetNbinsX();
@@ -503,10 +503,17 @@ void crossSectionPlots(){
 
     calc_xsec(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()), num_bins_e, bin_edges_e);
 
+    Double_t num_density = 0.;
+    if (fillENDF || fillENDFSmeared || fillJENDL)
+    {
+        num_density = num_density_map[filter_name];
+    }
+
     //ENDF Hists
     if (fillENDF){
         endf_trans_hist = new TH1D("endf_trans_hist","ENDF Transmission Hist",num_bins_e,bin_edges_e);
-        endf_xsec_hist = new TH1D("endf_xsec_hist","ENDF Cross Section Hist",num_bins_e,bin_edges_e);  
+        endf_xsec_hist = new TH1D("endf_xsec_hist","ENDF Cross Section Hist",num_bins_e,bin_edges_e);
+        endf(num_density, bin_edges_e, fillENDF, fillENDFSmeared);
     }
 
     if (fillENDFSmeared){
@@ -517,17 +524,8 @@ void crossSectionPlots(){
     if(fillJENDL){
         jendl_trans_hist = new TH1D("jendl_trans_hist","JENDL Transmission Hist",num_bins_e,bin_edges_e);
         jendl_xsec_hist = new TH1D("jendl_xsec_hist","JENDL Cross Section Hist",num_bins_e,bin_edges_e);  
-    }
-
-    //Filling ENDF hist
-    Double_t num_density = num_density_map[filter_name];
-    endf(num_density, bin_edges_e, fillENDF, fillENDFSmeared);
-
-    if(fillJENDL)
-    {
         jendl(num_density, bin_edges_e);
-    }
-    
+    }    
     
     //Plotting
     SetMArEXStyle();
