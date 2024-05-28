@@ -57,6 +57,11 @@
         "sstream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "anomalies_plots.C": "cpp",
+        "cutoffFitter.C": "cpp",
+        "fimgCutsAna.C": "cpp",
+        "cutoffFitter_PTBC.C": "cpp",
+        "cutoffFitter_PTBC_lin.C": "cpp"
     }
 }

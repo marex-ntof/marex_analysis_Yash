@@ -427,21 +427,21 @@ void plot_all_dn_plots(){
 
 void day_night_plots(){
 
-    day_night_filterOut_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_filterOut_PTBC");
-    day_night_Bi_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Bi_PTBC");
-    day_night_Al5_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Al5_PTBC");
-    day_night_emptyTS_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_emptyTS_PTBC");
-    day_night_emptyTank_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_emptyTank_PTBC");
-    day_night_Argon_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Argon_PTBC");
-    day_night_EmptyArgon_PTBC = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_EmptyArgon_PTBC");
+    day_night_filterOut_PTBC = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_filterOut_PTBC");
+    day_night_Bi_PTBC = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_Bi_PTBC");
+    day_night_Al5_PTBC = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_Al5_PTBC");
+    day_night_emptyTS_PTBC = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_emptyTS_PTBC");
+    day_night_emptyTank_PTBC = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_emptyTank_PTBC");
+    day_night_Argon_PTBC = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_Argon_PTBC");
+    day_night_EmptyArgon_PTBC = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_EmptyArgon_PTBC");
 
-    day_night_filterOut_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_filterOut_FIMG");
-    day_night_Bi_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Bi_FIMG");
-    day_night_Al5_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Al5_FIMG");
-    day_night_emptyTS_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_emptyTS_FIMG");
-    day_night_emptyTank_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_emptyTank_FIMG");
-    day_night_Argon_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_Argon_FIMG");
-    day_night_EmptyArgon_FIMG = retriveHistograms("../rootFiles/day_night_30mins_bins.root", "day_night_EmptyArgon_FIMG");
+    day_night_filterOut_FIMG = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_filterOut_FIMG");
+    day_night_Bi_FIMG = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_Bi_FIMG");
+    day_night_Al5_FIMG = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_Al5_FIMG");
+    day_night_emptyTS_FIMG = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_emptyTS_FIMG");
+    day_night_emptyTank_FIMG = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_emptyTank_FIMG");
+    day_night_Argon_FIMG = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_Argon_FIMG");
+    day_night_EmptyArgon_FIMG = retriveHistograms("../rootFiles/day_night_15mins_bins.root", "day_night_EmptyArgon_FIMG");
 
     // day_night_Bi_PTBC->SetLineColor();
     day_night_Al5_PTBC->SetLineColor(40);

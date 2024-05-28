@@ -464,9 +464,9 @@ void crossSectionPlots(){
 
     // transmission_hist_e_PTBC_nTOF_Cuts = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s_nTOF_cuts.root", filter_name.c_str()),"transmission_hist_e_PTBC", 1000, bins_per_decade);
 
-    bool fillENDF = false;
+    bool fillENDF = true;
     bool fillENDFSmeared = false;
-    bool fillJENDL = false;
+    bool fillJENDL = true;
 
     // //Getting energy bin edges
     // Int_t num_bins_e = transmission_hist_e_PTBC->GetNbinsX();

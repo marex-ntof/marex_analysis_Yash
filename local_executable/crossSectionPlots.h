@@ -31,10 +31,10 @@
 
 //////// Run variables
 // std::string mode = "run"; //"run", "test"
-const std::string filter_name("al5"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, al5_c_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, ar_bottle_full
-const std::string filter_name_title("Al (5 cm)");
+const std::string filter_name("ar_bottle_full"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, al5_c_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, ar_bottle_full
+const std::string filter_name_title("Argon Tank");
 Int_t bins_per_decade = 50;
-//Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
+//Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Tank, Empty Tank Rotated
 //Argon Tank, Al (5 cm) & C (1.2 cm)
 
 // const std::string root_file_name("rootFiles/crossSectionAna_al_8cm.root"); //Al_tot_xsec.txt, Bi_tot_xsec.txt
@@ -103,7 +103,7 @@ Double_t n_Al_5cm = (5.0 /*cm*/) * (2.70 /*g/cm3*/) * (6.02214076e23 /*atoms/mol
 Double_t n_Al_8cm = (8.0 /*cm*/) * (2.70 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (26.9815 /*g/mole*/);
 Double_t n_C_1p2cm = 0.105;// (1.2 /*cm*/) * (2.267 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (12.011 /*g/mole*/);
 Double_t n_CFib_1cm = (1.0 /*cm*/) * (1.8 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (12.011 /*g/mole*/);
-Double_t n_Ar_bottle = (11.0 /*cm*/) * ((ar_bottle_pressure)/(8.31446261815324 * ar_bottle_temp * 1e6)) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/);
+Double_t n_Ar_bottle = (8.9 /*cm*/) * ((ar_bottle_pressure)/(8.31446261815324 * ar_bottle_temp * 1e6)) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/);
 
 ////////////////////////
 std::map<std::string, Double_t> num_density_map;

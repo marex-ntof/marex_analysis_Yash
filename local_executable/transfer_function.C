@@ -123,19 +123,19 @@ void plot_hists(){
     c[i] = new TCanvas(Form("c%d", i)," ");
     c[i]->cd();
 
-    l[i] = new TLegend(0.77,0.7,0.86,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
-    l[i]->AddEntry(transfer_func_PTBC_noRF,"no RF","l");
+    l[i] = new TLegend(0.45,0.7,0.85,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i]->AddEntry(transfer_func_PTBC_noRF,"Without Moderator Effects","l");
     
     transfer_func_PTBC_noRF->GetXaxis()->SetTitle("ToF (in ns)");
     transfer_func_PTBC_noRF->GetYaxis()->SetTitle("Energy (in eV)");
-    transfer_func_PTBC_noRF->SetTitle("Transfer Function Histograms - FIMG");
+    transfer_func_PTBC_noRF->SetTitle("Transfer Function - PTBC");
     transfer_func_PTBC_noRF->SetLineWidth(2);
     transfer_func_PTBC_noRF->Draw(); //"HISTE"
     transfer_func_PTBC_noRF->SetStats(0);
     gPad->SetLogx();
     gPad->SetLogy();
 
-    l[i]->AddEntry(transfer_func_mean_PTBC_5itr,"5 Itr (Mean)","l");
+    l[i]->AddEntry(transfer_func_mean_PTBC_5itr,"With Moderator Effects","l");
     transfer_func_mean_PTBC_5itr->SetLineColor(6);
     transfer_func_mean_PTBC_5itr->SetLineWidth(2);
     transfer_func_mean_PTBC_5itr->Draw("SAME");
@@ -150,10 +150,10 @@ void plot_hists(){
     // transfer_func_mean_PTBC_15itr->SetLineWidth(2);
     // transfer_func_mean_PTBC_15itr->Draw("SAME");
 
-    l[i]->AddEntry(transfer_func_peak_PTBC_5itr,"5 Itr (Peak)","l");
-    transfer_func_peak_PTBC_5itr->SetLineColor(1);
-    transfer_func_peak_PTBC_5itr->SetLineWidth(2);
-    transfer_func_peak_PTBC_5itr->Draw("SAME");
+    // l[i]->AddEntry(transfer_func_peak_PTBC_5itr,"5 Itr (Peak)","l");
+    // transfer_func_peak_PTBC_5itr->SetLineColor(1);
+    // transfer_func_peak_PTBC_5itr->SetLineWidth(2);
+    // transfer_func_peak_PTBC_5itr->Draw("SAME");
 
     // l[i]->AddEntry(transfer_func_peak_PTBC_10itr,"10 Itr (Peak)","l");
     // transfer_func_peak_PTBC_10itr->SetLineColor(3);
@@ -168,21 +168,22 @@ void plot_hists(){
     c[i] = new TCanvas(Form("c%d", i)," ");
     c[i]->cd();
     gStyle->SetPalette(57);
-    rf_hist->GetXaxis()->SetTitle("ToF (in ns)");
-    rf_hist->GetYaxis()->SetTitle("Moderation Distance (in cm)");
-    rf_hist->SetTitle("Response Function Histogram");
+    rf_hist->GetXaxis()->SetTitle("Neutron Energy (eV)");
+    rf_hist->GetYaxis()->SetTitle("Neutron Moderation Distance (cm)");
+    rf_hist->SetTitle("");
+    rf_hist->GetXaxis()->SetTitleOffset(1.2);
     rf_hist->Draw("colz");
     gPad->SetLogx();
 
     l[i] = new TLegend(0.77,0.7,0.86,0.85);
 
-    l[i]->AddEntry(rf_hist_peak,"Peak","l");
-    rf_hist_peak->SetLineColor(2);
-    rf_hist_peak->SetLineWidth(2);
-    rf_hist_peak->Draw("SAME");
+    // l[i]->AddEntry(rf_hist_peak,"Peak","l");
+    // rf_hist_peak->SetLineColor(1);
+    // rf_hist_peak->SetLineWidth(2);
+    // rf_hist_peak->Draw("SAME");
 
-    l[i]->AddEntry(rf_hist_mean,"Mean","l");
-    rf_hist_mean->SetLineColor(1);
+    l[i]->AddEntry(rf_hist_mean,"Mean moderation distance","l");
+    rf_hist_mean->SetLineColor(2);
     rf_hist_mean->SetLineWidth(2);
     rf_hist_mean->Draw("SAME");
 
@@ -194,19 +195,19 @@ void plot_hists(){
     c[i] = new TCanvas(Form("c%d", i)," ");
     c[i]->cd();
 
-    l[i] = new TLegend(0.77,0.7,0.86,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
-    l[i]->AddEntry(transfer_func_FIMG_noRF,"no RF","l");
+    l[i] = new TLegend(0.45,0.7,0.85,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i]->AddEntry(transfer_func_FIMG_noRF,"Without Moderator Effects","l");
     
     transfer_func_FIMG_noRF->GetXaxis()->SetTitle("ToF (in ns)");
     transfer_func_FIMG_noRF->GetYaxis()->SetTitle("Energy (in eV)");
-    transfer_func_FIMG_noRF->SetTitle("Transfer Function Histograms - FIMG");
+    transfer_func_FIMG_noRF->SetTitle("Transfer Function - FIMG");
     transfer_func_FIMG_noRF->SetLineWidth(2);
     transfer_func_FIMG_noRF->Draw(); //"HISTE"
     transfer_func_FIMG_noRF->SetStats(0);
     gPad->SetLogx();
     gPad->SetLogy();
 
-    l[i]->AddEntry(transfer_func_mean_FIMG_5itr,"5 Itr (Mean)","l");
+    l[i]->AddEntry(transfer_func_mean_FIMG_5itr,"With Moderator Effects","l");
     transfer_func_mean_FIMG_5itr->SetLineColor(2);
     transfer_func_mean_FIMG_5itr->SetLineWidth(2);
     transfer_func_mean_FIMG_5itr->Draw("SAME");
@@ -327,6 +328,6 @@ void transfer_function(){
         }  
     }
 
-    store_hist();
+    // store_hist();
     plot_hists();
 }
