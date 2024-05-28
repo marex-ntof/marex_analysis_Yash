@@ -29,13 +29,18 @@
 #include "tools.h"
 
 //////// Run variables
-const std::string target_name("al5"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
-const std::string target_out_name("none"); //none, none_ts, ar_bottle
+const std::string target_name("ar_bottle_full"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, al5_c_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
+const std::string target_out_name("ar_bottle"); //none, none_ts, ar_bottle
 // const std::string mode("run");
 // bi1, al3, al5, al8 - none
 
 //Root file
 TFile *outputRootFile = 0;
+
+// TH2D* rf_hist = 0;
+
+TH1D* transfer_function_PTBC = 0;
+TH1D* transfer_function_FIMG = 0;
 
 TH1D* energy_hist_target_in_PTB = 0;
 TH1D* energy_hist_target_in_FIMG = 0;
@@ -123,6 +128,11 @@ void fillRuns(){
         ts_target_in_runs.insert( ts_target_in_runs.end(), f_out_t_al5_ts.begin(), f_out_t_al5_ts.end() );
     }
 
+    if(!target_name.compare("al5_c_ts")){
+        cout << "Setting up Al (5 cm) filter and C (1.2 cm) target run list" << endl;
+        ts_target_in_runs.insert( ts_target_in_runs.end(), f_al5_t_c_ts.begin(), f_al5_t_c_ts.end() );
+    }
+
     if(!target_name.compare("cf_bottle")){
         cout << "Setting up Empty Bottle target run list" << endl;
         ts_target_in_runs.insert( ts_target_in_runs.end(), f_out_t_emptyBot_ts.begin(), f_out_t_emptyBot_ts.end() );
@@ -171,3 +181,16 @@ void fillRuns(){
     f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_ta_f_out_t_out.begin(), c_ta_f_out_t_out.end() );
     f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_c_f_out_t_out.begin(), c_c_f_out_t_out.end() );
 }
+
+// Double_t get_rf_length_mean(Double_t n_energy){ // energy in eV;
+//     Int_t e_bin_num = rf_hist->GetXaxis()->FindBin(n_energy);
+//     std::string projection_name = "profile_" + std::to_string(n_energy);
+//     TH1D* projection = (TH1D*)rf_hist->ProjectionY(
+//         projection_name.c_str(),
+//         e_bin_num, e_bin_num
+//     );
+    
+//     Double_t rf_length = projection->GetMean(1) * 0.01; //converting to m
+    
+//     return rf_length; //in m
+// }

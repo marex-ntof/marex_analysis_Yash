@@ -32,6 +32,14 @@ Double_t EnergyToTOF(Double_t e, Double_t flight_path_length){ //e is in eV, fli
     Double_t TOF = (flight_path_length/speed_of_light) * correction_factor;
     return TOF; //tof in seconds
 }
+
+Double_t EnergyToTOF(Double_t e, Double_t flight_path_length, Double_t rf_length){ //e is in eV, flight_path_length is in m, rf_length is in m
+    Double_t KE_M = (e * 1e-6)/neutron_mass;
+    Double_t denominator = 1.0 - 1.0/((KE_M + 1.0)*(KE_M + 1.0));
+    Double_t correction_factor = std::sqrt(1.0 / denominator);
+    Double_t TOF = ((flight_path_length + rf_length)/speed_of_light) * correction_factor;
+    return TOF; //tof in seconds
+}
     
 Double_t TOFToEnergy(Double_t t, Double_t flight_path_length){ //t is in seconds
     Double_t denom_term = (flight_path_length)/(speed_of_light * t);
