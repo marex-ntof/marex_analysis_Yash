@@ -119,17 +119,15 @@ void fillCutGraph_FIMG(){
     FIMG_my_tof_amp_cut_para_det2->SetPoint(6, tof_cut_FIMG[1][4][1], amp_cut_FIMG[1][4][1]);
 }
 
-void retriveHistograms(const char *file_name, const char *hist_name, TH2D* hist_to_fill){
+void retriveHistograms(const char *file_name, const char *hist_name){
     TFile *hist_file = TFile::Open(file_name, "READ");
     if (!hist_file || hist_file->IsZombie()) {
         cout << "Unable to open " << file_name << " for reading..." <<endl;
         return;
     }
 
-    hist_to_fill = (TH2D*)hist_file->Get(hist_name);
-
-    // h[histCounter] = (TH2D*)hist_file->Get(hist_name);
-    // histCounter++;
+    h[histCounter] = (TH2D*)hist_file->Get(hist_name);
+    histCounter++;
 }
 
 
@@ -202,7 +200,7 @@ void hist2DPlots() {
 
     for (Int_t i = 0; i < 6; i++)
     {
-        PTBC_tof_amp_hists[i] = GetHist2D("../rootFiles/cutoffAnalysis_PTBC_bi1.root", Form("PTBC_tof_amp_det%i", i+2));
+        PTBC_tof_amp_hists[i] = GetHist2D("../rootFiles/cutoffAnalysis_PTBC_al5.root", Form("PTBC_tof_amp_fIn_det%i", i+2));
         PTBC_tof_amp_cuts[i] = GetHist1D("../rootFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
     }
 

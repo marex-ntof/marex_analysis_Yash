@@ -1,10 +1,9 @@
 /**
- * @file cutoffFitter_PTBC.C
+ * @file cutoffFitter_PTBC_lin.C
  * @author Yashwanth Bezawada [ysbezawada@ucdavis.edu]
- * @brief 
+ * @brief Trying different way of applying cuts for PTBC
  * @version 0.1
- * @date 2023-11-13
- * @date 2024-05-21 (name change)
+ * @date 2024-05-28
  */
 
 #include <TROOT.h>
@@ -34,9 +33,10 @@ const std::string target_name_title("No Target");
 //Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
 //Argon Tank, Bi (1 cm) - Sep 17, No Target, SCUBA Tank
 
-Int_t bins_per_decade_cuts = 5;
+// Int_t bins_per_decade_cuts = 5;
 
 TH2D* PTBC_tof_amp_hists[6];
+TH2D* PTBC_ringing_hists[6];
 TH1D* projection_hists[6];
 TF1* alphas_fits_total[6];
 TH1D* det_cut_hists[6];
@@ -45,6 +45,9 @@ Double_t det_alphas_cuts[6];
 TCanvas *alphas_canvas[6];
 TLegend *alphas_legend[6];
 Int_t alphas_plot_index = 0;
+
+TCanvas *ringing_canvas[6];
+Int_t ringing_plot_index = 0;
 
 TCanvas *cuts_canvas[6];
 Int_t cuts_plot_index = 0;
@@ -133,85 +136,67 @@ Double_t fitFunction(Double_t *x, Double_t *par){
 // cuts for tof < 10^4
 void determine_gamma_flash_cuts(Int_t det_num, TH1D* cut_hist){
 
-    TH2D* PTBC_tof_amp_hist_forCuts;
-
-    PTBC_tof_amp_hist_forCuts = (TH2D*)PTBC_tof_amp_hists[det_num-2]->Rebin2D((Int_t) 1000/bins_per_decade_cuts, 5, Form("PTBC_tof_amp_forCuts_det%i", det_num));
-
-    Int_t num_tof_bins = PTBC_tof_amp_hist_forCuts->GetNbinsX();
+    Int_t num_tof_bins = cut_hist->GetNbinsX();
 
     for (Int_t i = 1; i <= num_tof_bins; i++) 
     {
-        if (i < 5) //starting from xbin = 5 (around tof = 800ns)
+        if (i == 1)
         {
             cut_hist->SetBinContent(i, 50000.);
             continue;
         }
 
-        if (i >= 5 && i <= 10) // For tof below 10^4 ns
+        if (i >= 2 && i <= num_tof_bins-1) // For tof below 10^4 ns
         {
             std::string projection_name = "profile_bin_" + std::to_string(i);
-            TH1D* proj_hist = (TH1D*)PTBC_tof_amp_hist_forCuts->ProjectionY(projection_name.c_str(),i, i);
 
-            TF1 *gaus_fit_total = new TF1("gaus_fit_total", "gaus", 0, 10000);
+            TH1D* proj_hist = (TH1D*)PTBC_ringing_hists[det_num-2]->ProjectionY(projection_name.c_str(),i-1, i-1);
+
+            cout << "Fitting cut for bin number " << i << endl;
+
+            TF1 *gaus_fit_total = new TF1("gaus_fit_total", "gaus", 300, 10000);
             // gaus_fit_total->SetParameters(par);
             proj_hist->Fit(gaus_fit_total, "0R");
 
             Double_t mean_val = gaus_fit_total->GetParameter(1);
             Double_t std_dev = gaus_fit_total->GetParameter(2);
             
-            Double_t cut_val = 0;
+            // Double_t cut_val = 0;
+            // if (i <= 6){
+            //     cut_val = mean_val + 6*std_dev;
+            // } else {
+            //     cut_val = mean_val + 5*std_dev;
+            // }
 
-            if (det_num == 4 || det_num == 7)
-            {
-                if (i <= 6){
-                    cut_val = mean_val + 6*std_dev;
-                } else {
-                    cut_val = mean_val + 5*std_dev;
-                }
-            } else {
-                cut_val = mean_val + 5*std_dev;
-            }
+            Double_t cut_val = mean_val + 5*std_dev;
 
             if (cut_val > det_alphas_cuts[det_num-2])
             {
                 cut_hist->SetBinContent(i, cut_val);
+                cout << "Cut for bin " << i << " = " << cut_val << endl;
             } else {
                 cut_hist->SetBinContent(i, det_alphas_cuts[det_num-2]);
+                cout << "Cut for bin " << i << " = " << det_alphas_cuts[det_num-2] << endl;
             }
 
-            if (det_num == 4 || det_num == 7){
-                
-                if (i == 6)
-                {
-                    Double_t bin_6_val = cut_hist->GetBinContent(6);
-                    Double_t bin_5_val = cut_hist->GetBinContent(5);
+            // if (i == 7)
+            // {
+            //     Double_t bin_7_val = cut_hist->GetBinContent(7);
+            //     Double_t bin_6_val = cut_hist->GetBinContent(6);
+            //     Double_t bin_5_val = cut_hist->GetBinContent(5);
 
-                    if (bin_5_val > bin_6_val)
-                    {
-                        cut_hist->SetBinContent(6, bin_5_val);
-                    }
-                }
-            }
+            //     if (bin_7_val > bin_6_val) {
+            //         cut_hist->SetBinContent(6, bin_7_val);
+            //     }
 
-            if (i == 7)
-            {
-                Double_t bin_7_val = cut_hist->GetBinContent(7);
-                Double_t bin_6_val = cut_hist->GetBinContent(6);
-                Double_t bin_5_val = cut_hist->GetBinContent(5);
-
-                if (bin_7_val > bin_6_val) {
-                    cut_hist->SetBinContent(6, bin_7_val);
-                }
-
-                if (bin_7_val > bin_5_val) {
-                    cut_hist->SetBinContent(5, bin_7_val);
-                }
-            }      
-
+            //     if (bin_7_val > bin_5_val) {
+            //         cut_hist->SetBinContent(5, bin_7_val);
+            //     }
+            // }
             continue;
         }
 
-        if (i > 10){ //40 // For tof above 10^4 ns
+        if (i == num_tof_bins){ // For tof above 10^4 ns
             cut_hist->SetBinContent(i, det_alphas_cuts[det_num-2]);
             continue;
         }
@@ -338,9 +323,33 @@ void plot_det_cuts(Int_t det_num, TH2D* tof_amp_hist, TH1D* cut_hist) {
     return;
 }
 
+void plot_ringing(Int_t det_num, TH2D* tof_amp_hist) {
+    //Plotting
+    SetMArEXStyle();
+    
+    gStyle->SetStatX(0.27);
+    gStyle->SetStatY(0.9);
+    gStyle->SetStatH(0.1);
+    gStyle->SetStatW(0.17);
+    gStyle->SetPalette(57);
+
+    ringing_canvas[ringing_plot_index] = new TCanvas(Form("ringing_c_%i", ringing_plot_index)," ");
+    ringing_canvas[ringing_plot_index]->cd();
+
+    tof_amp_hist->GetXaxis()->SetTitle("TOF (in ns)");
+    tof_amp_hist->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    tof_amp_hist->SetTitle(Form("ToF-Amp Hist - Det %i - %s", det_num, target_name_title.c_str()));
+    tof_amp_hist->Draw("COLZ");
+    gPad->SetLogx();
+    gPad->SetLogz();
+
+    ringing_plot_index++;
+    return;
+}
+
 void StoreHist(){
     
-    TFile *f = new TFile("../inputFiles/PTBC_cuts.root","recreate");
+    TFile *f = new TFile("../rootFiles/PTBC_cuts.root","recreate");
 
     for (Int_t i = 0; i < 6; i++)
     {
@@ -354,41 +363,65 @@ void StoreHist(){
     std::cout << "Created output file 'PTBC_cuts.root'" << std::endl;
 }
 
-void cutoffFitter_PTBC() {
+void cutoffFitter_PTBC_lin() {
 
     fill_fit_ranges();
 
-    //Calculating TOF (x) bin edges FOR CUTS
-    Int_t Num_decades = 6;
-    Int_t num_bins_tof_cuts = bins_per_decade_cuts * Num_decades;
-    Double_t bin_edges_tof_cuts[num_bins_tof_cuts+1];
-    Double_t step_tof_cuts = ((Double_t) 1.0/(Double_t) bins_per_decade_cuts);
-    for(Int_t i = 0; i < num_bins_tof_cuts+1; i++)
+    for (Int_t i = 0; i < 6; i++)
     {
-        Double_t base = 10.;
-        Double_t exponent = (step_tof_cuts * (Double_t) i) + 2.;
-        bin_edges_tof_cuts[i] = (Double_t) std::pow(base, exponent);
+        PTBC_tof_amp_hists[i] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", Form("PTBC_tof_amp_det%i", i+2));
+        PTBC_ringing_hists[i] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", Form("PTBC_ringing_det%i", i+2));
+        PTBC_ringing_hists[i]->Rebin2D(40, 5);
+    }
+
+    Int_t num_bins_ringing = PTBC_ringing_hists[0]->GetNbinsX();
+    Double_t* bin_edges_cuts = new Double_t[num_bins_ringing + 2 + 1];
+
+    for (Int_t i = 1; i <= num_bins_ringing+2; i++)
+    {
+        if (i == 1)
+        {
+            bin_edges_cuts[i-1] = 100.;
+            bin_edges_cuts[i] = PTBC_ringing_hists[0]->GetXaxis()->GetBinLowEdge(i);
+            continue;
+        }
+
+        if (i == num_bins_ringing+2)
+        {
+            bin_edges_cuts[i] = 1e8;
+            continue;
+        }
+        
+        bin_edges_cuts[i] = PTBC_ringing_hists[0]->GetXaxis()->GetBinUpEdge(i-1);
     }
     
-    PTBC_tof_amp_hists[0] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det2");
-    PTBC_tof_amp_hists[1] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det3");
-    PTBC_tof_amp_hists[2] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det4");
-    PTBC_tof_amp_hists[3] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det5");
-    PTBC_tof_amp_hists[4] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det6");
-    PTBC_tof_amp_hists[5] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det7");
+    // PTBC_tof_amp_hists[0] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det2");
+    // PTBC_tof_amp_hists[1] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det3");
+    // PTBC_tof_amp_hists[2] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det4");
+    // PTBC_tof_amp_hists[3] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det5");
+    // PTBC_tof_amp_hists[4] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det6");
+    // PTBC_tof_amp_hists[5] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det7");
 
-    for (Int_t i = 0; i < 6; i++)
+    // PTBC_ringing_hists[0] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_ringing_det2");
+    // PTBC_ringing_hists[1] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_ringing_det3");
+    // PTBC_ringing_hists[2] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_ringing_det4");
+    // PTBC_ringing_hists[3] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_ringing_det5");
+    // PTBC_ringing_hists[4] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_ringing_det6");
+    // PTBC_ringing_hists[5] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_ringing_det7");
+
+    for (Int_t i = 2; i < 3; i++)
     {
         projection_hists[i] = (TH1D*)PTBC_tof_amp_hists[i]->ProjectionY(Form("profile_fission_alphas_det%i", i+2), 5001, 6000);
         alphas_fits_total[i] = new TF1(Form("alphas_total_fit_det%i", i+2), "expo(0)+gaus(2)", total_fit_ranges[i][0], total_fit_ranges[i][1]);
         determine_alpha_cut(i+2, PTBC_tof_amp_hists[i], projection_hists[i], alphas_fits_total[i]);
         // plot_alpha_cuts(i+2, projection_hists[i], alphas_fits_total[i]);
 
-        det_cut_hists[i] = new TH1D(Form("PTBC_cuts_det%i", i+2), Form("ToF-Amp cut Hist - PTBC Det %i - %s", i+2, target_name_title.c_str()), num_bins_tof_cuts, bin_edges_tof_cuts);
+        // plot_ringing(i+2, PTBC_ringing_hists[i]);
+        det_cut_hists[i] = new TH1D(Form("PTBC_cuts_det%i", i+2), Form("ToF-Amp cut Hist - PTBC Det %i - %s", i+2, target_name_title.c_str()), num_bins_ringing+2, bin_edges_cuts);
         determine_gamma_flash_cuts(i+2, det_cut_hists[i]);
         plot_det_cuts(i+2, PTBC_tof_amp_hists[i], det_cut_hists[i]);
     }
 
-    StoreHist();
+    // StoreHist();
 
 }
