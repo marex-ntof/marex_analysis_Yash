@@ -35,6 +35,7 @@ Double_t ar_bottle_pressure = 197.385 * 1e5; // in Pa (SI unit)
 Double_t ar_bottle_temp = 293.0; // in Kelvin
 Double_t delT_pkup_ptbc = 660.0; //in ns
 Double_t delT_pkup_fimg = 630.0; //in ns
+Double_t min_tof_PTBC = 800.0; //in ns
 
 Double_t n_Bi_1cm = (1.0 /*cm*/) * (9.78 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (208.9804 /*g/mole*/);
 Double_t n_Bi_1p2cm = (1.2 /*cm*/) * (9.78 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (208.9804 /*g/mole*/);

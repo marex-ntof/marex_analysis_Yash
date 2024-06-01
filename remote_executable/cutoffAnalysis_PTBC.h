@@ -29,9 +29,9 @@
 #include <vector>
 #include "parameters.h"
 
-const std::string target_name("bi1"); ////bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full, bi1sep17
+const std::string target_name("none"); ////bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full, bi1sep17
 //no targets - none, none_ts, ar_bottle
-const std::string target_name_title("Bi (1 cm)");
+const std::string target_name_title("No Target");
 //Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
 //Argon Tank, Bi (1 cm) - Sep 17, No Target, SCUBA Tank
 

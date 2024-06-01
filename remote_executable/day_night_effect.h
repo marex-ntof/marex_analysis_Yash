@@ -32,6 +32,9 @@
 //Root file
 TFile *outputRootFile = 0;
 
+//PTBC cuts
+TH1D* PTBC_tof_amp_cuts[6];
+
 //////////// Counts plots
 TH1D* counts_filterOut_PTBC = 0;
 TH1D* counts_Bi_PTBC = 0;
@@ -83,8 +86,6 @@ TH1D* day_night_emptyTS_FIMG = 0;
 TH1D* day_night_emptyTank_FIMG = 0;
 TH1D* day_night_Argon_FIMG = 0;
 TH1D* day_night_EmptyArgon_FIMG = 0;
-
-Double_t t_gamma_PTBC = (flight_path_length_PTB / speed_of_light) * 1e9; //converting into ns
 
 // Run Lists
 std::vector<Int_t> filterOut_run_list;
@@ -139,58 +140,19 @@ Int_t timeToSeconds(const std::string& timeStr) {
     }
 }
 
-bool select_hit_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num, Int_t run_number){
-    if (pulseIntensity <= 6e12)
+bool select_hit_PTBC(Double_t tof, Float_t amp, Int_t det_num){
+
+    if (tof < min_tof_PTBC)
     {
-        for (int k = 0; k < 2; k++)
-        {
-            if (tof >= t_para[k][0] && tof < t_para[k][1])
-            {
-                if ( (Double_t) amp > yOnTheCutLine(t_para[k][0], a_para[k][0], t_para[k][1], a_para[k][1], tof) )
-                {
-                    return 1;
-                }
-            }
-        }
+        return 0;
     }
 
-    if (det_num == 2) {
-        for (int k = 0; k < 4; k++)
-        {
-            if (tof >= t_det2[k][0] && tof < t_det2[k][1])
-            {
-                if ( (Double_t) amp > yOnTheCutLine(t_det2[k][0], a_det2[k][0], t_det2[k][1], a_det2[k][1], tof) )
-                {
-                    return 1;
-                }
-            }
-        }
-    } 
+    Double_t tof_cut_bin = PTBC_tof_amp_cuts[det_num-2]->GetXaxis()->FindBin(tof);
+    Double_t amp_cut = PTBC_tof_amp_cuts[det_num-2]->GetBinContent(tof_cut_bin);
 
-    if(run_number >= 117386 && run_number <= 117390) {
-        if (det_num == 5){
-            for (int k = 0; k < 4; k++)
-            {
-                if (tof >= t_det5_early_runs[k][0] && tof < t_det5_early_runs[k][1])
-                {
-                    if ( (Double_t) amp > yOnTheCutLine(t_det5_early_runs[k][0], a_det5_early_runs[k][0], t_det5_early_runs[k][1], a_det5_early_runs[k][1], tof) )
-                    {
-                        return 1;
-                    }
-                }
-            }
-        }
-    }
-    
-    for (int k = 0; k < 2; k++)
+    if ( (Double_t) amp > amp_cut)
     {
-        if (tof >= t_det3to7[det_num-3][k][0] && tof < t_det3to7[det_num-3][k][1])
-        {
-            if ( (Double_t) amp > yOnTheCutLine(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
-            {
-                return 1;
-            }
-        }
+        return 1;
     }
 
     return 0;

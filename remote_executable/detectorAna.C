@@ -8,77 +8,24 @@
 
 #include "detectorAna.h"
 
-void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num, TH1D* hist_tof, TH1D* hist_e, Int_t run_number){
-    //Filling the histograms
-    if (pulseIntensity <= 6e12)
+void applyMyCuts_PTBC(Double_t tof, Float_t amp, Int_t det_num, TH1D* hist_tof, TH1D* hist_e){
+
+    if (tof < min_tof_PTBC)
     {
-        for (int k = 0; k < 2; k++)
-        {
-            if (tof >= t_para[k][0] && tof < t_para[k][1])
-            {
-                if ( (Double_t) amp > yOnTheCutLine(t_para[k][0], a_para[k][0], t_para[k][1], a_para[k][1], tof) )
-                {
-                    hist_tof->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                    Int_t bin_num = transfer_function_PTBC->GetXaxis()->FindBin(tof);
-                    hist_e->Fill(transfer_function_PTBC->GetBinContent(bin_num));
-                    break;    
-                }
-            }
-        }
         return;
     }
 
-    if (det_num == 2) {
-        for (int k = 0; k < 4; k++)
-        {
-            if (tof >= t_det2[k][0] && tof < t_det2[k][1])
-            {
-                if ( (Double_t) amp > yOnTheCutLine(t_det2[k][0], a_det2[k][0], t_det2[k][1], a_det2[k][1], tof) )
-                {
-                    hist_tof->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                    Int_t bin_num = transfer_function_PTBC->GetXaxis()->FindBin(tof);
-                    hist_e->Fill(transfer_function_PTBC->GetBinContent(bin_num));
-                    break;    
-                }
-            }
-        }
-        return;
-    }
-    
-    if(run_number >= 117386 && run_number <= 117390) {
-        if (det_num == 5){
-            for (int k = 0; k < 4; k++)
-            {
-                if (tof >= t_det5_early_runs[k][0] && tof < t_det5_early_runs[k][1])
-                {
-                    if ( (Double_t) amp > yOnTheCutLine(t_det5_early_runs[k][0], a_det5_early_runs[k][0], t_det5_early_runs[k][1], a_det5_early_runs[k][1], tof) )
-                    {
-                        hist_tof->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                        Int_t bin_num = transfer_function_PTBC->GetXaxis()->FindBin(tof);
-                        hist_e->Fill(transfer_function_PTBC->GetBinContent(bin_num));
-                        break;    
-                    }
-                }
-            }
-            return;
-        }
-    }
-    
-    
-    for (int k = 0; k < 2; k++)
+    Double_t tof_cut_bin = PTBC_tof_amp_cuts[det_num-2]->GetXaxis()->FindBin(tof);
+    Double_t amp_cut = PTBC_tof_amp_cuts[det_num-2]->GetBinContent(tof_cut_bin);
+
+    if ( (Double_t) amp > amp_cut)
     {
-        if (tof >= t_det3to7[det_num-3][k][0] && tof < t_det3to7[det_num-3][k][1])
-        {
-            if ( (Double_t) amp > yOnTheCutLine(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
-            {
-                hist_tof->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                Int_t bin_num = transfer_function_PTBC->GetXaxis()->FindBin(tof);
-                hist_e->Fill(transfer_function_PTBC->GetBinContent(bin_num));
-                break;    
-            }
-        }
+        hist_tof->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
+        Int_t bin_num = transfer_function_PTBC->GetXaxis()->FindBin(tof);
+        hist_e->Fill(transfer_function_PTBC->GetBinContent(bin_num));
     }
-    
+
+    return;
 }
 
 void applynTOFCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num, TH1D* hist_tof, TH1D* hist_e){
@@ -216,7 +163,7 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
                 NormFactor += (Double_t) PulseIntensity;
             }
 
-            applyMyCuts_PTBC(corrected_tof, amp_PTB, PulseIntensity, det_num_PTB, tof_hist_PTB, energy_hist_PTB, run_list.at(i));
+            applyMyCuts_PTBC(corrected_tof, amp_PTB, det_num_PTB, tof_hist_PTB, energy_hist_PTB);
             // applynTOFCuts_PTBC(corrected_tof, amp_PTB, PulseIntensity, det_num_PTB, tof_hist_PTB);
         }
 
@@ -243,75 +190,16 @@ Double_t fillEnergyHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTB, TH1D
             Double_t t_pkup = BNum_tpkup_map[BunchNumber_FIMG];
             Double_t corrected_tof = tof_FIMG - t_pkup + delT_pkup_fimg + t_gamma_FIMG;
 
-            // Double_t tof_cut_low = 0;
-            // Double_t tof_cut_up = 0;
-            // Double_t min_amp_cut = 0;
-
-            // if (det_num == 1){
-            //     tof_cut_low = FIMG_tof_cut_low_det1;
-            //     tof_cut_up = FIMG_tof_cut_up_det1;
-            //     min_amp_cut = FIMG_min_amp_cut_det1;
-            // }
-            // else if (det_num == 2){
-            //     tof_cut_low = FIMG_tof_cut_low_det2;
-            //     tof_cut_up = FIMG_tof_cut_up_det2;
-            //     min_amp_cut = FIMG_min_amp_cut_det2;
-            // }
-
-            // //Filling the histograms after cuts
-            // if (corrected_tof < tof_cut_low)
-            // {
-            //     continue;
-            // }
-
-            // if ((Double_t) amp < min_amp_cut)
-            // {
-            //     continue;
-            // }
-
-            // if (corrected_tof > tof_cut_up)
-            // {
-            //     tof_hist_FIMG->Fill(corrected_tof); //TOFToEnergy(corrected_tof * 1e-9, flight_path_length_FIMG)
-            //     continue;
-            // }
-
-            // if ((Double_t) amp >= fimgCutFunction(corrected_tof, det_num))
-            // {
-            //     tof_hist_FIMG->Fill(corrected_tof); //TOFToEnergy(corrected_tof * 1e-9, flight_path_length_FIMG)
-            // }
-
             applyMyCuts_FIMG(corrected_tof, amp_FIMG, det_num_FIMG, tof_hist_FIMG, energy_hist_FIMG);
         }
 
         file_ntof->Close();
     }
 
-    // Int_t num_bins_PTB = energy_hist_PTB->GetNbinsX();
-    // for(Int_t i = 0; i < num_bins_PTB; i++){
-    //     energy_hist_PTB->SetBinContent(i+1, tof_hist_PTB->GetBinContent(num_bins_PTB-i));
-    // }
-
-    // Int_t num_bins_FIMG = energy_hist_FIMG->GetNbinsX();
-    // for(Int_t i = 0; i < num_bins_FIMG; i++){
-    //     energy_hist_FIMG->SetBinContent(i+1, tof_hist_FIMG->GetBinContent(num_bins_FIMG-i));
-    // }
-
     return NormFactor;
-
-    // tof_hist_filter_out->Scale(1.0/NormFactor);
-    // energy_hist_filter_out->Scale(1.0/NormFactor);
 }
 
 void fillRunHists(){
-    // Int_t num_bins_e, Double_t bin_edges_e[], Int_t num_bins_tof, Double_t bin_edges_tof[]
-    //Getting tof edges
-    // Double_t bin_edges_tof_PTBC[num_bins_e+1];
-    // Double_t bin_edges_tof_FIMG[num_bins_e+1];
-    // for(Int_t i = 0; i < num_bins_e+1; i++){
-    //     Double_t rf_length = get_rf_length_mean(bin_edges_e[num_bins_e-i]);
-    //     bin_edges_tof_PTBC[i] = EnergyToTOF(bin_edges_e[num_bins_e-i], flight_path_length_PTB, rf_length) * 1e9;
-    //     bin_edges_tof_FIMG[i] = EnergyToTOF(bin_edges_e[num_bins_e-i], flight_path_length_FIMG, rf_length) * 1e9;
-    // }
 
     Double_t norm_factor_target_in = 0;
     Double_t norm_factor_target_out = 0;
@@ -331,92 +219,29 @@ void fillRunHists(){
     norm_factors.push_back(norm_factor_target_out);
     // Double_t Qout_Qin = norm_factor_target_out / norm_factor_target_in;
 
-    // //Transmission
-    // for (int i = 0; i < num_bins_e; i++)
-    // {
-    //     //PTBC
-    //     Double_t bin_content_in_PTB = energy_hist_target_in_PTB->GetBinContent(i+1);
-    //     Double_t bin_content_out_PTB = energy_hist_target_out_PTB->GetBinContent(i+1);
-    //     if (bin_content_in_PTB == 0. || bin_content_out_PTB == 0.)
-    //     {
-    //         transmission_hist_e_PTB->SetBinContent(i+1, 0.);
-    //         transmission_hist_e_PTB->SetBinError(i+1, 0.);
-    //     } else {
-    //         Double_t transmission_PTB = (bin_content_in_PTB * Qout_Qin)/bin_content_out_PTB;
-    //         Double_t bin_unc_PTB = transmission_PTB * std::sqrt( (1./bin_content_in_PTB) + (1./bin_content_out_PTB) );
-    //         transmission_hist_e_PTB->SetBinContent(i+1, transmission_PTB);
-    //         transmission_hist_e_PTB->SetBinError(i+1, bin_unc_PTB);
-    //     }
-
-    //     //FIMG
-    //     Double_t bin_content_in_FIMG = energy_hist_target_in_FIMG->GetBinContent(i+1);
-    //     Double_t bin_content_out_FIMG = energy_hist_target_out_FIMG->GetBinContent(i+1);
-    //     if (bin_content_in_FIMG == 0. || bin_content_out_FIMG == 0.)
-    //     {
-    //         transmission_hist_e_FIMG->SetBinContent(i+1, 0.);
-    //         transmission_hist_e_FIMG->SetBinError(i+1, 0.);
-    //     } else {
-    //         Double_t transmission_FIMG = (bin_content_in_FIMG * Qout_Qin)/bin_content_out_FIMG;
-    //         Double_t bin_unc_FIMG = transmission_FIMG * std::sqrt( (1./bin_content_in_FIMG) + (1./bin_content_out_FIMG) );
-    //         transmission_hist_e_FIMG->SetBinContent(i+1, transmission_FIMG);
-    //         transmission_hist_e_FIMG->SetBinError(i+1, bin_unc_FIMG);
-    //     }
-    // }
-
-    // //Cross Section
-    // Double_t num_density = num_density_map[target_name];
-    // cout << Form("Number density of %s = ", target_name.c_str()) << num_density << endl;
-    // Double_t n_inverse = ( (Double_t) 1.0/num_density);
-    // cout << Form("1/n of %s = ", target_name.c_str()) << n_inverse << endl;
-
-    // for (int i = 0; i < num_bins_e; i++)
-    // {
-    //     //PTBC
-    //     Double_t trans_bin_content_PTB = transmission_hist_e_PTB->GetBinContent(i+1);
-    //     Double_t trans_bin_error_PTB = transmission_hist_e_PTB->GetBinError(i+1);
-    //     if (trans_bin_content_PTB == 0)
-    //     {
-    //         cross_section_hist_e_PTB->SetBinContent(i+1, 0);
-    //         cross_section_hist_e_PTB->SetBinError(i+1, 0);
-    //     } else {
-    //         Double_t cross_section_PTB = - n_inverse * std::log(trans_bin_content_PTB);
-    //         Double_t bin_unc_PTB = n_inverse * (1./trans_bin_content_PTB) * trans_bin_error_PTB;
-    //         cross_section_hist_e_PTB->SetBinContent(i+1, cross_section_PTB);
-    //         cross_section_hist_e_PTB->SetBinError(i+1, bin_unc_PTB);
-    //     }
-
-    //     //FIMG
-    //     Double_t trans_bin_content_FIMG = transmission_hist_e_FIMG->GetBinContent(i+1);
-    //     Double_t trans_bin_error_FIMG = transmission_hist_e_FIMG->GetBinError(i+1);
-    //     if (trans_bin_content_FIMG == 0)
-    //     {
-    //         cross_section_hist_e_FIMG->SetBinContent(i+1, 0);
-    //         cross_section_hist_e_FIMG->SetBinError(i+1, 0);
-    //     } else {
-    //         Double_t cross_section_FIMG = - n_inverse * std::log(trans_bin_content_FIMG);
-    //         Double_t bin_unc_FIMG = n_inverse * (1./trans_bin_content_FIMG) * trans_bin_error_FIMG;
-    //         cross_section_hist_e_FIMG->SetBinContent(i+1, cross_section_FIMG);
-    //         cross_section_hist_e_FIMG->SetBinError(i+1, bin_unc_FIMG);
-    //     }
-    // }
-
     cout << Form("Total Protons %s = ", target_name.c_str()) << norm_factor_target_in << endl;
     cout << "Total Protons Target Out = " << norm_factor_target_out << endl;
 }
 
 void detectorAna(){
-
-    fillCutsPTBC();
-    fillCutsFIMG();
     
-    // fillCutsPTBC_para_nTOF();
-    // fillCutsPTBC_nTOF();
+    fillCutsFIMG();
     fillRuns();
     fillNumDensityMap();
 
-    TFile *tfFile = TFile::Open("../inputFiles/transfer_function.root", "READ");
-    transfer_function_PTBC = (TH1D*)tfFile->Get("transfer_func_mean_PTBC_5itr");
-    transfer_function_FIMG = (TH1D*)tfFile->Get("transfer_func_mean_FIMG_5itr");
+    // TFile *tfFile = TFile::Open("../inputFiles/transfer_function.root", "READ");
+    // transfer_function_PTBC = (TH1D*)tfFile->Get("transfer_func_mean_PTBC_5itr");
+    // transfer_function_FIMG = (TH1D*)tfFile->Get("transfer_func_mean_FIMG_5itr");
+
+    //Get Transfer Functions
+    transfer_function_PTBC = GetHist1D("../inputFiles/transfer_function.root", "transfer_func_mean_PTBC_5itr");
+    transfer_function_FIMG = GetHist1D("../inputFiles/transfer_function.root", "transfer_func_mean_FIMG_5itr");
+
+    //Get PTBC Cuts
+    for (Int_t i = 0; i < 6; i++)
+    {
+        PTBC_tof_amp_cuts[i] = GetHist1D("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
+    }
 
     //Calculating TOF bin edges
     int num_decades = 5;

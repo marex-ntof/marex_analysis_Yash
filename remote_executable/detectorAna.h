@@ -29,15 +29,15 @@
 #include "tools.h"
 
 //////// Run variables
-const std::string target_name("ar_bottle_full"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, al5_c_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
-const std::string target_out_name("ar_bottle"); //none, none_ts, ar_bottle
+const std::string target_name("al5"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, al5_c_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
+const std::string target_out_name("none"); //none, none_ts, ar_bottle
 // const std::string mode("run");
 // bi1, al3, al5, al8 - none
 
 //Root file
 TFile *outputRootFile = 0;
 
-// TH2D* rf_hist = 0;
+TH1D* PTBC_tof_amp_cuts[6];
 
 TH1D* transfer_function_PTBC = 0;
 TH1D* transfer_function_FIMG = 0;

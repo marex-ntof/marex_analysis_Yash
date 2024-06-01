@@ -78,7 +78,7 @@ void fillTOFHist(std::vector<Int_t> run_list, TH1D* energy_hist_PTBC, TH1D* ener
                 NormFactor += (Double_t) PulseIntensity;
             }
 
-            applyMyCuts_PTBC(corrected_tof, amp_PTBC, PulseIntensity, det_num_PTBC, tof_hist_PTBC, run_list.at(i));
+            applyMyCuts_PTBC(corrected_tof, amp_PTBC, det_num_PTBC, tof_hist_PTBC);
             // applynTOFCuts_PTBC(corrected_tof, amp_PTBC, PulseIntensity, det_num_PTBC, tof_hist_PTBC);
         }
 
@@ -306,9 +306,14 @@ void fill_dn_hists(std::vector<Int_t> run_list, TH1D* dn_hist_PTBC, TH1D* dn_his
 
 void data_stability(){
 
-    fillCutsPTBC();
     fillCutsFIMG();
     fillNumDensityMap();
+
+    //Get PTBC Cuts
+    for (Int_t i = 0; i < 6; i++)
+    {
+        PTBC_tof_amp_cuts[i] = GetHist1D("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
+    }
 
     // Int_t num_bins = 240; // 4 hours
     // Double_t x_min = 0.;

@@ -31,6 +31,8 @@
 //Root file
 TFile *outputRootFile = 0;
 
+TH1D* PTBC_tof_amp_cuts[6];
+
 // TH1D* stability_hist_PTBC = 0;
 // TH1D* stability_hist_FIMG_det1 = 0;
 // TH1D* stability_hist_FIMG_det2 = 0;
@@ -83,7 +85,6 @@ TH1D* norm_counts_ArgonFull_oct22_FIMG = 0;
 // TH1D* day_night_Argon_oct22_FIMG = 0;
 
 Int_t bins_per_decade = 100;
-Double_t t_gamma_PTBC = (flight_path_length_PTB / speed_of_light) * 1e9; //converting into ns
 
 // Function to convert hhmmss format to seconds
 Int_t timeToSeconds(const std::string& timeStr) {
@@ -133,68 +134,22 @@ Int_t timeToSeconds(const std::string& timeStr) {
     }
 }
 
-void applyMyCuts_PTBC(Double_t tof, Float_t amp, Float_t pulseIntensity, Int_t det_num, TH1D* hist, Int_t run_number){
-    //Filling the histograms
-    if (pulseIntensity <= 6e12)
+void applyMyCuts_PTBC(Double_t tof, Float_t amp, Int_t det_num, TH1D* hist_tof){
+
+    if (tof < min_tof_PTBC)
     {
-        for (int k = 0; k < 2; k++)
-        {
-            if (tof >= t_para[k][0] && tof < t_para[k][1])
-            {
-                if ( (Double_t) amp > yOnTheCutLine(t_para[k][0], a_para[k][0], t_para[k][1], a_para[k][1], tof) )
-                {
-                    hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                    break;    
-                }
-            }
-        }
         return;
     }
 
-    if (det_num == 2) {
-        for (int k = 0; k < 4; k++)
-        {
-            if (tof >= t_det2[k][0] && tof < t_det2[k][1])
-            {
-                if ( (Double_t) amp > yOnTheCutLine(t_det2[k][0], a_det2[k][0], t_det2[k][1], a_det2[k][1], tof) )
-                {
-                    hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                    break;    
-                }
-            }
-        }
-        return;
+    Double_t tof_cut_bin = PTBC_tof_amp_cuts[det_num-2]->GetXaxis()->FindBin(tof);
+    Double_t amp_cut = PTBC_tof_amp_cuts[det_num-2]->GetBinContent(tof_cut_bin);
+
+    if ( (Double_t) amp > amp_cut)
+    {
+        hist_tof->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
     }
 
-    if(run_number >= 117386 && run_number <= 117390) {
-        if (det_num == 5){
-            for (int k = 0; k < 4; k++)
-            {
-                if (tof >= t_det5_early_runs[k][0] && tof < t_det5_early_runs[k][1])
-                {
-                    if ( (Double_t) amp > yOnTheCutLine(t_det5_early_runs[k][0], a_det5_early_runs[k][0], t_det5_early_runs[k][1], a_det5_early_runs[k][1], tof) )
-                    {
-                        hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                        break;    
-                    }
-                }
-            }
-            return;
-        }
-    } 
-    
-    for (int k = 0; k < 2; k++)
-    {
-        if (tof >= t_det3to7[det_num-3][k][0] && tof < t_det3to7[det_num-3][k][1])
-        {
-            if ( (Double_t) amp > yOnTheCutLine(t_det3to7[det_num-3][k][0], a_det3to7[det_num-3][k][0], t_det3to7[det_num-3][k][1], a_det3to7[det_num-3][k][1], tof) )
-            {
-                hist->Fill(tof); //TOFToEnergy(tof * 1e-9, flight_path_length_PTB)
-                break;    
-            }
-        }
-    }
-    
+    return;
 }
 
 void applyMyCuts_FIMG(Double_t tof, Float_t amp, Int_t det_num, TH1D* hist){

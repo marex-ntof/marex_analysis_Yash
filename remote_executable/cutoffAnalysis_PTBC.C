@@ -103,106 +103,6 @@ void Fill_tof_amp_hists(std::vector<Int_t> run_list){
     }
 }
 
-void determine_cuts(){
-
-    //Fill cut histograms
-    TH2D* PTBC_tof_amp_det2_forCuts = (TH2D*)PTBC_tof_amp_det2->Rebin2D(50, 25, "PTBC_tof_amp_det2_forCuts");
-    // TH2D* PTBC_tof_amp_det3_forCuts = (TH2D*)PTBC_tof_amp_det3->Rebin2D(50, 50, "PTBC_tof_amp_det3_forCuts");
-    // TH2D* PTBC_tof_amp_det4_forCuts = (TH2D*)PTBC_tof_amp_det4->Rebin2D(50, 50, "PTBC_tof_amp_det4_forCuts");
-    // TH2D* PTBC_tof_amp_det5_forCuts = (TH2D*)PTBC_tof_amp_det5->Rebin2D(50, 50, "PTBC_tof_amp_det5_forCuts");
-    // TH2D* PTBC_tof_amp_det6_forCuts = (TH2D*)PTBC_tof_amp_det6->Rebin2D(50, 50, "PTBC_tof_amp_det6_forCuts");
-    // TH2D* PTBC_tof_amp_det7_forCuts = (TH2D*)PTBC_tof_amp_det7->Rebin2D(50, 50, "PTBC_tof_amp_det7_forCuts");
-
-    Int_t num_tof_bins = PTBC_tof_amp_det2_forCuts->GetNbinsX();
-
-    for (Int_t i = 1; i <= num_tof_bins; i++) 
-    {
-        if (i < 19) //starting from xbin = 19 (around tof = 800ns)
-        {
-            PTBC_cuts_det2->SetBinContent(i, 50000.);
-            continue;
-        }
-        
-        std::string projection_name_det2 = "profile_det2_bin_" + std::to_string(i);
-        TH1D* projection_det2 = (TH1D*)PTBC_tof_amp_det2_forCuts->ProjectionY(projection_name_det2.c_str(),i, i);
-
-        if (i >= 19 && i <= 40) // For tof below 10^4 ns
-        {
-            std::vector<Int_t> peaks_bin_num;
-            std::vector<Int_t> valleys_bin_num;
-            std::vector<Int_t> peaks_bin_value;
-            std::vector<Int_t> valleys_bin_value;
-
-            for (Int_t j = 3; j < 41; j++) // scanning only till 10k ampluitude to get the min value
-            {
-                Int_t prevprevBinContent = projection_det2->GetBinContent(j-2);
-                Int_t prevBinContent = projection_det2->GetBinContent(j-1);
-                Int_t currentBinContent = projection_det2->GetBinContent(j);
-                Int_t nextBinContent = projection_det2->GetBinContent(j+1);
-                Int_t nextnextBinContent = projection_det2->GetBinContent(j+2);
-
-                // Check for peak
-                if (currentBinContent > prevprevBinContent && currentBinContent > prevBinContent && currentBinContent > nextBinContent && currentBinContent > nextnextBinContent) {
-                    peaks_bin_num.push_back(j);
-                    peaks_bin_value.push_back(currentBinContent);
-                }
-                
-                // Check for valley
-                if (currentBinContent < prevprevBinContent && currentBinContent < prevBinContent && currentBinContent < nextBinContent && currentBinContent < nextnextBinContent) {
-                    valleys_bin_num.push_back(j);
-                    valleys_bin_value.push_back(currentBinContent);
-                }
-            }
-
-            // if (*max_element(peaks_bin_value.begin(), peaks_bin_value.end()) < ) 
-            // {
-            //     /* code */
-            // }
-
-            Int_t min_bin_num = 0; //Bin after which the cut needs to be placed
-            for (Int_t j = 0; j < peaks_bin_value.size(); j++)
-            {
-                if (peaks_bin_value.at(j) > 500)
-                {
-                    min_bin_num = peaks_bin_num.at(j);
-                }
-            }
-
-            Int_t amp_cut_bin = 0; //Bin where the cut is determined
-            for (Int_t j = 0; j < valleys_bin_num.size(); j++)
-            {
-                if (valleys_bin_num.at(j) > min_bin_num && valleys_bin_value.at(j) < 100)
-                {
-                    amp_cut_bin = valleys_bin_num.at(j);
-                    break;
-                }
-            }
-            PTBC_cuts_det2->SetBinContent(i, projection_det2->GetBinCenter(amp_cut_bin));
-            continue;
-        }
-        
-
-        if (i > 40){ // For tof above 10^4 ns
-            Int_t low_bin = -1;
-            Int_t low_value = std::numeric_limits<int>::max();
-            // Int_t num_bins_projection = projection_det2->GetNbinsX();
-            for (Int_t j = 3; j < 21; j++) // scanning only till 5k ampluitude to get the min value
-            {
-                Int_t binContent = projection_det2->GetBinContent(j);
-
-                // Check for low point
-                if (binContent < low_value) {
-                    low_value = binContent;
-                    low_bin = j;
-                }
-            }
-            PTBC_cuts_det2->SetBinContent(i, projection_det2->GetBinCenter(low_bin));
-            continue;
-        }
-        
-    }
-}
-
 void StoreHist(){
     
     TFile *f = new TFile(Form("../rootFiles/cutoffAnalysis_PTBC_%s.root", target_name.c_str()),"recreate");
@@ -308,14 +208,6 @@ void cutoffAnalysis_PTBC(){
     PTBC_ringing_det5 = new TH2D("PTBC_ringing_det5",Form("ToF vs Amp - Ringing - PTBC Det 5 - %s", target_name_title.c_str()), 920, 800., 10000., 2000, 0., 20000.);
     PTBC_ringing_det6 = new TH2D("PTBC_ringing_det6",Form("ToF vs Amp - Ringing - PTBC Det 6 - %s", target_name_title.c_str()), 920, 800., 10000., 2000, 0., 20000.);
     PTBC_ringing_det7 = new TH2D("PTBC_ringing_det7",Form("ToF vs Amp - Ringing - PTBC Det 7 - %s", target_name_title.c_str()), 920, 800., 10000., 2000, 0., 20000.);
-
-    //Cut histograms
-    // PTBC_cuts_det2 = new TH1D("PTBC_cuts_det2", Form("ToF-Amp cut Hist - PTBC Det 2 - %s", target_name_title.c_str()), num_bins_tof_cuts, bin_edges_tof_cuts);
-    // PTBC_cuts_det3 = new TH1D("PTBC_cuts_det3", Form("ToF-Amp cut Hist - PTBC Det 3 - %s", target_name_title.c_str()), num_bins_tof_cuts, bin_edges_tof_cuts);
-    // PTBC_cuts_det4 = new TH1D("PTBC_cuts_det4", Form("ToF-Amp cut Hist - PTBC Det 4 - %s", target_name_title.c_str()), num_bins_tof_cuts, bin_edges_tof_cuts);
-    // PTBC_cuts_det5 = new TH1D("PTBC_cuts_det5", Form("ToF-Amp cut Hist - PTBC Det 5 - %s", target_name_title.c_str()), num_bins_tof_cuts, bin_edges_tof_cuts);
-    // PTBC_cuts_det6 = new TH1D("PTBC_cuts_det6", Form("ToF-Amp cut Hist - PTBC Det 6 - %s", target_name_title.c_str()), num_bins_tof_cuts, bin_edges_tof_cuts);
-    // PTBC_cuts_det7 = new TH1D("PTBC_cuts_det7", Form("ToF-Amp cut Hist - PTBC Det 7 - %s", target_name_title.c_str()), num_bins_tof_cuts, bin_edges_tof_cuts);
     
     
     // PTBC_tof_amp_det2_afterCuts = new TH2D("PTBC_tof_amp_det2_afterCuts",Form("ToF vs Amp - PTBC Det 2 - %s - After Cuts", target_name_title.c_str()),num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);;
@@ -324,12 +216,6 @@ void cutoffAnalysis_PTBC(){
     // PTBC_tof_amp_det5_afterCuts = new TH2D("PTBC_tof_amp_det5_afterCuts",Form("ToF vs Amp - PTBC Det 5 - %s - After Cuts", target_name_title.c_str()),num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);;
     // PTBC_tof_amp_det6_afterCuts = new TH2D("PTBC_tof_amp_det6_afterCuts",Form("ToF vs Amp - PTBC Det 6 - %s - After Cuts", target_name_title.c_str()),num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);;
     // PTBC_tof_amp_det7_afterCuts = new TH2D("PTBC_tof_amp_det7_afterCuts",Form("ToF vs Amp - PTBC Det 7 - %s - After Cuts", target_name_title.c_str()),num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);;
-
-    // PTBC_tof_amp_fOut_det1_cutoff = new TH2D("PTBC_tof_amp_fOut_det1_cutoff","ToF vs Amp Hist - PTBC Det 1 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    // PTBC_tof_amp_fOut_det2_cutoff = new TH2D("PTBC_tof_amp_fOut_det2_cutoff","ToF vs Amp Hist - PTBC Det 2 - Filter Out Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-
-    // PTBC_tof_amp_det1_cutoff = new TH2D("PTBC_tof_amp_det1_cutoff","ToF vs Amp Hist - PTBC Det 1 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
-    // PTBC_tof_amp_det2_cutoff = new TH2D("PTBC_tof_amp_det2_cutoff","ToF vs Amp Hist - PTBC Det 2 - Al (5cm) Filter Cutoff",num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
 
     PTBC_tof_amp_total_dedicated = new TH2D("PTBC_tof_amp_total_dedicated",Form("ToF vs Amp Hist - %s - Total Dedicated", target_name_title.c_str()),num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);
     PTBC_tof_amp_total_parasitic = new TH2D("PTBC_tof_amp_total_parasitic",Form("ToF vs Amp Hist - %s - Total Parasitic", target_name_title.c_str()),num_bins_tof,bin_edges_tof,num_bins_amp,bin_edges_amp);

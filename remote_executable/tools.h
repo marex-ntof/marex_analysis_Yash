@@ -130,3 +130,51 @@ Double_t FindFWHM(TH1D* projection_hist){
     }
     return (right_edge - left_edge);
 }
+
+TH1D* GetHist1D(const char* file_name, const char* hist_name) {
+    // Open the ROOT file
+    TFile *file = TFile::Open(file_name, "READ");
+    if (!file || file->IsZombie()) {
+        std::cerr << "Error: cannot open file " << file_name << std::endl;
+        return nullptr;
+    }
+
+    // Retrieve the histogram
+    TH1D *hist = nullptr;
+    file->GetObject(hist_name, hist);
+    if (!hist) {
+        std::cerr << "Error: cannot find histogram " << hist_name << " in file " << file_name << std::endl;
+        file->Close();
+        return nullptr;
+    }
+
+    return hist;
+
+    // TH1D *histClone = (TH1D*)hist->Clone();
+    // file->Close();
+    // return histClone;
+}
+
+TH2D* GetHist2D(const char* file_name, const char* hist_name) {
+    // Open the ROOT file
+    TFile *file = TFile::Open(file_name, "READ");
+    if (!file || file->IsZombie()) {
+        std::cerr << "Error: cannot open file " << file_name << std::endl;
+        return nullptr;
+    }
+
+    // Retrieve the histogram
+    TH2D *hist = nullptr;
+    file->GetObject(hist_name, hist);
+    if (!hist) {
+        std::cerr << "Error: cannot find histogram " << hist_name << " in file " << file_name << std::endl;
+        file->Close();
+        return nullptr;
+    }
+
+    return hist;
+
+    // TH2D *histClone = (TH2D*)hist->Clone();
+    // file->Close();
+    // return histClone;
+}

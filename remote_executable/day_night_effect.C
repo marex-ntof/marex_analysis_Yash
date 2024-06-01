@@ -74,7 +74,7 @@ void fill_dn_hists(std::vector<Int_t> run_list, TH1D* counts_hist_PTBC, TH1D* co
             Double_t t_pkup = BNum_tpkup_map[BunchNumber_PTBC];
             Double_t corrected_tof = tof_PTBC - t_pkup + delT_pkup_ptbc + t_gamma_PTBC;
 
-            if (!select_hit_PTBC(corrected_tof, amp_PTBC, PulseIntensity_PTBC, det_num_PTBC, run_list.at(i)))
+            if (!select_hit_PTBC(corrected_tof, amp_PTBC, det_num_PTBC))
             {
                 continue;
             }
@@ -216,10 +216,15 @@ void fill_run_list(){
 
 void day_night_effect(){
 
-    fillCutsPTBC();
     fillCutsFIMG();
     fillNumDensityMap();
     fill_run_list();
+
+    //Get PTBC Cuts
+    for (Int_t i = 0; i < 6; i++)
+    {
+        PTBC_tof_amp_cuts[i] = GetHist1D("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
+    }
 
     // Calculating day-night effect bins
     Int_t num_bins_dn = 96; // 96 bins for 15 min bins // 24 hours
