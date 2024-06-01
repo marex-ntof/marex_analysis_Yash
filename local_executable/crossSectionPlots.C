@@ -8,17 +8,59 @@
 
 #include "crossSectionPlots.h"
 
-void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFSmeared){
+TH1D* retriveHistograms(const char *fname, const char *hist_name){
+    
+    TFile* hist_file = TFile::Open(fname, "READ");
+    // if (!hist_file || hist_file->IsZombie()) {
+    //     cout << "Unable to open " << fname << " for reading..." <<endl;
+    //     return;
+    // }
+
+    TH1D* hist_new = (TH1D*)hist_file->Get(hist_name);
+
+    return hist_new;
+}
+
+void exclude_first_last_bins(TH1D* hist_to_change){
+    // excluding the first and the last bin
+    Int_t seaching_for_first_last_bin = 1; // 1 - first bin; 2 - last bin
+    Int_t num_bins_e = hist_to_change->GetNbinsX();
+    for (Int_t i = 1; i <= num_bins_e; i++)
+    {
+        Double_t new_bin_content = hist_to_change->GetBinContent(i);
+
+        // Searching for the first bin and setting it to zero
+        if (seaching_for_first_last_bin == 1)
+        {
+            if (new_bin_content != 0)
+            {
+                hist_to_change->SetBinContent(i, 0);
+                hist_to_change->SetBinError(i, 0);
+                seaching_for_first_last_bin = 2;
+                continue;
+            }
+        }
+        
+        // Searching for the last bin and setting it to zero
+        if (seaching_for_first_last_bin == 2)
+        {
+            if (new_bin_content == 0)
+            {
+                hist_to_change->SetBinContent(i-1, 0);
+                hist_to_change->SetBinError(i-1, 0);
+                seaching_for_first_last_bin = 3;
+                break;
+            }
+        }
+    }
+}
+
+void endf(Double_t n, Int_t num_bins_e, Double_t e_bin_low_edge, Double_t e_bin_up_edge){
     //Extracting ENDF Cross Section and transmission
 
     fillMaxLineCount();
 
     std::ifstream inputFile(Form("../evalData/%s", eval_file_name_map[filter_name].c_str())); // endf_file_name.c_str()
-
-    if (fillENDFSmeared == true){
-        TFile *rfFile = TFile::Open("../inputFiles/RF.root", "READ");
-        rf_hist = (TH2D*)rfFile->Get("histfluka");
-    }
 
     if (!inputFile.is_open()) {
         std::cerr << "Failed to open the file.\n";
@@ -48,159 +90,163 @@ void endf(Double_t n, Double_t energy_bin_edges[], bool fillENDF, bool fillENDFS
         if (iss >> val1 >> val2) {
             endf_e.push_back(val1);
             endf_xsec.push_back(val2);
-            endf_trans.push_back(std::exp(- n * val2));
         } else {
             std::cerr << "Invalid data format.\n";
         }
     }
 
-    //Filling the histograms
-    Double_t xsec_sum = 0;
-    Int_t sum_counter = 0;
-    Int_t bin_counter = 1;
-    
-    Double_t xsec_sum_rf = 0;
-    Int_t sum_counter_rf = 0;
-    Int_t bin_counter_rf = 1;
+    std::map<Int_t, std::vector<Double_t>> bin_content_map;
 
-    for (int i = 0; i < endf_e.size(); i++)
-    {
-        Double_t new_e = 0;
-        if (fillENDFSmeared == true)
-        {
-            //Convoluting endf with rf
-            Int_t e_bin_num = rf_hist->GetXaxis()->FindBin(endf_e[i]);
-            std::string projection_name = "profile_" + std::to_string(endf_e[i]);
-            TH1D* projection = (TH1D*)rf_hist->ProjectionY(
-                projection_name.c_str(),
-                e_bin_num, e_bin_num
-            );
-            // Double_t fwhm = FindFWHM(projection); //in cm
-            Double_t rf_length = projection->GetMean(1) * 0.01; //projection->GetBinCenter( projection->GetMaximumBin() ) * 0.01; //converting to m
-            Double_t e_tof = EnergyToTOF(endf_e[i], flight_path_length_PTBC);
-            new_e = TOFToEnergy(e_tof, flight_path_length_PTBC, rf_length); //in eV
-        }
-        
-        if (fillENDF == true && endf_e[i] > energy_bin_edges[bin_counter])
-        {
-            if (sum_counter == 0)
-            {
-                endf_xsec_hist->SetBinContent(bin_counter, 0);
-                endf_trans_hist->SetBinContent(bin_counter, 0);
-            } else {
-                endf_xsec_hist->SetBinContent(bin_counter, xsec_sum/sum_counter);
-                endf_trans_hist->SetBinContent(bin_counter, std::exp(- n * xsec_sum/sum_counter));
-            }
-            
-            xsec_sum = 0; //endf_xsec[i];
-            sum_counter = 0; //1;
-            bin_counter++;
-            i--;
-            continue;
-        }
-
-        if (fillENDFSmeared == true && new_e > energy_bin_edges[bin_counter_rf])
-        {
-            if (sum_counter_rf == 0)
-            {
-                endf_rf_xsec_hist->SetBinContent(bin_counter_rf, 0);
-                endf_rf_trans_hist->SetBinContent(bin_counter_rf, 0);
-            } else {
-                endf_rf_xsec_hist->SetBinContent(bin_counter_rf, xsec_sum_rf/sum_counter_rf);
-                endf_rf_trans_hist->SetBinContent(bin_counter_rf, std::exp(- n * xsec_sum_rf/sum_counter_rf));
-            }
-            
-            xsec_sum_rf = endf_xsec[i];
-            sum_counter_rf = 1;
-            bin_counter_rf++;
-            i--;
-            continue;
-        }
-
-        if (fillENDF == true && endf_e[i] < energy_bin_edges[bin_counter])
-        {
-            xsec_sum += endf_xsec[i];
-            sum_counter++;
-        }
-
-        if (fillENDFSmeared == true && new_e < energy_bin_edges[bin_counter])
-        {
-            xsec_sum_rf += endf_xsec[i];
-            sum_counter_rf++;
-        }
-    }
-}
-
-void jendl(Double_t n, Double_t energy_bin_edges[]){
-    //Extracting ENDF Cross Section and transmission
-
-    std::ifstream inputFile("../evalData/JENDL_Ar_tot_xsec.txt");
-
-    if (!inputFile.is_open()) {
-        std::cerr << "Failed to open the file.\n";
+    for (Int_t i = 1; i <= num_bins_e; ++i) {
+        bin_content_map[i] = std::vector<Double_t>();
     }
 
-    //Extracting the data from the text file
-    Double_t val1, val2; //val1 -> Energy (eV); val2 -> Cross Section (barns)
-    std::string line;
-    Double_t line_count = 0;
+    for (Int_t i = 0; i < endf_e.size(); ++i) {
+        if (endf_e[i] < e_bin_low_edge) continue;
+        if (endf_e[i] >= e_bin_up_edge) break;
 
-    while (std::getline(inputFile, line)) {
+        Int_t bin_num = endf_xsec_hist->GetXaxis()->FindBin(endf_e[i]);
+        if (bin_num > num_bins_e) break;
 
-        line_count++;
+        bin_content_map[bin_num].push_back(endf_xsec[i]);
+    }
 
-        if (line_count == 1)
-        {
-            continue;
+    std::vector<Double_t> bin_contents(num_bins_e, 0.0);
+
+    for (const auto& bin : bin_content_map) {
+        Int_t bin_n = bin.first;
+        const std::vector<Double_t>& xsecs = bin.second;
+        if (xsecs.empty()) {
+            endf_xsec_hist->SetBinContent(bin_n, 0.0);
+            bin_contents[bin_n - 1] = 0.0;
+        } else {
+            Double_t bin_content = std::accumulate(xsecs.begin(), xsecs.end(), 0.0) / xsecs.size();
+            endf_xsec_hist->SetBinContent(bin_n, bin_content);
+            bin_contents[bin_n - 1] = bin_content;
+        }
+    }
+
+    // Find indices of zero bins
+    std::vector<Int_t> zero_indices;
+    for (Int_t i = 0; i < num_bins_e; ++i) {
+        if (bin_contents[i] == 0.0) {
+            zero_indices.push_back(i);
+        }
+    }
+
+    for (Int_t idx : zero_indices) {
+        Int_t left_idx = idx - 1;
+        Int_t right_idx = idx + 1;
+
+        // Find the nearest non-zero bins to the left
+        while (left_idx >= 0 && bin_contents[left_idx] == 0.0) {
+            --left_idx;
         }
 
-        if (line_count == 51631)
+        // Find the nearest non-zero bins to the right
+        while (right_idx < num_bins_e && bin_contents[right_idx] == 0.0) {
+            ++right_idx;
+        }
+
+        if (right_idx == num_bins_e)
         {
             break;
         }
 
-        std::istringstream iss(line);
+        if (left_idx >= 0 && right_idx < num_bins_e) {
+            Double_t left_value = bin_contents[left_idx];
+            Double_t left_e_val = endf_xsec_hist->GetBinCenter(left_idx + 1);
+            Double_t right_value = bin_contents[right_idx];
+            Double_t right_e_val = endf_xsec_hist->GetBinCenter(right_idx + 1);
 
-        if (iss >> val1 >> val2) {
-            jendl_e.push_back(val1);
-            jendl_xsec.push_back(val2);
-            jendl_trans.push_back(std::exp(- n * val2));
-        } else {
-            std::cerr << "Invalid data format.\n";
+            // Linear Interpolation
+            Double_t slope = (right_value - left_value) / (right_e_val - left_e_val);
+            Int_t num_bins_to_update = right_idx - left_idx - 1;
+            for (Int_t j = 1; j <= num_bins_to_update; ++j) {
+                Double_t bin_center = endf_xsec_hist->GetBinCenter(left_idx + j + 1);
+                bin_contents[left_idx + j] = slope * (bin_center - left_e_val) + left_value;
+            }
         }
     }
 
-    //Filling the histograms
-    Double_t xsec_sum = 0;
-    Int_t sum_counter = 0;
-    Int_t bin_counter = 1;
-
-    for (int i = 0; i < jendl_e.size(); i++)
-    {
-        
-        if (jendl_e[i] > energy_bin_edges[bin_counter])
+    // Update histogram with interpolated values
+    for (int i = 1; i <= num_bins_e; ++i) {
+        endf_xsec_hist->SetBinContent(i, bin_contents[i - 1]);
+        if (bin_contents[i - 1] == 0)
         {
-            if (sum_counter == 0)
-            {
-                jendl_xsec_hist->SetBinContent(bin_counter, 0);
-                jendl_trans_hist->SetBinContent(bin_counter, 0);
-            } else {
-                jendl_xsec_hist->SetBinContent(bin_counter, xsec_sum/sum_counter);
-                jendl_trans_hist->SetBinContent(bin_counter, std::exp(- n * xsec_sum/sum_counter));
-            }
-            
-            xsec_sum = jendl_xsec[i];
-            sum_counter = 1;
-            bin_counter++;
-            i--;
+            endf_trans_hist->SetBinContent(i, 0);
             continue;
         }
+        Double_t trans_val = std::exp(- n * bin_contents[i - 1]);
+        endf_trans_hist->SetBinContent(i, trans_val);
+    }
+}
 
-        if (jendl_e[i] < energy_bin_edges[bin_counter])
-        {
-            xsec_sum += jendl_xsec[i];
-            sum_counter++;
-        }
+void endf_argon(Double_t n, Int_t bpd){
+    //Extracting ENDF Cross Section and transmission
+
+    cout << "Opening ENDF Argon hist File ../inputFiles/natAr_xsec_hists.root" << endl;
+    TFile *hist_file = TFile::Open("../inputFiles/natAr_xsec_hists.root", "READ");
+
+    if (bpd == 20)
+    {
+        endf_xsec_hist = (TH1D*)hist_file->Get("natAr_xsec_hist_20bpd_endf");
+        endf_trans_hist = (TH1D*)endf_xsec_hist->Clone("natAr_trans_hist_20bpd_endf");
+    }
+
+    if (bpd == 50)
+    {
+        endf_xsec_hist = (TH1D*)hist_file->Get("natAr_xsec_hist_50bpd_endf");
+        endf_trans_hist = (TH1D*)endf_xsec_hist->Clone("natAr_trans_hist_50bpd_endf");
+    }
+
+    if (bpd == 100)
+    {
+        endf_xsec_hist = (TH1D*)hist_file->Get("natAr_xsec_hist_100bpd_endf");
+        endf_trans_hist = (TH1D*)endf_xsec_hist->Clone("natAr_trans_hist_100bpd_endf");
+    }
+    
+    Int_t num_bins_hist = endf_trans_hist->GetNbinsX();
+
+    for (Int_t i = 1; i < num_bins_hist+1; i++)
+    {
+        Double_t xsec_val = endf_trans_hist->GetBinContent(i);
+        Double_t trans_val = std::exp(- n * xsec_val);
+        endf_trans_hist->SetBinContent(i, trans_val);
+    }
+}
+
+void jendl_argon(Double_t n, Int_t bpd){
+    //Extracting JENDL Cross Section and transmission
+
+    cout << "Opening JENDL Argon hist File ../inputFiles/natAr_xsec_hists.root" << endl;
+    TFile *hist_file = TFile::Open("../inputFiles/natAr_xsec_hists.root", "READ");
+
+    if (bpd == 20)
+    {
+        jendl_xsec_hist = (TH1D*)hist_file->Get("natAr_xsec_hist_20bpd_jendl");
+        jendl_trans_hist = (TH1D*)jendl_xsec_hist->Clone("natAr_trans_hist_20bpd_jendl");
+    }
+
+    if (bpd == 50)
+    {
+        jendl_xsec_hist = (TH1D*)hist_file->Get("natAr_xsec_hist_50bpd_jendl");
+        jendl_trans_hist = (TH1D*)jendl_xsec_hist->Clone("natAr_trans_hist_50bpd_jendl");
+    }
+
+    if (bpd == 100)
+    {
+        jendl_xsec_hist = (TH1D*)hist_file->Get("natAr_xsec_hist_100bpd_jendl");
+        jendl_trans_hist = (TH1D*)jendl_xsec_hist->Clone("natAr_trans_hist_100bpd_jendl");
+    }
+
+    Int_t num_bins_hist = jendl_trans_hist->GetNbinsX();
+
+    for (Int_t i = 1; i < num_bins_hist+1; i++)
+    {
+        Double_t xsec_val = jendl_trans_hist->GetBinContent(i);
+        Double_t trans_val = std::exp(- n * xsec_val);
+        jendl_trans_hist->SetBinContent(i, trans_val);
     }
 }
 
@@ -271,21 +317,6 @@ TH1D* retriveHistogramsChangeBPD(const char *fname, const char *hist_name, Int_t
         hist_new->SetBinContent(i+1, bin_content[i]);
         hist_new->SetBinError(i+1, bin_error[i]);
     }
-
-    return hist_new;
-}
-
-TH1D* retriveHistograms(const char *fname, const char *hist_name){
-    
-    TFile* hist_file = TFile::Open(fname, "READ");
-    // if (!hist_file || hist_file->IsZombie()) {
-    //     cout << "Unable to open " << fname << " for reading..." <<endl;
-    //     return;
-    // }
-
-    TH1D* hist_new = (TH1D*)hist_file->Get(hist_name);
-
-    hist_file->Close();
 
     return hist_new;
 }
@@ -447,6 +478,11 @@ void calc_xsec(const char *fname, Int_t num_bins_e, Double_t bin_edges_e[]){
         }
     }
 
+    exclude_first_last_bins(transmission_hist_e_PTBC);
+    exclude_first_last_bins(transmission_hist_e_FIMG);
+    exclude_first_last_bins(cross_section_hist_e_PTBC);
+    exclude_first_last_bins(cross_section_hist_e_FIMG);
+
     cout << Form("Total Protons %s = ", filter_name.c_str()) << norm_factors[0] << endl;
     cout << "Total Protons Target Out = " << norm_factors[1] << endl;
 }
@@ -455,18 +491,6 @@ void crossSectionPlots(){
 
     fillNumDensityMap();
     fillEValFileNameMap();
-
-    // retriveHistograms(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str())); //root_file_name.c_str()
-    // transmission_hist_e_PTBC = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"transmission_hist_e_PTBC", 1000, bins_per_decade);
-    // transmission_hist_e_FIMG = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"transmission_hist_e_FIMG", 1000, bins_per_decade);
-    // cross_section_hist_e_PTBC = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"cross_section_hist_e_PTBC", 1000, bins_per_decade);
-    // cross_section_hist_e_FIMG = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()),"cross_section_hist_e_FIMG", 1000, bins_per_decade);
-
-    // transmission_hist_e_PTBC_nTOF_Cuts = retriveHistogramsChangeBPD(Form("../rootFiles/crossSectionAna_%s_nTOF_cuts.root", filter_name.c_str()),"transmission_hist_e_PTBC", 1000, bins_per_decade);
-
-    bool fillENDF = true;
-    bool fillENDFSmeared = false;
-    bool fillJENDL = true;
 
     // //Getting energy bin edges
     // Int_t num_bins_e = transmission_hist_e_PTBC->GetNbinsX();
@@ -486,13 +510,13 @@ void crossSectionPlots(){
     Double_t tof_max = 1e8; //ns
     Double_t e_min = TOFToEnergy(tof_max * 1e-9, flight_path_length_FIMG); //converting into seconds
     Double_t e_max = TOFToEnergy(tof_min * 1e-9, flight_path_length_FIMG); //converting into seconds
-    int min_power = FindDecadePower(e_min);
-    int max_power = FindDecadePower(e_max);
-    int num_decades_e = max_power - min_power;
-    int num_bins_e = bins_per_decade * num_decades_e;
+    Int_t min_power = FindDecadePower(e_min);
+    Int_t max_power = FindDecadePower(e_max);
+    Int_t num_decades_e = max_power - min_power;
+    Int_t num_bins_e = bins_per_decade * num_decades_e;
     Double_t bin_edges_e[num_bins_e+1];
     Double_t step_e = ((Double_t) 1.0/(Double_t) bins_per_decade);
-    for(int i = 0; i < num_bins_e+1; i++)
+    for(Int_t i = 0; i < num_bins_e+1; i++)
     {
         Double_t base = 10.;
         Double_t exponent = (step_e * (Double_t) i) + (Double_t) min_power;
@@ -504,28 +528,37 @@ void crossSectionPlots(){
     calc_xsec(Form("../rootFiles/crossSectionAna_%s.root", filter_name.c_str()), num_bins_e, bin_edges_e);
 
     Double_t num_density = 0.;
-    if (fillENDF || fillENDFSmeared || fillJENDL)
+    if (fillENDF || fillJENDL)
     {
         num_density = num_density_map[filter_name];
     }
 
-    //ENDF Hists
-    if (fillENDF){
-        endf_trans_hist = new TH1D("endf_trans_hist","ENDF Transmission Hist",num_bins_e,bin_edges_e);
-        endf_xsec_hist = new TH1D("endf_xsec_hist","ENDF Cross Section Hist",num_bins_e,bin_edges_e);
-        endf(num_density, bin_edges_e, fillENDF, fillENDFSmeared);
-    }
+    if (!filter_name.compare("ar_bottle_full"))
+    {
 
-    if (fillENDFSmeared){
-        endf_rf_trans_hist = new TH1D("endf_rf_trans_hist","ENDF Transmission Hist - RF Convoluted",num_bins_e,bin_edges_e);
-        endf_rf_xsec_hist = new TH1D("endf_rf_xsec_hist","ENDF Cross Section Hist - RF Convoluted",num_bins_e,bin_edges_e);
-    }
+        //ENDF Hists
+        if (fillENDF){
+            // endf_trans_hist = new TH1D("endf_trans_hist","ENDF Transmission Hist",num_bins_e,bin_edges_e);
+            // endf_xsec_hist = new TH1D("endf_xsec_hist","ENDF Cross Section Hist",num_bins_e,bin_edges_e);
+            endf_argon(num_density, bins_per_decade);
+        }
 
-    if(fillJENDL){
-        jendl_trans_hist = new TH1D("jendl_trans_hist","JENDL Transmission Hist",num_bins_e,bin_edges_e);
-        jendl_xsec_hist = new TH1D("jendl_xsec_hist","JENDL Cross Section Hist",num_bins_e,bin_edges_e);  
-        jendl(num_density, bin_edges_e);
-    }    
+        if(fillJENDL){
+            // jendl_trans_hist = new TH1D("jendl_trans_hist","JENDL Transmission Hist",num_bins_e,bin_edges_e);
+            // jendl_xsec_hist = new TH1D("jendl_xsec_hist","JENDL Cross Section Hist",num_bins_e,bin_edges_e);  
+            jendl_argon(num_density, bins_per_decade);
+        }
+        
+    } else {
+
+        //ENDF Hists
+        if (fillENDF){
+            endf_trans_hist = new TH1D("endf_trans_hist","ENDF Transmission Hist",num_bins_e,bin_edges_e);
+            endf_xsec_hist = new TH1D("endf_xsec_hist","ENDF Cross Section Hist",num_bins_e,bin_edges_e);
+            endf(num_density, num_bins_e, bin_edges_e[0], bin_edges_e[num_bins_e]);
+        }  
+
+    }
     
     //Plotting
     SetMArEXStyle();
@@ -564,40 +597,12 @@ void crossSectionPlots(){
     // transmission_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-2,1e3);
     transmission_hist_e_FIMG->Draw("SAME");
 
-    // l[i]->AddEntry(transmission_hist_e_PTBC_nTOF_Cuts,"PTBC - nTOF Cuts","l");
-    // transmission_hist_e_PTBC_nTOF_Cuts->SetLineColor(6);
-    // transmission_hist_e_PTBC_nTOF_Cuts->SetLineWidth(1);
-    // transmission_hist_e_PTBC_nTOF_Cuts->Draw("SAME");
-
-    // l[i]->AddEntry(trans_hist_fOut,"No Al5","l");
-    // trans_hist_fOut->SetLineColor(2);
-    // trans_hist_fOut->Draw("SAME");
-
-    // l[i]->AddEntry(trans_hist_fIn,"With Al5","l");
-    // trans_hist_fIn->SetLineColor(1);
-    // trans_hist_fIn->Draw("SAME");
-
-    // l[i]->AddEntry(trans_hist_fOut_endf,"No Al5 with ENDF","l");
-    // trans_hist_fOut_endf->SetLineColor(6);
-    // trans_hist_fOut_endf->Draw("SAME");
-
-    // l[i]->AddEntry(trans_hist_fIn_endf,"With Al5 and ENDF","l");
-    // trans_hist_fIn_endf->SetLineColor(7);
-    // trans_hist_fIn_endf->Draw("SAME");
-
     if (fillENDF){
         l[i]->AddEntry(endf_trans_hist,"ENDF","l");
         endf_trans_hist->SetLineColor(2);
         endf_trans_hist->SetLineWidth(2);
         // endf_trans_hist->GetXaxis()->SetRange(1e-2,2e7);
         endf_trans_hist->Draw("SAME");
-    }
-
-    if (fillENDFSmeared){
-        l[i]->AddEntry(endf_rf_trans_hist,"ENDF smeared","l");
-        endf_rf_trans_hist->SetLineColor(7);
-        endf_rf_trans_hist->SetLineWidth(1);
-        endf_rf_trans_hist->Draw("SAME");
     }
 
     if (fillJENDL)
@@ -623,13 +628,6 @@ void crossSectionPlots(){
     //     endf_trans_graph->SetLineWidth(1);
     //     // endf_trans_graph->GetXaxis()->SetRange(1e-2,2e7);
     //     endf_trans_graph->Draw("SAME");
-    // }
-
-    // if (fillENDFSmeared){
-    //     l[i]->AddEntry(endf_rf_trans_hist,"ENDF smeared","l");
-    //     endf_rf_trans_hist->SetLineColor(7);
-    //     endf_rf_trans_hist->SetLineWidth(1);
-    //     endf_rf_trans_hist->Draw("SAME");
     // }
 
     // if (fillJENDL)
@@ -683,13 +681,6 @@ void crossSectionPlots(){
         // endf_xsec_hist->GetXaxis()->SetRange(1e-2,2e7);
         endf_xsec_hist->Draw("SAME");
     }
-    
-    if (fillENDFSmeared){
-        l[i]->AddEntry(endf_rf_xsec_hist,"ENDF smeared","l");
-        endf_rf_xsec_hist->SetLineColor(7);
-        endf_rf_xsec_hist->SetLineWidth(1);
-        endf_rf_xsec_hist->Draw("SAME");
-    }
 
     if (fillJENDL)
     {
@@ -703,48 +694,4 @@ void crossSectionPlots(){
     l[i]->SetMargin(0.4);
     l[i]->Draw();
     // c[i]->Print(Form("../plots/h_xsec_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
-
-    // i++;
-
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-
-    // l[i] = new TLegend(0.72,0.8,0.90,0.9);
-    // l[i]->AddEntry(tof_hist_filter_in,"Filter In","l");
-    // l[i]->AddEntry(tof_hist_filter_out,"Filter Out","l");
-
-    // tof_hist_filter_in->GetXaxis()->SetTitle("Time of Flight (in ns)");
-    // tof_hist_filter_in->GetYaxis()->SetTitle("Counts (per proton)");
-    // tof_hist_filter_in->SetTitle("Time of Flight Histograms");
-    // tof_hist_filter_in->Draw(); //"HISTE"
-    // gPad->SetGrid();
-    // gPad->SetLogx();
-    // gPad->SetLogy();
-    // tof_hist_filter_out->SetLineColor(2);
-    // tof_hist_filter_out->Draw("HISTESAME");
-    // l[i]->Draw();
-
-    // c[i]->Print("../plots/tof_hist.png");
-
-    // i++;
-
-    // c[i] = new TCanvas(Form("c%d", i)," ");
-    // c[i]->cd();
-
-    // l[i] = new TLegend(0.72,0.8,0.90,0.9);
-    // l[i]->AddEntry(energy_hist_filter_in,"Filter In","l");
-    // l[i]->AddEntry(energy_hist_filter_out,"Filter Out","l");
-
-    // energy_hist_filter_in->GetXaxis()->SetTitle("Energy (in eV)");
-    // energy_hist_filter_in->GetYaxis()->SetTitle("Counts (per proton)");
-    // energy_hist_filter_in->SetTitle("Energy Histograms");
-    // energy_hist_filter_in->Draw("HISTE");
-    // gPad->SetGrid();
-    // gPad->SetLogx();
-    // gPad->SetLogy();
-    // energy_hist_filter_out->SetLineColor(2);
-    // energy_hist_filter_out->Draw("HISTESAME");
-    // l[i]->Draw();
-
-    // c[i]->Print("../plots/energy_hist.png");
 }

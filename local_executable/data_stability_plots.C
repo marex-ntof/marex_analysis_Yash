@@ -114,9 +114,18 @@ void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* n
     p[plot_index][1]->SetBorderMode(0);
     p[plot_index][1]->Draw();
     p[plot_index][1]->cd();
-    residual_plot[plot_index] = (TH1D*)(norm_count_plot_1->Clone(Form("residual_plot_%d", plot_index)));
+
+    //Computing the residual plots
+    // TH1D* subtraction_plot = (TH1D*)(norm_count_plot_1->Clone(Form("residual_plot_%d", plot_index)));
+    // subtraction_plot->Add(norm_count_plot_2, -1);
+    TH1D* addition_plot = (TH1D*)(norm_count_plot_1->Clone(Form("residual_plot_%d", plot_index)));
+    addition_plot->Add(norm_count_plot_2, 1);
+    addition_plot->Scale(0.5);
+    residual_plot[plot_index] = (TH1D*)(norm_count_plot_1->Clone(Form("residual_plot_%d", plot_index))); //subtraction plot
     residual_plot[plot_index]->Add(norm_count_plot_2, -1);
+    residual_plot[plot_index]->Divide(addition_plot);
     residual_plot[plot_index]->SetTitle("");
+
     // X Axis
     residual_plot[plot_index]->GetXaxis()->SetTitle("Energy (in eV)");
     residual_plot[plot_index]->GetXaxis()->SetTitleSize(0.1);
@@ -124,7 +133,7 @@ void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* n
     residual_plot[plot_index]->GetXaxis()->SetTitleOffset(0.85); //decrease to move up
     residual_plot[plot_index]->GetXaxis()->SetLabelSize(0.07);
     // Y Axis
-    residual_plot[plot_index]->GetYaxis()->SetTitle("Residuals");
+    residual_plot[plot_index]->GetYaxis()->SetTitle("Fractional Residuals");
     residual_plot[plot_index]->GetYaxis()->SetTitleSize(0.1);
     residual_plot[plot_index]->GetYaxis()->SetTitleOffset(0.38);
     residual_plot[plot_index]->GetYaxis()->SetLabelSize(0.07);
@@ -132,7 +141,7 @@ void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* n
     residual_plot[plot_index]->Draw();
     gPad->SetGrid();
     gPad->SetLogx();
-    // c[plot_index]->Print( Form("../plots/stability_plots/%s.png", output_file_name) );
+    c[plot_index]->Print( Form("../plots/stability_plots/%s.png", output_file_name) );
 
     plot_index++;
     return;
@@ -197,6 +206,35 @@ TH1D* retriveHistogramsChangeBPD(const char *file_name, const char *hist_name, I
     }
     histCounter++;
 
+    // excluding the first and the last bin
+    Int_t seaching_for_first_last_bin = 1; // 1 - first bin; 2 - last bin
+    for (Int_t i = 1; i <= num_bins_new; i++)
+    {
+        Double_t new_bin_content = hist_new->GetBinContent(i);
+
+        // Searching for the first bin and setting it to zero
+        if (seaching_for_first_last_bin == 1)
+        {
+            if (new_bin_content != 0)
+            {
+                hist_new->SetBinContent(i, 0);
+                seaching_for_first_last_bin = 2;
+                continue;
+            }
+        }
+        
+        // Searching for the last bin and setting it to zero
+        if (seaching_for_first_last_bin == 2)
+        {
+            if (new_bin_content == 0)
+            {
+                hist_new->SetBinContent(i-1, 0);
+                seaching_for_first_last_bin = 3;
+                break;
+            }
+        }
+    }
+    
     return hist_new;
 }
 
