@@ -29,10 +29,10 @@
 #include "MArEXStyle.C"
 
 const std::string target_name("none"); ////bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full, bi1sep17
-//no targets - none, none_ts, ar_bottle
+//no targets - none, none_ts, ar_bottle_empty
 const std::string target_name_title("No Target");
 //Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
-//Argon Tank, Bi (1 cm) - Sep 17, No Target, SCUBA Tank
+//Argon Tank, Bi (1 cm) - Sep 17, No Target, SCUBA Tank, Argon Tank Empty
 
 Double_t min_tof = 800.0; //ns
 Double_t max_tof = 1e8; //ns
@@ -211,37 +211,30 @@ void determine_gamma_flash_cuts(Int_t det_num, TH1D* cut_hist){
                 cut_hist->SetBinContent(i, det_alphas_cuts[det_num-2]);
             }
 
-            // For bins 5 and 6, we are choosing the cut that is of higher value and setting it equal for both bins
-            if (i == 6)
-            {
+            // For bins 5, 6, and 7, we are choosing the cut that is of higher value and setting it equal to all three bins (and bin 8 is also included for detector 6)
+            if (i == 8)
+            {   
+                Double_t bin_7_val = cut_hist->GetBinContent(7);
                 Double_t bin_6_val = cut_hist->GetBinContent(6);
                 Double_t bin_5_val = cut_hist->GetBinContent(5);
 
-                if (bin_5_val > bin_6_val)
+                Double_t max_cut = 0.;
+
+                if (det_num == 6)
                 {
-                    cut_hist->SetBinContent(6, bin_5_val);
+                    Double_t bin_8_val = cut_hist->GetBinContent(8);
+                    max_cut = std::max({bin_8_val, bin_7_val, bin_6_val, bin_5_val});
+                    cut_hist->SetBinContent(5, max_cut);
+                    cut_hist->SetBinContent(6, max_cut);
+                    cut_hist->SetBinContent(7, max_cut);
+                    cut_hist->SetBinContent(8, max_cut);
+                } else {
+                    max_cut = std::max({bin_7_val, bin_6_val, bin_5_val});
+                    cut_hist->SetBinContent(5, max_cut);
+                    cut_hist->SetBinContent(6, max_cut);
+                    cut_hist->SetBinContent(7, max_cut);
                 }
-
-                if (bin_6_val > bin_5_val)
-                {
-                    cut_hist->SetBinContent(5, bin_6_val);
-                }
-            }
-
-            // if (i == 7)
-            // {
-            //     Double_t bin_7_val = cut_hist->GetBinContent(7);
-            //     Double_t bin_6_val = cut_hist->GetBinContent(6);
-            //     Double_t bin_5_val = cut_hist->GetBinContent(5);
-
-            //     if (bin_7_val > bin_6_val) {
-            //         cut_hist->SetBinContent(6, bin_7_val);
-            //     }
-
-            //     if (bin_7_val > bin_5_val) {
-            //         cut_hist->SetBinContent(5, bin_7_val);
-            //     }
-            // }      
+            }   
 
             continue;
         }
@@ -405,12 +398,12 @@ void cutoffFitter_PTBC() {
         bin_edges_tof_cuts[i] = (Double_t) std::pow(base, exponent);
     }
     
-    PTBC_tof_amp_hists[0] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det2");
-    PTBC_tof_amp_hists[1] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det3");
-    PTBC_tof_amp_hists[2] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det4");
-    PTBC_tof_amp_hists[3] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det5");
-    PTBC_tof_amp_hists[4] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det6");
-    PTBC_tof_amp_hists[5] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det7");
+    PTBC_tof_amp_hists[0] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_empty.root", "PTBC_tof_amp_det2");
+    PTBC_tof_amp_hists[1] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_empty.root", "PTBC_tof_amp_det3");
+    PTBC_tof_amp_hists[2] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_empty.root", "PTBC_tof_amp_det4");
+    PTBC_tof_amp_hists[3] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_empty.root", "PTBC_tof_amp_det5");
+    PTBC_tof_amp_hists[4] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_empty.root", "PTBC_tof_amp_det6");
+    PTBC_tof_amp_hists[5] = retriveHistograms("../rootFiles/cutoffAnalysis_PTBC_ar_bottle_empty.root", "PTBC_tof_amp_det7");
 
     for (Int_t i = 0; i < 6; i++)
     {
