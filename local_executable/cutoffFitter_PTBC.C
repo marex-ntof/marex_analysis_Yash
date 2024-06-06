@@ -34,6 +34,10 @@ const std::string target_name_title("No Target");
 //Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
 //Argon Tank, Bi (1 cm) - Sep 17, No Target, SCUBA Tank
 
+Double_t min_tof = 800.0; //ns
+Double_t max_tof = 1e8; //ns
+Double_t max_amp = 50000.0;
+
 Int_t bins_per_decade_cuts = 5;
 
 TH2D* PTBC_tof_amp_hists[6];
@@ -41,6 +45,7 @@ TH1D* projection_hists[6];
 TF1* alphas_fits_total[6];
 TH1D* det_cut_hists[6];
 Double_t det_alphas_cuts[6];
+TCutG* det_cuts[6];
 
 TCanvas *alphas_canvas[6];
 TLegend *alphas_legend[6];
@@ -130,6 +135,32 @@ Double_t fitFunction(Double_t *x, Double_t *par){
     return exponential(x, par) + gaussian(x, &par[2]);
 }
 
+// void convert_hist_to_TCutG(Int_t det_num, TH1D* cut_hist){
+
+//     const Int_t nBins = cut_hist->GetNbinsX();
+//     const Int_t nPoints = nBins * 2; // Two points per bin (for the top and bottom of the bin)
+    
+//     Double_t *x = new Double_t[nPoints];
+//     Double_t *y = new Double_t[nPoints];
+    
+//     Int_t pointIndex = 0;
+    
+//     for (Int_t i = 1; i <= nBins; ++i) {
+//         Double_t binCenter = cut_hist->GetBinCenter(i);
+//         Double_t binContent = cut_hist->GetBinContent(i);
+        
+//         if (binContent > 0) {
+//             x[pointIndex] = binCenter;
+//             y[pointIndex] = 0; // Bottom of the bin
+//             ++pointIndex;
+
+//             x[pointIndex] = binCenter;
+//             y[pointIndex] = binContent; // Top of the bin
+//             ++pointIndex;
+//         }
+//     }
+// }
+
 // cuts for tof < 10^4
 void determine_gamma_flash_cuts(Int_t det_num, TH1D* cut_hist){
 
@@ -161,6 +192,7 @@ void determine_gamma_flash_cuts(Int_t det_num, TH1D* cut_hist){
             
             Double_t cut_val = 0;
 
+            //For detectors 4 and 7, the bins closer to the gamma flash are cut harder (6 sigma)
             if (det_num == 4 || det_num == 7)
             {
                 if (i <= 6){
@@ -179,34 +211,37 @@ void determine_gamma_flash_cuts(Int_t det_num, TH1D* cut_hist){
                 cut_hist->SetBinContent(i, det_alphas_cuts[det_num-2]);
             }
 
-            if (det_num == 4 || det_num == 7){
-                
-                if (i == 6)
-                {
-                    Double_t bin_6_val = cut_hist->GetBinContent(6);
-                    Double_t bin_5_val = cut_hist->GetBinContent(5);
-
-                    if (bin_5_val > bin_6_val)
-                    {
-                        cut_hist->SetBinContent(6, bin_5_val);
-                    }
-                }
-            }
-
-            if (i == 7)
+            // For bins 5 and 6, we are choosing the cut that is of higher value and setting it equal for both bins
+            if (i == 6)
             {
-                Double_t bin_7_val = cut_hist->GetBinContent(7);
                 Double_t bin_6_val = cut_hist->GetBinContent(6);
                 Double_t bin_5_val = cut_hist->GetBinContent(5);
 
-                if (bin_7_val > bin_6_val) {
-                    cut_hist->SetBinContent(6, bin_7_val);
+                if (bin_5_val > bin_6_val)
+                {
+                    cut_hist->SetBinContent(6, bin_5_val);
                 }
 
-                if (bin_7_val > bin_5_val) {
-                    cut_hist->SetBinContent(5, bin_7_val);
+                if (bin_6_val > bin_5_val)
+                {
+                    cut_hist->SetBinContent(5, bin_6_val);
                 }
-            }      
+            }
+
+            // if (i == 7)
+            // {
+            //     Double_t bin_7_val = cut_hist->GetBinContent(7);
+            //     Double_t bin_6_val = cut_hist->GetBinContent(6);
+            //     Double_t bin_5_val = cut_hist->GetBinContent(5);
+
+            //     if (bin_7_val > bin_6_val) {
+            //         cut_hist->SetBinContent(6, bin_7_val);
+            //     }
+
+            //     if (bin_7_val > bin_5_val) {
+            //         cut_hist->SetBinContent(5, bin_7_val);
+            //     }
+            // }      
 
             continue;
         }
@@ -386,7 +421,7 @@ void cutoffFitter_PTBC() {
 
         det_cut_hists[i] = new TH1D(Form("PTBC_cuts_det%i", i+2), Form("ToF-Amp cut Hist - PTBC Det %i - %s", i+2, target_name_title.c_str()), num_bins_tof_cuts, bin_edges_tof_cuts);
         determine_gamma_flash_cuts(i+2, det_cut_hists[i]);
-        plot_det_cuts(i+2, PTBC_tof_amp_hists[i], det_cut_hists[i]);
+        // plot_det_cuts(i+2, PTBC_tof_amp_hists[i], det_cut_hists[i]);
     }
 
     StoreHist();
