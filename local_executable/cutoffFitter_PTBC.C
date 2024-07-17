@@ -11,6 +11,7 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <iostream>
+#include <vector>
 
 #include "TFile.h"
 #include "TCanvas.h"
@@ -38,7 +39,7 @@ Double_t min_tof = 800.0; //ns
 Double_t max_tof = 1e8; //ns
 Double_t max_amp = 50000.0;
 
-Int_t bins_per_decade_cuts = 5;
+Int_t bins_per_decade_cuts = 5; //For determining the cuts
 
 TH2D* PTBC_tof_amp_hists[6];
 TH1D* projection_hists[6];
@@ -49,6 +50,7 @@ TCutG* det_cuts[6];
 
 TH2D* tof_amp_hists_for_plots[6];
 TH1D* cut_hists_for_plots[6];
+TCutG* det_cuts_for_plots[6];
 
 TCanvas *alphas_canvas[6];
 TLegend *alphas_legend[6];
@@ -60,6 +62,9 @@ Int_t cuts_plot_index = 0;
 Double_t expo_fit_ranges[6][2];
 Double_t gaus_fit_ranges[6][2];
 Double_t total_fit_ranges[6][2];
+
+TGraph* det_cuts_skewness[6];
+TGraph* det_cuts_kurtosis[6];
 
 void fill_fit_ranges(){
 
@@ -133,6 +138,14 @@ TH2D* retrive_TH2D_Histograms(const char *file_name, const char *hist_name){
     return hist_new;
 }
 
+TCutG* retrive_TCutG(const char *file_name, const char *cut_name){
+    
+    TFile* root_file = TFile::Open(file_name, "READ");
+    TCutG* tcutg_new = (TCutG*)root_file->Get(cut_name);
+
+    return tcutg_new;
+}
+
 Double_t exponential(Double_t *x, Double_t *par) {
     return TMath::Exp(par[0] + par[1] * x[0]);
 }
@@ -146,31 +159,60 @@ Double_t fitFunction(Double_t *x, Double_t *par){
     return exponential(x, par) + gaussian(x, &par[2]);
 }
 
-// void convert_hist_to_TCutG(Int_t det_num, TH1D* cut_hist){
+void convert_hist_to_TCutG(Int_t det_num, TH1D* cut_hist){
 
-//     const Int_t nBins = cut_hist->GetNbinsX();
-//     const Int_t nPoints = nBins * 2; // Two points per bin (for the top and bottom of the bin)
-    
-//     Double_t *x = new Double_t[nPoints];
-//     Double_t *y = new Double_t[nPoints];
-    
-//     Int_t pointIndex = 0;
-    
-//     for (Int_t i = 1; i <= nBins; ++i) {
-//         Double_t binCenter = cut_hist->GetBinCenter(i);
-//         Double_t binContent = cut_hist->GetBinContent(i);
-        
-//         if (binContent > 0) {
-//             x[pointIndex] = binCenter;
-//             y[pointIndex] = 0; // Bottom of the bin
-//             ++pointIndex;
+    const Int_t nBins = cut_hist->GetNbinsX();
 
-//             x[pointIndex] = binCenter;
-//             y[pointIndex] = binContent; // Top of the bin
-//             ++pointIndex;
-//         }
-//     }
-// }
+    std::vector<Double_t> xPoints;
+    std::vector<Double_t> yPoints;
+
+    std::vector<std::pair<Double_t, Double_t>> pointPairs;
+    
+    // Int_t pointIndex = 0;
+
+    //Setting the first point
+    pointPairs.push_back(std::make_pair(800., 50000.));
+    
+    // Getting points from the hist
+    for (Int_t i = 5; i <= nBins; ++i) { 
+        Double_t binUpEdge = cut_hist->GetXaxis()->GetBinUpEdge(i);
+        Double_t binLowEdge = cut_hist->GetXaxis()->GetBinLowEdge(i);
+        Double_t binAmp = cut_hist->GetBinContent(i);
+
+        if (i == 5)
+        {
+            pointPairs.push_back(std::make_pair(800., binAmp));
+            pointPairs.push_back(std::make_pair(binUpEdge, binAmp));
+        } else {
+            pointPairs.push_back(std::make_pair(binLowEdge, binAmp));
+            pointPairs.push_back(std::make_pair(binUpEdge, binAmp));
+        }
+    }
+
+    //Setting the last point
+    pointPairs.push_back(std::make_pair(1e8, 50000.));
+
+    // Selecting unique points
+    std::set<std::pair<Double_t, Double_t>> uniquePoints;
+    std::vector<std::pair<Double_t, Double_t>> uniquePoints_vec; //To preserve the order they were inserted in
+    for (const auto& pair : pointPairs) {
+        if (uniquePoints.insert(pair).second) {
+            uniquePoints_vec.push_back(pair);
+        }
+    }
+
+    Int_t num_points = uniquePoints_vec.size();
+    det_cuts[det_num-2] = new TCutG(Form("tof_amp_cut_det%i", det_num), num_points);
+    det_cuts[det_num-2]->SetVarX("TOF");
+    det_cuts[det_num-2]->SetVarY("Amp");
+    Int_t point_index = 0;
+    for (const auto& point : uniquePoints_vec) {
+        det_cuts[det_num-2]->SetPoint(point_index, point.first, point.second);
+        point_index++;
+    }
+    det_cuts[det_num-2]->SetPoint(point_index, 800., 50000.);
+    det_cuts[det_num-2]->SetLineColor(2);
+}
 
 // cuts for tof < 10^4
 void determine_gamma_flash_cuts(Int_t det_num, TH1D* cut_hist){
@@ -271,6 +313,42 @@ void determine_alpha_cut(Int_t det_num, TH2D* tof_amp_hist, TH1D* projection_his
     return;
 }
 
+void combine_all_cuts(){
+
+    fill_fit_ranges();
+
+    //Calculating TOF (x) bin edges FOR CUTS
+    Int_t Num_decades = 6;
+    Int_t num_bins_tof_cuts = bins_per_decade_cuts * Num_decades;
+    Double_t bin_edges_tof_cuts[num_bins_tof_cuts+1];
+    Double_t step_tof_cuts = ((Double_t) 1.0/(Double_t) bins_per_decade_cuts);
+    for(Int_t i = 0; i < num_bins_tof_cuts+1; i++)
+    {
+        Double_t base = 10.;
+        Double_t exponent = (step_tof_cuts * (Double_t) i) + 2.;
+        bin_edges_tof_cuts[i] = (Double_t) std::pow(base, exponent);
+    }
+
+    for (Int_t i = 0; i < 6; i++)
+    {
+        // using no filter runs to determine detector cuts
+        PTBC_tof_amp_hists[i] = retrive_TH2D_Histograms("../rootFiles/cutoffAnalysis_PTBC_none.root", Form("PTBC_tof_amp_det%i", i+2));
+
+        //Determining alphas cuts
+        projection_hists[i] = (TH1D*)PTBC_tof_amp_hists[i]->ProjectionY(Form("profile_fission_alphas_det%i", i+2), 5001, 6000);
+        alphas_fits_total[i] = new TF1(Form("alphas_total_fit_det%i", i+2), "expo(0)+gaus(2)", total_fit_ranges[i][0], total_fit_ranges[i][1]);
+        determine_alpha_cut(i+2, PTBC_tof_amp_hists[i], projection_hists[i], alphas_fits_total[i]);
+        // plot_alpha_cuts(i+2, projection_hists[i], alphas_fits_total[i]);
+        
+        //Determining gamma flash cuts
+        det_cut_hists[i] = new TH1D(Form("PTBC_cuts_det%i", i+2), Form("ToF-Amp cut Hist - PTBC Det %i - No Target", i+2), num_bins_tof_cuts, bin_edges_tof_cuts);
+        determine_gamma_flash_cuts(i+2, det_cut_hists[i]);
+        // plot_det_cuts(i+2, PTBC_tof_amp_hists[i], det_cut_hists[i], "No Target");
+
+        convert_hist_to_TCutG(i+2, det_cut_hists[i]);
+    }
+}
+
 void plot_alpha_cuts(Int_t det_num, TH1D* projection_hist, TF1* total_fit) {
 
     //Plotting
@@ -336,7 +414,7 @@ void plot_alpha_cuts(Int_t det_num, TH1D* projection_hist, TF1* total_fit) {
     return;
 }
 
-void plot_det_cuts(Int_t det_num, TH2D* tof_amp_hist, TH1D* cut_hist, const char* target_title) {
+void plot_det_cuts(Int_t det_num, TH2D* tof_amp_hist, TCutG* det_cut) {
     
     //Plotting
     SetMArEXStyle();
@@ -352,53 +430,19 @@ void plot_det_cuts(Int_t det_num, TH2D* tof_amp_hist, TH1D* cut_hist, const char
 
     tof_amp_hist->GetXaxis()->SetTitle("TOF (in ns)");
     tof_amp_hist->GetYaxis()->SetTitle("Amplitude (a.u.)");
-    tof_amp_hist->SetTitle(Form("ToF-Amp Hist - Det %i - %s", det_num, target_title));
+    tof_amp_hist->SetTitle(Form("ToF-Amp Hist - Det %i - %s", det_num, target_name_title.c_str()));
     tof_amp_hist->Draw("COLZ");
     gPad->SetLogx();
     gPad->SetLogz();
 
-    cut_hist->SetLineColor(2);
-    cut_hist->SetLineWidth(2);
-    cut_hist->Draw("SAME");
+    det_cut->SetLineColor(2);
+    det_cut->SetLineWidth(2);
+    det_cut->Draw("SAME");
 
     // cuts_canvas[cuts_plot_index]->Print(Form("../plots/cuts_plots/tof_amp_hist_%s_det%i.png", target_name.c_str(), det_num));
     
     cuts_plot_index++;
     return;
-}
-
-void determine_all_cuts(){
-
-    fill_fit_ranges();
-
-    //Calculating TOF (x) bin edges FOR CUTS
-    Int_t Num_decades = 6;
-    Int_t num_bins_tof_cuts = bins_per_decade_cuts * Num_decades;
-    Double_t bin_edges_tof_cuts[num_bins_tof_cuts+1];
-    Double_t step_tof_cuts = ((Double_t) 1.0/(Double_t) bins_per_decade_cuts);
-    for(Int_t i = 0; i < num_bins_tof_cuts+1; i++)
-    {
-        Double_t base = 10.;
-        Double_t exponent = (step_tof_cuts * (Double_t) i) + 2.;
-        bin_edges_tof_cuts[i] = (Double_t) std::pow(base, exponent);
-    }
-
-    for (Int_t i = 0; i < 6; i++)
-    {
-        // using no filter runs to determine detector cuts
-        PTBC_tof_amp_hists[i] = retrive_TH2D_Histograms("../rootFiles/cutoffAnalysis_PTBC_none.root", Form("PTBC_tof_amp_det%i", i+2));
-
-        //Determining alphas cuts
-        projection_hists[i] = (TH1D*)PTBC_tof_amp_hists[i]->ProjectionY(Form("profile_fission_alphas_det%i", i+2), 5001, 6000);
-        alphas_fits_total[i] = new TF1(Form("alphas_total_fit_det%i", i+2), "expo(0)+gaus(2)", total_fit_ranges[i][0], total_fit_ranges[i][1]);
-        determine_alpha_cut(i+2, PTBC_tof_amp_hists[i], projection_hists[i], alphas_fits_total[i]);
-        // plot_alpha_cuts(i+2, projection_hists[i], alphas_fits_total[i]);
-        
-        //Determining gamma flash cuts
-        det_cut_hists[i] = new TH1D(Form("PTBC_cuts_det%i", i+2), Form("ToF-Amp cut Hist - PTBC Det %i - No Target", i+2), num_bins_tof_cuts, bin_edges_tof_cuts);
-        determine_gamma_flash_cuts(i+2, det_cut_hists[i]);
-        // plot_det_cuts(i+2, PTBC_tof_amp_hists[i], det_cut_hists[i], "No Target");
-    }
 }
 
 void StoreCutHists(){
@@ -410,6 +454,10 @@ void StoreCutHists(){
         det_cut_hists[i]->SetLineColor(2);
         det_cut_hists[i]->SetLineWidth(2);
         det_cut_hists[i]->Write();
+
+        det_cuts[i]->SetLineColor(2);
+        det_cuts[i]->SetLineWidth(2);
+        det_cuts[i]->Write();
     }
     
     f->Close();
@@ -417,18 +465,57 @@ void StoreCutHists(){
     std::cout << "Created output file 'PTBC_cuts.root'" << std::endl;
 }
 
+void calculate_skewness(TH1D* hist, Double_t mean_val, Double_t std_val){
+
+    Int_t num_bins = hist->GetNbinsX();
+    Double_t x = 0;
+    Double_t sum = 0;
+    Double_t np = 0;
+    for (Int_t i = 1; i <= num_bins; i++) {
+        x = hist->GetBinCenter(i);
+        Double_t freq = hist->GetBinContent(i);
+        np += freq;
+        sum += freq*(x-mean_val)*(x-mean_val)*(x-mean_val);
+    }
+    sum /= np*std_val*std_val*std_val;
+    return sum;
+
+}
+
+void calculate_kurtosis(TH1D* hist, Double_t mean_val, Double_t std_val){
+
+    Int_t num_bins = hist->GetNbinsX();
+    Double_t x = 0;
+    Double_t sum = 0;
+    Double_t np = 0;
+    for (Int_t i = 1; i <= num_bins; i++) {
+        x = hist->GetBinCenter(i);
+        Double_t freq = hist->GetBinContent(i);
+        np += freq;
+        sum += freq*(x-mean_val)*(x-mean_val)*(x-mean_val)*(x-mean_val);
+    }
+    sum /= np*std_val*std_val*std_val*std_val;
+    return sum;
+
+}
+
+// void determine_skew_kurt(){
+
+// }
+
 void cutoffFitter_PTBC() {
 
-    determine_all_cuts();
-
-    StoreCutHists();
+    combine_all_cuts(); // Will recompute all the cuts
+    
+    StoreCutHists(); // Will store the cuts in a root file
 
     for (Int_t i = 0; i < 6; i++)
     {
         tof_amp_hists_for_plots[i] = retrive_TH2D_Histograms(Form("../rootFiles/cutoffAnalysis_PTBC_%s.root", target_name.c_str()), Form("PTBC_tof_amp_det%i", i+2));
         cut_hists_for_plots[i] = retrive_TH1D_Histograms("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
+        det_cuts_for_plots[i] = retrive_TCutG("../inputFiles/PTBC_cuts.root", Form("tof_amp_cut_det%i", i+2));
 
-        plot_det_cuts(i+2, tof_amp_hists_for_plots[i], cut_hists_for_plots[i], "Argon Tank");
+        plot_det_cuts(i+2, tof_amp_hists_for_plots[i], det_cuts[i]);
     }
     
 }
