@@ -36,14 +36,8 @@ TH2D* PTBC_al5_anomaly[6];
 TH2D* FIMG_al5_anomaly[2];
 TH2D* PTBC_filterOut_anomaly[6];
 
-//cut plots
-TCutG* PTBC_tof_amp_cut_det2;
-TCutG* PTBC_tof_amp_cut_det3;
-TCutG* PTBC_tof_amp_cut_det4;
-TCutG* PTBC_tof_amp_cut_det5;
-TCutG* PTBC_tof_amp_cut_det6;
-TCutG* PTBC_tof_amp_cut_det7;
-TCutG* PTBC_tof_amp_cut_para;
+TH2D* PTBC_filterOut_anomaly_before[6];
+TH2D* PTBC_filterOut_anomaly_after[6];
 
 //My cut plots
 TCutG* FIMG_my_tof_amp_cut_dedi_det1;
@@ -59,90 +53,6 @@ Double_t amp_max = 50000.;
 // Run Lists
 std::vector<Int_t> filterOut_run_list;
 std::vector<Int_t> al5_run_list;
-
-void fillCutGraph_PTBC(){
-    
-    PTBC_tof_amp_cut_det2 = new TCutG("PTBC_tof_amp_cut_det2",8);
-    PTBC_tof_amp_cut_det2->SetLineColor(2);
-    PTBC_tof_amp_cut_det2->SetLineWidth(2);
-    PTBC_tof_amp_cut_det2->SetVarX("x");
-    PTBC_tof_amp_cut_det2->SetVarY("y");
-    PTBC_tof_amp_cut_det2->SetPoint(0, t_det2[0][0], amp_max);
-    PTBC_tof_amp_cut_det2->SetPoint(1, t_det2[0][0], a_det2[0][0]);
-    PTBC_tof_amp_cut_det2->SetPoint(2, t_det2[0][1], a_det2[0][1]);
-    PTBC_tof_amp_cut_det2->SetPoint(3, t_det2[1][0], a_det2[1][0]);
-    PTBC_tof_amp_cut_det2->SetPoint(4, t_det2[1][1], a_det2[1][1]);
-    PTBC_tof_amp_cut_det2->SetPoint(5, t_det2[2][0], a_det2[2][0]);
-    PTBC_tof_amp_cut_det2->SetPoint(6, t_det2[2][1], a_det2[2][1]);
-    PTBC_tof_amp_cut_det2->SetPoint(7, t_det2[3][0], a_det2[3][0]);
-    PTBC_tof_amp_cut_det2->SetPoint(8, t_det2[3][1], a_det2[3][1]);
-    
-    PTBC_tof_amp_cut_det3 = new TCutG("PTBC_tof_amp_cut_det3",4);
-    PTBC_tof_amp_cut_det3->SetLineColor(2);
-    PTBC_tof_amp_cut_det3->SetLineWidth(2);
-    PTBC_tof_amp_cut_det3->SetVarX("x");
-    PTBC_tof_amp_cut_det3->SetVarY("y");
-    PTBC_tof_amp_cut_det3->SetPoint(0, t_det3to7[0][0][0], amp_max);
-    PTBC_tof_amp_cut_det3->SetPoint(1, t_det3to7[0][0][0], a_det3to7[0][0][0]);
-    PTBC_tof_amp_cut_det3->SetPoint(2, t_det3to7[0][0][1], a_det3to7[0][0][1]);
-    PTBC_tof_amp_cut_det3->SetPoint(3, t_det3to7[0][1][0], a_det3to7[0][1][0]);
-    PTBC_tof_amp_cut_det3->SetPoint(4, t_det3to7[0][1][1], a_det3to7[0][1][1]);
-    
-    PTBC_tof_amp_cut_det4 = new TCutG("PTBC_tof_amp_cut_det4",4);
-    PTBC_tof_amp_cut_det4->SetLineColor(2);
-    PTBC_tof_amp_cut_det4->SetLineWidth(2);
-    PTBC_tof_amp_cut_det4->SetVarX("x");
-    PTBC_tof_amp_cut_det4->SetVarY("y");
-    PTBC_tof_amp_cut_det4->SetPoint(0, t_det3to7[1][0][0], amp_max);
-    PTBC_tof_amp_cut_det4->SetPoint(1, t_det3to7[1][0][0], a_det3to7[1][0][0]);
-    PTBC_tof_amp_cut_det4->SetPoint(2, t_det3to7[1][0][1], a_det3to7[1][0][1]);
-    PTBC_tof_amp_cut_det4->SetPoint(3, t_det3to7[1][1][0], a_det3to7[1][1][0]);
-    PTBC_tof_amp_cut_det4->SetPoint(4, t_det3to7[1][1][1], a_det3to7[1][1][1]);
-    
-    PTBC_tof_amp_cut_det5 = new TCutG("PTBC_tof_amp_cut_det5",4);
-    PTBC_tof_amp_cut_det5->SetLineColor(2);
-    PTBC_tof_amp_cut_det5->SetLineWidth(2);
-    PTBC_tof_amp_cut_det5->SetVarX("x");
-    PTBC_tof_amp_cut_det5->SetVarY("y");
-    PTBC_tof_amp_cut_det5->SetPoint(0, t_det3to7[2][0][0], amp_max);
-    PTBC_tof_amp_cut_det5->SetPoint(1, t_det3to7[2][0][0], a_det3to7[2][0][0]);
-    PTBC_tof_amp_cut_det5->SetPoint(2, t_det3to7[2][0][1], a_det3to7[2][0][1]);
-    PTBC_tof_amp_cut_det5->SetPoint(3, t_det3to7[2][1][0], a_det3to7[2][1][0]);
-    PTBC_tof_amp_cut_det5->SetPoint(4, t_det3to7[2][1][1], a_det3to7[2][1][1]);
-    
-    PTBC_tof_amp_cut_det6 = new TCutG("PTBC_tof_amp_cut_det6",4);
-    PTBC_tof_amp_cut_det6->SetLineColor(2);
-    PTBC_tof_amp_cut_det6->SetLineWidth(2);
-    PTBC_tof_amp_cut_det6->SetVarX("x");
-    PTBC_tof_amp_cut_det6->SetVarY("y");
-    PTBC_tof_amp_cut_det6->SetPoint(0, t_det3to7[3][0][0], amp_max);
-    PTBC_tof_amp_cut_det6->SetPoint(1, t_det3to7[3][0][0], a_det3to7[3][0][0]);
-    PTBC_tof_amp_cut_det6->SetPoint(2, t_det3to7[3][0][1], a_det3to7[3][0][1]);
-    PTBC_tof_amp_cut_det6->SetPoint(3, t_det3to7[3][1][0], a_det3to7[3][1][0]);
-    PTBC_tof_amp_cut_det6->SetPoint(4, t_det3to7[3][1][1], a_det3to7[3][1][1]);
-    
-    PTBC_tof_amp_cut_det7 = new TCutG("PTBC_tof_amp_cut_det7",4);
-    PTBC_tof_amp_cut_det7->SetLineColor(2);
-    PTBC_tof_amp_cut_det7->SetLineWidth(2);
-    PTBC_tof_amp_cut_det7->SetVarX("x");
-    PTBC_tof_amp_cut_det7->SetVarY("y");
-    PTBC_tof_amp_cut_det7->SetPoint(0, t_det3to7[4][0][0], amp_max);
-    PTBC_tof_amp_cut_det7->SetPoint(1, t_det3to7[4][0][0], a_det3to7[4][0][0]);
-    PTBC_tof_amp_cut_det7->SetPoint(2, t_det3to7[4][0][1], a_det3to7[4][0][1]);
-    PTBC_tof_amp_cut_det7->SetPoint(3, t_det3to7[4][1][0], a_det3to7[4][1][0]);
-    PTBC_tof_amp_cut_det7->SetPoint(4, t_det3to7[4][1][1], a_det3to7[4][1][1]);
-
-    PTBC_tof_amp_cut_para = new TCutG("PTBC_tof_amp_cut_para",4);
-    PTBC_tof_amp_cut_para->SetLineColor(2);
-    PTBC_tof_amp_cut_para->SetLineWidth(2);
-    PTBC_tof_amp_cut_para->SetVarX("x");
-    PTBC_tof_amp_cut_para->SetVarY("y");
-    PTBC_tof_amp_cut_para->SetPoint(0, 800.0, amp_max);
-    PTBC_tof_amp_cut_para->SetPoint(1, 800.0, 5000.0);
-    PTBC_tof_amp_cut_para->SetPoint(2, 3000.0, 5000.0);
-    PTBC_tof_amp_cut_para->SetPoint(3, 3000.0, 4000.0);
-    PTBC_tof_amp_cut_para->SetPoint(4, 1e8, 4000.0);
-}
 
 void fillCutGraph_FIMG(){
 
@@ -372,8 +282,8 @@ void Fill_tof_amp_hists(std::vector<Int_t> run_list, Int_t det_type, TH2D* hist_
 
 void anomalies(){
 
-    fillCutGraph_PTBC();
-    fillCutGraph_FIMG();
+    // fillCutGraph_PTBC();
+    // fillCutGraph_FIMG();
     fill_run_list();
 
     //Calculating TOF (x) bin edges
@@ -401,66 +311,60 @@ void anomalies(){
 
     for (Int_t i = 0; i < 6; i++){
         PTBC_al5_anomaly[i] = new TH2D(Form("PTBC_al5_anomaly_det%i", i+2), Form("ToF vs Amp Hist - Al (5 cm) PTBC Det %i", i+2), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
-        PTBC_filterOut_anomaly[i] = new TH2D(Form("PTBC_filterOut_anomaly_det%i", i+2), Form("ToF vs Amp Hist - Filter Out PTBC Det %i", i+2), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
+        // PTBC_filterOut_anomaly[i] = new TH2D(Form("PTBC_filterOut_anomaly_det%i", i+2), Form("ToF vs Amp Hist - Filter Out PTBC Det %i", i+2), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
+        // PTBC_filterOut_anomaly_after[i] = new TH2D(Form("PTBC_filterOut_anomaly_after_det%i", i+2), Form("ToF vs Amp Hist - Filter Out PTBC Det %i", i+2), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
+        // PTBC_filterOut_anomaly_before[i] = new TH2D(Form("PTBC_filterOut_anomaly_before_det%i", i+2), Form("ToF vs Amp Hist - Filter Out PTBC Det %i", i+2), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
     }
 
-    for (Int_t i = 0; i < 2; i++){
-        FIMG_al5_anomaly[i] = new TH2D(Form("FIMG_al5_anomaly_det%i", i+1), Form("ToF vs Amp Hist - Al (5 cm) FIMG Det %i", i+1), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
-    }
+    // for (Int_t i = 0; i < 2; i++){
+    //     FIMG_al5_anomaly[i] = new TH2D(Form("FIMG_al5_anomaly_det%i", i+1), Form("ToF vs Amp Hist - Al (5 cm) FIMG Det %i", i+1), num_bins_tof, bin_edges_tof, num_bins_amp, bin_edges_amp);
+    // }
 
     Int_t start_time_al5 = timeToSeconds(std::to_string(121500));
     Int_t end_time_al5 = timeToSeconds(std::to_string(130000));
 
-    Int_t start_time_filterOut = timeToSeconds(std::to_string(100000));
-    Int_t end_time_filterOut = timeToSeconds(std::to_string(101500));
+    // Int_t start_time_filterOut = timeToSeconds(std::to_string(100000));
+    // Int_t end_time_filterOut = timeToSeconds(std::to_string(101500));
+
+    // Int_t start_time_filterOut_after = timeToSeconds(std::to_string(101500));
+    // Int_t end_time_filterOut_after = timeToSeconds(std::to_string(103000));
+
+    // Int_t start_time_filterOut_before = timeToSeconds(std::to_string(94500));
+    // Int_t end_time_filterOut_before = timeToSeconds(std::to_string(100000));
 
     Fill_tof_amp_hists(al5_run_list, 1, PTBC_al5_anomaly, start_time_al5, end_time_al5); // 1 = PTBC, 2 = FIMG
     Fill_tof_amp_hists(al5_run_list, 2, FIMG_al5_anomaly, start_time_al5, end_time_al5); // 1 = PTBC, 2 = FIMG
-    Fill_tof_amp_hists(filterOut_run_list, 1, PTBC_filterOut_anomaly, start_time_filterOut, end_time_filterOut); // 1 = PTBC, 2 = FIMG
+    // Fill_tof_amp_hists(filterOut_run_list, 1, PTBC_filterOut_anomaly, start_time_filterOut, end_time_filterOut); // 1 = PTBC, 2 = FIMG
+    // Fill_tof_amp_hists(filterOut_run_list, 1, PTBC_filterOut_anomaly_after, start_time_filterOut_after, end_time_filterOut_after); // 1 = PTBC, 2 = FIMG
+    // Fill_tof_amp_hists(filterOut_run_list, 1, PTBC_filterOut_anomaly_before, start_time_filterOut_before, end_time_filterOut_before); // 1 = PTBC, 2 = FIMG
 
     //Writing to the output file
     outputRootFile = new TFile("../rootFiles/anomalies.root","recreate");
 
     for (Int_t i = 0; i < 6; i++){
-        // outputRootFile->WriteObject(PTBC_al5_anomaly[i], Form("PTBC_al5_anomaly_det%i", i+2));
         PTBC_al5_anomaly[i]->Write();
     }
 
     for (Int_t i = 0; i < 2; i++){
-        // outputRootFile->WriteObject(FIMG_al5_anomaly[i], Form("FIMG_al5_anomaly_det%i", i+1));
         FIMG_al5_anomaly[i]->Write();
     }
 
-    for (Int_t i = 0; i < 6; i++){
-        // outputRootFile->WriteObject(PTBC_filterOut_anomaly[i], Form("PTBC_filterOut_anomaly_det%i", i+2));
-        PTBC_filterOut_anomaly[i]->Write();
-    }
+    // for (Int_t i = 0; i < 6; i++){
+    //     PTBC_filterOut_anomaly[i]->Write();
+    // }
 
-    // outputRootFile->WriteObject(PTBC_tof_amp_cut_det2, "PTBC_tof_amp_cut_det2");
-    // outputRootFile->WriteObject(PTBC_tof_amp_cut_det3, "PTBC_tof_amp_cut_det3");
-    // outputRootFile->WriteObject(PTBC_tof_amp_cut_det4, "PTBC_tof_amp_cut_det4");
-    // outputRootFile->WriteObject(PTBC_tof_amp_cut_det5, "PTBC_tof_amp_cut_det5");
-    // outputRootFile->WriteObject(PTBC_tof_amp_cut_det6, "PTBC_tof_amp_cut_det6");
-    // outputRootFile->WriteObject(PTBC_tof_amp_cut_det7, "PTBC_tof_amp_cut_det7");
-    // outputRootFile->WriteObject(PTBC_tof_amp_cut_para, "PTBC_tof_amp_cut_para");
+    // for (Int_t i = 0; i < 6; i++){
+    //     PTBC_filterOut_anomaly_after[i]->Write();
+    // }
 
-    // outputRootFile->WriteObject(FIMG_my_tof_amp_cut_dedi_det1, "FIMG_my_tof_amp_cut_dedi_det1");
-    // outputRootFile->WriteObject(FIMG_my_tof_amp_cut_dedi_det2, "FIMG_my_tof_amp_cut_dedi_det2");
-    // outputRootFile->WriteObject(FIMG_my_tof_amp_cut_para_det1, "FIMG_my_tof_amp_cut_para_det1");
-    // outputRootFile->WriteObject(FIMG_my_tof_amp_cut_para_det2, "FIMG_my_tof_amp_cut_para_det2");
+    // for (Int_t i = 0; i < 6; i++){
+    //     PTBC_filterOut_anomaly_before[i]->Write();
+    // }
 
-    PTBC_tof_amp_cut_det2->Write();
-    PTBC_tof_amp_cut_det3->Write();
-    PTBC_tof_amp_cut_det4->Write();
-    PTBC_tof_amp_cut_det5->Write();
-    PTBC_tof_amp_cut_det6->Write();
-    PTBC_tof_amp_cut_det7->Write();
-    PTBC_tof_amp_cut_para->Write();
-
-    FIMG_my_tof_amp_cut_dedi_det1->Write();
-    FIMG_my_tof_amp_cut_dedi_det2->Write();
-    FIMG_my_tof_amp_cut_para_det1->Write();
-    FIMG_my_tof_amp_cut_para_det2->Write();
+    // FIMG_my_tof_amp_cut_dedi_det1->Write();
+    // FIMG_my_tof_amp_cut_dedi_det2->Write();
+    // FIMG_my_tof_amp_cut_para_det1->Write();
+    // FIMG_my_tof_amp_cut_para_det2->Write();
 
     outputRootFile->Close();
 

@@ -29,11 +29,11 @@
 #include <vector>
 #include "parameters.h"
 
-const std::string target_name("none"); ////bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full, bi1sep17
-//no targets - none, none_ts, ar_bottle
-const std::string target_name_title("No Target");
+const std::string target_name("ar_bottle_empty"); ////bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full, bi1sep17
+//no targets - none, none_ts, ar_bottle_empty
+const std::string target_name_title("Argon Tank Empty");
 //Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Target Al (5 cm), Al (8 cm), Target C (1.2 cm), Empty Bottle, Empty Bottle Rotated
-//Argon Tank, Bi (1 cm) - Sep 17, No Target, SCUBA Tank
+//Argon Tank, Bi (1 cm) - Sep 17, No Target, SCUBA Tank, Argon Tank Empty
 
 // std::reference_wrapper<TH2D*> PTBC_tof_amp_fOut_dets[] = {PTBC_tof_amp_fOut_det2, PTBC_tof_amp_fOut_det3, PTBC_tof_amp_fOut_det4, PTBC_tof_amp_fOut_det5, PTBC_tof_amp_fOut_det6, PTBC_tof_amp_fOut_det7};
 
@@ -184,7 +184,7 @@ void fillRuns(){
         filter_run_list.insert( filter_run_list.end(), f_out_t_arBot_ts.begin(), f_out_t_arBot_ts.end() );
     }
 
-    if(!target_name.compare("ar_bottle")){
+    if(!target_name.compare("ar_bottle_empty")){
         cout << "Setting up empty argon tank target run list" << endl;
         filter_run_list.insert( filter_run_list.end(), f_out_t_arBotEmpty_ts.begin(), f_out_t_arBotEmpty_ts.end() );
     }
