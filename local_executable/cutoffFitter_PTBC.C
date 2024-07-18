@@ -26,6 +26,7 @@
 #include "TLegend.h"
 #include "TAttMarker.h"
 #include "TRandom3.h"
+#include "TMultiGraph.h"
 
 #include "MArEXStyle.C"
 
@@ -63,8 +64,10 @@ Double_t expo_fit_ranges[6][2];
 Double_t gaus_fit_ranges[6][2];
 Double_t total_fit_ranges[6][2];
 
+TMultiGraph* skew_kurt_multiGraph[6];
 TGraph* det_cuts_skewness[6];
 TGraph* det_cuts_kurtosis[6];
+TCanvas *skew_kurt_canvas[6];
 
 void fill_fit_ranges(){
 
@@ -214,6 +217,40 @@ void convert_hist_to_TCutG(Int_t det_num, TH1D* cut_hist){
     det_cuts[det_num-2]->SetLineColor(2);
 }
 
+Double_t calculate_skewness(TH1D* hist, Double_t mean_val, Double_t std_val){
+
+    Int_t num_bins = hist->GetNbinsX();
+    Double_t x = 0;
+    Double_t sum = 0;
+    Double_t np = 0;
+    for (Int_t i = 1; i <= num_bins; i++) {
+        x = hist->GetBinCenter(i);
+        Double_t freq = hist->GetBinContent(i);
+        np += freq;
+        sum += freq*(x-mean_val)*(x-mean_val)*(x-mean_val);
+    }
+    sum /= np*std_val*std_val*std_val;
+    return sum;
+
+}
+
+Double_t calculate_kurtosis(TH1D* hist, Double_t mean_val, Double_t std_val){
+
+    Int_t num_bins = hist->GetNbinsX();
+    Double_t x = 0;
+    Double_t sum = 0;
+    Double_t np = 0;
+    for (Int_t i = 1; i <= num_bins; i++) {
+        x = hist->GetBinCenter(i);
+        Double_t freq = hist->GetBinContent(i);
+        np += freq;
+        sum += freq*(x-mean_val)*(x-mean_val)*(x-mean_val)*(x-mean_val);
+    }
+    sum /= np*std_val*std_val*std_val*std_val;
+    return sum;
+
+}
+
 // cuts for tof < 10^4
 void determine_gamma_flash_cuts(Int_t det_num, TH1D* cut_hist){
 
@@ -349,6 +386,41 @@ void combine_all_cuts(){
     }
 }
 
+void determine_skew_kurt(Int_t det_num, TH2D* tof_amp_hist){
+
+    TH2D* PTBC_tof_amp_hist_forCuts;
+
+    PTBC_tof_amp_hist_forCuts = (TH2D*)tof_amp_hist->Rebin2D((Int_t) 1000/bins_per_decade_cuts, 5, Form("tof_amp_forCuts_det%i", det_num));
+
+    Int_t skew_kurt_index = 0;
+    for (Int_t i = 5; i <= 10; i++) 
+    {
+        std::string projection_name = "profile_forCuts_bin_" + std::to_string(i);
+        TH1D* proj_hist = (TH1D*)PTBC_tof_amp_hist_forCuts->ProjectionY(projection_name.c_str(),i, i);
+        proj_hist->GetXaxis()->SetRangeUser(0., 10000.);
+        TF1 *gaus_fit_total = new TF1("gaus_fit_total", "gaus", 0, 10000);
+        // gaus_fit_total->SetParameters(par);
+        proj_hist->Fit(gaus_fit_total, "0R");
+
+        Double_t mean_val = gaus_fit_total->GetParameter(1);
+        Double_t std_dev = gaus_fit_total->GetParameter(2);
+
+        Double_t x_val = PTBC_tof_amp_hist_forCuts->GetXaxis()->GetBinCenter(i);
+        Double_t y_val_skew = calculate_skewness(proj_hist, mean_val, std_dev);
+        Double_t y_val_kurt = calculate_kurtosis(proj_hist, mean_val, std_dev);
+
+        // cout << "(x_val, skew, kurt) = " << x_val << ", " << y_val_skew << ", " << y_val_kurt << endl;
+
+        //Calculating the skewness and kurtosis
+        det_cuts_skewness[det_num-2]->SetPoint(skew_kurt_index, x_val, y_val_skew);
+        det_cuts_kurtosis[det_num-2]->SetPoint(skew_kurt_index, x_val, y_val_kurt);
+
+        // cout << "X point skew = " << det_cuts_skewness[det_num-2]->GetPointX(skew_kurt_index) << endl;
+        // cout << "Y point skew = " << det_cuts_skewness[det_num-2]->GetPointY(skew_kurt_index) << endl;
+        skew_kurt_index++;
+    }
+}
+
 void plot_alpha_cuts(Int_t det_num, TH1D* projection_hist, TF1* total_fit) {
 
     //Plotting
@@ -445,6 +517,48 @@ void plot_det_cuts(Int_t det_num, TH2D* tof_amp_hist, TCutG* det_cut) {
     return;
 }
 
+void plot_skew_kurt(Int_t det_num){
+
+    //Plotting
+    SetMArEXStyle();
+    
+    gStyle->SetStatX(0.27);
+    gStyle->SetStatY(0.9);
+    gStyle->SetStatH(0.1);
+    gStyle->SetStatW(0.17);
+    gStyle->SetPalette(57);
+
+    skew_kurt_canvas[det_num-2] = new TCanvas(Form("cuts_c_%i", det_num-2)," ");
+    skew_kurt_canvas[det_num-2]->cd();
+
+    // Draw on the left y-axis
+    det_cuts_skewness[det_num-2]->SetMarkerColor(kBlue);
+    det_cuts_skewness[det_num-2]->SetLineColor(kBlue);
+
+    // Draw on the right y-axis
+    det_cuts_kurtosis[det_num-2]->SetMarkerColor(kRed);
+    det_cuts_kurtosis[det_num-2]->SetLineColor(kRed);
+    
+
+    skew_kurt_multiGraph[det_num-2] = new TMultiGraph();
+    skew_kurt_multiGraph[det_num-2]->Add(det_cuts_skewness[det_num-2]);
+    skew_kurt_multiGraph[det_num-2]->Add(det_cuts_kurtosis[det_num-2]);
+    skew_kurt_multiGraph[det_num-2]->Draw("AP*");
+    skew_kurt_multiGraph[det_num-2]->SetTitle(Form("Skewness and Kurtosis - Det %i - %s;TOF (in ns);Skewness", det_num, target_name_title.c_str()));
+
+    // Create a new right y-axis
+    // skew_kurt_canvas[det_num-2]->Update();
+    // TGaxis *rightAxis = new TGaxis(gPad->GetUxmax(), gPad->GetUymin(),
+    //                                gPad->GetUxmax(), gPad->GetUymax(),
+    //                                skew_kurt_multiGraph[det_num-2]->GetYaxis()->GetXmin(), skew_kurt_multiGraph[det_num-2]->GetYaxis()->GetXmax(), 510, "+L");
+    // rightAxis->SetTitle("Kurtosis");
+    // rightAxis->SetTitleColor(kRed);
+    // rightAxis->SetLineColor(kRed);
+    // rightAxis->SetLabelColor(kRed);
+    // rightAxis->Draw("SAME");
+
+}
+
 void StoreCutHists(){
     
     TFile *f = new TFile("../inputFiles/PTBC_cuts.root","recreate");
@@ -465,57 +579,24 @@ void StoreCutHists(){
     std::cout << "Created output file 'PTBC_cuts.root'" << std::endl;
 }
 
-void calculate_skewness(TH1D* hist, Double_t mean_val, Double_t std_val){
-
-    Int_t num_bins = hist->GetNbinsX();
-    Double_t x = 0;
-    Double_t sum = 0;
-    Double_t np = 0;
-    for (Int_t i = 1; i <= num_bins; i++) {
-        x = hist->GetBinCenter(i);
-        Double_t freq = hist->GetBinContent(i);
-        np += freq;
-        sum += freq*(x-mean_val)*(x-mean_val)*(x-mean_val);
-    }
-    sum /= np*std_val*std_val*std_val;
-    return sum;
-
-}
-
-void calculate_kurtosis(TH1D* hist, Double_t mean_val, Double_t std_val){
-
-    Int_t num_bins = hist->GetNbinsX();
-    Double_t x = 0;
-    Double_t sum = 0;
-    Double_t np = 0;
-    for (Int_t i = 1; i <= num_bins; i++) {
-        x = hist->GetBinCenter(i);
-        Double_t freq = hist->GetBinContent(i);
-        np += freq;
-        sum += freq*(x-mean_val)*(x-mean_val)*(x-mean_val)*(x-mean_val);
-    }
-    sum /= np*std_val*std_val*std_val*std_val;
-    return sum;
-
-}
-
-// void determine_skew_kurt(){
-
-// }
-
 void cutoffFitter_PTBC() {
 
-    combine_all_cuts(); // Will recompute all the cuts
+    // combine_all_cuts(); // Will recompute all the cuts
     
-    StoreCutHists(); // Will store the cuts in a root file
+    // StoreCutHists(); // Will store the cuts in a root file
 
-    for (Int_t i = 0; i < 6; i++)
+    for (Int_t i = 0; i < 1; i++)
     {
         tof_amp_hists_for_plots[i] = retrive_TH2D_Histograms(Form("../rootFiles/cutoffAnalysis_PTBC_%s.root", target_name.c_str()), Form("PTBC_tof_amp_det%i", i+2));
-        cut_hists_for_plots[i] = retrive_TH1D_Histograms("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
-        det_cuts_for_plots[i] = retrive_TCutG("../inputFiles/PTBC_cuts.root", Form("tof_amp_cut_det%i", i+2));
+        // cut_hists_for_plots[i] = retrive_TH1D_Histograms("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
+        // det_cuts_for_plots[i] = retrive_TCutG("../inputFiles/PTBC_cuts.root", Form("tof_amp_cut_det%i", i+2));
 
-        plot_det_cuts(i+2, tof_amp_hists_for_plots[i], det_cuts[i]);
+        // plot_det_cuts(i+2, tof_amp_hists_for_plots[i], det_cuts[i]);
+
+        det_cuts_skewness[i] = new TGraph();
+        det_cuts_kurtosis[i] = new TGraph();
+        determine_skew_kurt(i+2, tof_amp_hists_for_plots[i]);
+        plot_skew_kurt(i+2);
     }
     
 }

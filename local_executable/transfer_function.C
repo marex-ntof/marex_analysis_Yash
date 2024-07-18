@@ -87,141 +87,28 @@ Double_t get_rf_length_peak(Double_t n_energy){ // energy in eV;
     return rf_length; //in m
 }
 
-void store_hist(){
-
-    // TFile *output_file = new TFile("../inputFiles/transfer_function.root","recreate");
-    TFile *output_file = TFile::Open("../inputFiles/transfer_function.root", "recreate");
-
-    output_file->WriteObject(transfer_func_PTBC_noRF, "transfer_func_PTBC_noRF");
-    output_file->WriteObject(transfer_func_FIMG_noRF, "transfer_func_FIMG_noRF");
-    output_file->WriteObject(transfer_func_mean_PTBC_5itr, "transfer_func_mean_PTBC_5itr");
-    // output_file->WriteObject(transfer_func_mean_PTBC_10itr, "transfer_func_mean_PTBC_10itr");
-    // output_file->WriteObject(transfer_func_mean_PTBC_15itr, "transfer_func_mean_PTBC_15itr");
-    output_file->WriteObject(transfer_func_mean_FIMG_5itr, "transfer_func_mean_FIMG_5itr");
-    output_file->WriteObject(transfer_func_peak_PTBC_5itr, "transfer_func_peak_PTBC_5itr");
-    // output_file->WriteObject(transfer_func_peak_PTBC_10itr, "transfer_func_peak_PTBC_10itr");
-    output_file->Close();
-
-    std::cout << "Created output file 'transfer_function.root'" << std::endl;
-}
-
-void plot_hists(){
-
-    //Plotting
-    SetMArEXStyle();
-
-    gStyle->SetStatX(0.27);
-    gStyle->SetStatY(0.9);
-    gStyle->SetStatH(0.1);
-    gStyle->SetStatW(0.17);
-
-    TCanvas *c[3];
-    TLegend *l[3];
-
-    int i = 0;
-
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-
-    l[i] = new TLegend(0.45,0.7,0.85,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
-    l[i]->AddEntry(transfer_func_PTBC_noRF,"Without Moderator Effects","l");
-    
-    transfer_func_PTBC_noRF->GetXaxis()->SetTitle("ToF (in ns)");
-    transfer_func_PTBC_noRF->GetYaxis()->SetTitle("Energy (in eV)");
-    transfer_func_PTBC_noRF->SetTitle("Transfer Function - PTBC");
-    transfer_func_PTBC_noRF->SetLineWidth(2);
-    transfer_func_PTBC_noRF->Draw(); //"HISTE"
-    transfer_func_PTBC_noRF->SetStats(0);
-    gPad->SetLogx();
-    gPad->SetLogy();
-
-    l[i]->AddEntry(transfer_func_mean_PTBC_5itr,"With Moderator Effects","l");
-    transfer_func_mean_PTBC_5itr->SetLineColor(6);
-    transfer_func_mean_PTBC_5itr->SetLineWidth(2);
-    transfer_func_mean_PTBC_5itr->Draw("SAME");
-
-    // l[i]->AddEntry(transfer_func_mean_PTBC_10itr,"10 Itr (Mean)","l");
-    // transfer_func_mean_PTBC_10itr->SetLineColor(2);
-    // transfer_func_mean_PTBC_10itr->SetLineWidth(2);
-    // transfer_func_mean_PTBC_10itr->Draw("SAME");
-
-    // l[i]->AddEntry(transfer_func_mean_PTBC_15itr,"15 Itr (Mean)","l");
-    // transfer_func_mean_PTBC_15itr->SetLineColor(3);
-    // transfer_func_mean_PTBC_15itr->SetLineWidth(2);
-    // transfer_func_mean_PTBC_15itr->Draw("SAME");
-
-    // l[i]->AddEntry(transfer_func_peak_PTBC_5itr,"5 Itr (Peak)","l");
-    // transfer_func_peak_PTBC_5itr->SetLineColor(1);
-    // transfer_func_peak_PTBC_5itr->SetLineWidth(2);
-    // transfer_func_peak_PTBC_5itr->Draw("SAME");
-
-    // l[i]->AddEntry(transfer_func_peak_PTBC_10itr,"10 Itr (Peak)","l");
-    // transfer_func_peak_PTBC_10itr->SetLineColor(3);
-    // transfer_func_peak_PTBC_10itr->SetLineWidth(2);
-    // transfer_func_peak_PTBC_10itr->Draw("SAME");
-
-    l[i]->SetMargin(0.4);
-    l[i]->Draw();
-
-    i++;
-
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-    gStyle->SetPalette(57);
-    rf_hist->GetXaxis()->SetTitle("Neutron Energy (eV)");
-    rf_hist->GetYaxis()->SetTitle("Neutron Moderation Distance (cm)");
-    rf_hist->SetTitle("");
-    rf_hist->GetXaxis()->SetTitleOffset(1.2);
-    rf_hist->Draw("colz");
-    gPad->SetLogx();
-
-    l[i] = new TLegend(0.77,0.7,0.86,0.85);
-
-    // l[i]->AddEntry(rf_hist_peak,"Peak","l");
-    // rf_hist_peak->SetLineColor(1);
-    // rf_hist_peak->SetLineWidth(2);
-    // rf_hist_peak->Draw("SAME");
-
-    l[i]->AddEntry(rf_hist_mean,"Mean moderation distance","l");
-    rf_hist_mean->SetLineColor(2);
-    rf_hist_mean->SetLineWidth(2);
-    rf_hist_mean->Draw("SAME");
-
-    l[i]->SetMargin(0.4);
-    l[i]->Draw();
-
-    i++;
-
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-
-    l[i] = new TLegend(0.45,0.7,0.85,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
-    l[i]->AddEntry(transfer_func_FIMG_noRF,"Without Moderator Effects","l");
-    
-    transfer_func_FIMG_noRF->GetXaxis()->SetTitle("ToF (in ns)");
-    transfer_func_FIMG_noRF->GetYaxis()->SetTitle("Energy (in eV)");
-    transfer_func_FIMG_noRF->SetTitle("Transfer Function - FIMG");
-    transfer_func_FIMG_noRF->SetLineWidth(2);
-    transfer_func_FIMG_noRF->Draw(); //"HISTE"
-    transfer_func_FIMG_noRF->SetStats(0);
-    gPad->SetLogx();
-    gPad->SetLogy();
-
-    l[i]->AddEntry(transfer_func_mean_FIMG_5itr,"With Moderator Effects","l");
-    transfer_func_mean_FIMG_5itr->SetLineColor(2);
-    transfer_func_mean_FIMG_5itr->SetLineWidth(2);
-    transfer_func_mean_FIMG_5itr->Draw("SAME");
-
-    l[i]->SetMargin(0.4);
-    l[i]->Draw();
-}
-
-void transfer_function(){
+void get_rf_hists(){
 
     //opening the rf hist file
-    
     TFile *rfFile = TFile::Open("../inputFiles/RF.root", "READ");
     rf_hist = (TH2D*)rfFile->Get("histfluka");
+
+    Int_t num_bins_e_rf = rf_hist->GetNbinsX();
+    rf_hist_peak = (TH1D*)rf_hist->ProjectionX("RF Hist Peak", 10, 10);
+    rf_hist_mean = (TH1D*)rf_hist->ProjectionX("RF Hist Mean", 15, 15);
+
+    // Filling peak and mean histograms
+    for(Int_t i = 0; i < num_bins_e_rf; i++){
+
+        TH1D* y_projection = (TH1D*)rf_hist->ProjectionY("Y projection", i+1, i+1);
+        rf_hist_mean->SetBinContent(i+1, y_projection->GetMean(1));
+        Int_t peak_bin_num = y_projection->GetMaximumBin();
+        Double_t peak_value = y_projection->GetBinCenter(peak_bin_num);
+        rf_hist_peak->SetBinContent(i+1, peak_value);
+    }
+}
+
+void calculate_transfer_function(){
 
     // tof bins - 1000 bins per decade
     // Calculating TOF (x) bin edges
@@ -237,27 +124,7 @@ void transfer_function(){
         bin_edges_tof[i] = (Double_t) std::pow(base, exponent);
     }
 
-    //extracting rf_hist tof bins
-    // Int_t num_bins_e_rf = rf_hist->GetNbinsX();
-    // Double_t bin_edges_e_rf[num_bins_e_rf+1];
-    // for(Int_t i = 0; i < num_bins_e_rf+1; i++)
-    // {
-    //     bin_edges_e_rf[i] = 
-    // }
-
-    Int_t num_bins_e_rf = rf_hist->GetNbinsX();
-    rf_hist_peak = (TH1D*)rf_hist->ProjectionX("RF Hist Peak", 10, 10);
-    rf_hist_mean = (TH1D*)rf_hist->ProjectionX("RF Hist Mean", 15, 15);
-
-    // Filling peak and mean histograms
-    for(Int_t i = 0; i < num_bins_e_rf; i++){
-
-        TH1D* y_projection = (TH1D*)rf_hist->ProjectionY("Y projection", i+1, i+1);
-        rf_hist_mean->SetBinContent(i+1, y_projection->GetMean(1));
-        Int_t peak_bin_num = y_projection->GetMaximumBin();
-        Double_t peak_value = y_projection->GetBinCenter(peak_bin_num);
-        rf_hist_peak->SetBinContent(i+1, peak_value);
-    }
+    get_rf_hists();
 
     // Initializing histograms
     transfer_func_PTBC_noRF = new TH1D("transfer_func_PTBC_noRF","ToF vs Energy - Transfer Function - PTBC - no RF",num_bins_tof,bin_edges_tof);
@@ -327,6 +194,240 @@ void transfer_function(){
             // }
         }  
     }
+}
+
+void store_hist(){
+
+    // TFile *output_file = new TFile("../inputFiles/transfer_function.root","recreate");
+    TFile *output_file = TFile::Open("../inputFiles/transfer_function.root", "recreate");
+
+    output_file->WriteObject(transfer_func_PTBC_noRF, "transfer_func_PTBC_noRF");
+    output_file->WriteObject(transfer_func_FIMG_noRF, "transfer_func_FIMG_noRF");
+    output_file->WriteObject(transfer_func_mean_PTBC_5itr, "transfer_func_mean_PTBC_5itr");
+    // output_file->WriteObject(transfer_func_mean_PTBC_10itr, "transfer_func_mean_PTBC_10itr");
+    // output_file->WriteObject(transfer_func_mean_PTBC_15itr, "transfer_func_mean_PTBC_15itr");
+    output_file->WriteObject(transfer_func_mean_FIMG_5itr, "transfer_func_mean_FIMG_5itr");
+    output_file->WriteObject(transfer_func_peak_PTBC_5itr, "transfer_func_peak_PTBC_5itr");
+    // output_file->WriteObject(transfer_func_peak_PTBC_10itr, "transfer_func_peak_PTBC_10itr");
+    output_file->Close();
+
+    std::cout << "Created output file 'transfer_function.root'" << std::endl;
+}
+
+void plot_hists(){
+
+    TFile *tfFile = TFile::Open("../inputFiles/transfer_function.root", "READ");
+    transfer_func_PTBC_noRF = (TH1D*)tfFile->Get("transfer_func_PTBC_noRF");
+    transfer_func_FIMG_noRF = (TH1D*)tfFile->Get("transfer_func_FIMG_noRF");
+    transfer_func_mean_PTBC_5itr = (TH1D*)tfFile->Get("transfer_func_mean_PTBC_5itr");
+    transfer_func_mean_FIMG_5itr = (TH1D*)tfFile->Get("transfer_func_mean_FIMG_5itr");
+    transfer_func_peak_PTBC_5itr = (TH1D*)tfFile->Get("transfer_func_peak_PTBC_5itr");
+
+    get_rf_hists();
+
+    //Plotting
+    SetMArEXStyle();
+    gStyle->SetCanvasDefW(800); //600
+    gStyle->SetCanvasDefH(400); //500 
+
+    gStyle->SetStatX(0.27);
+    gStyle->SetStatY(0.9);
+    gStyle->SetStatH(0.1);
+    gStyle->SetStatW(0.17);
+
+    TCanvas *c[3];
+    TPad *p[3][2];
+    TLegend *l[3];
+
+    int i = 0;
+
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+    c[i]->Draw();
+    // c[i]->SetLeftMargin(0.1);
+    // c[i]->SetRightMargin(0.05);
+    
+    //Pad 1
+    c[i]->cd(0);
+    p[i][0] = new TPad(Form("p_%d_0", i), Form("p_%d_0", i), 0., 0.35, 1., 1.);
+    p[i][0]->SetFillColor(kWhite);
+    p[i][0]->SetBottomMargin(0.00001);
+    p[i][0]->SetRightMargin(0.05);
+    p[i][0]->SetBorderMode(0);
+    p[i][0]->Draw();
+    p[i][0]->cd();
+
+    // Y Axis
+    transfer_func_PTBC_noRF->GetYaxis()->SetTitle("Energy (in eV)");
+    transfer_func_PTBC_noRF->GetYaxis()->SetLabelSize(0.05);
+    transfer_func_PTBC_noRF->GetYaxis()->SetTitleSize(0.06);
+    transfer_func_PTBC_noRF->GetYaxis()->SetTitleOffset(0.65);
+    // X Axis
+    transfer_func_PTBC_noRF->GetXaxis()->SetLabelOffset(999);
+    transfer_func_PTBC_noRF->GetXaxis()->SetLabelSize(0);
+    
+    transfer_func_PTBC_noRF->SetTitle("Transfer Function - PTBC");
+    transfer_func_PTBC_noRF->SetLineWidth(2);
+    transfer_func_PTBC_noRF->Draw(); //"HISTE"
+    transfer_func_PTBC_noRF->SetStats(0);
+    gPad->SetLogx();
+    gPad->SetLogy();
+
+    l[i] = new TLegend(0.45,0.7,0.85,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i]->AddEntry(transfer_func_PTBC_noRF,"Without Moderator Effects","l");
+
+    l[i]->AddEntry(transfer_func_mean_PTBC_5itr,"With Moderator Effects","l");
+    transfer_func_mean_PTBC_5itr->SetLineColor(6);
+    transfer_func_mean_PTBC_5itr->SetLineWidth(2);
+    transfer_func_mean_PTBC_5itr->Draw("SAME");
+
+    l[i]->SetMargin(0.4);
+    l[i]->Draw();
+
+    //Pad 2
+    c[i]->cd(0);
+    p[i][1] = new TPad(Form("p_%d_1", i), Form("p_%d_1", i), 0., 0., 1., 0.35);
+    p[i][1]->SetFillColor(kWhite);
+    p[i][1]->SetTopMargin(0.00001);
+    p[i][1]->SetBottomMargin(0.25);
+    p[i][1]->SetRightMargin(0.05);
+    p[i][1]->SetBorderMode(0);
+    p[i][1]->Draw();
+    p[i][1]->cd();
+
+    TH1D* residual_plot_PTBC = (TH1D*)(transfer_func_mean_PTBC_5itr->Clone("residual_plot_PTBC"));
+    residual_plot_PTBC->Add(transfer_func_PTBC_noRF, -1);
+    residual_plot_PTBC->Divide(transfer_func_PTBC_noRF);
+    residual_plot_PTBC->Scale(100., "nosw2");
+    residual_plot_PTBC->SetTitle("");
+
+    // X Axis
+    residual_plot_PTBC->GetXaxis()->SetTitle("ToF (in ns)");
+    residual_plot_PTBC->GetXaxis()->SetTitleSize(0.1);
+    residual_plot_PTBC->GetXaxis()->SetLabelOffset(0.01);
+    residual_plot_PTBC->GetXaxis()->SetTitleOffset(0.85); //decrease to move up
+    residual_plot_PTBC->GetXaxis()->SetLabelSize(0.07);
+    // Y Axis
+    residual_plot_PTBC->GetYaxis()->SetTitle("\% Difference");
+    residual_plot_PTBC->GetYaxis()->SetTitleSize(0.1);
+    residual_plot_PTBC->GetYaxis()->SetTitleOffset(0.38);
+    residual_plot_PTBC->GetYaxis()->SetLabelSize(0.07);
+    residual_plot_PTBC->Draw();
+    gPad->SetLogx();
+
+    i++;
+
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+    c[i]->SetTopMargin(0.05);
+    c[i]->SetBottomMargin(0.1);
+    c[i]->SetRightMargin(0.1);
+    gStyle->SetPalette(57);
+    rf_hist->GetXaxis()->SetTitle("Neutron Energy (eV)");
+    rf_hist->GetYaxis()->SetTitle("Neutron Moderation Distance (cm)");
+    rf_hist->SetTitle("");
+    rf_hist->GetXaxis()->SetTitleOffset(1.2);
+    rf_hist->GetYaxis()->SetRangeUser(-100., 700.);
+    rf_hist->Draw("colz");
+    gPad->SetLogx();
+
+    l[i] = new TLegend(0.45,0.13,0.85,0.18);
+
+    // l[i]->AddEntry(rf_hist_peak,"Peak","l");
+    // rf_hist_peak->SetLineColor(1);
+    // rf_hist_peak->SetLineWidth(2);
+    // rf_hist_peak->Draw("SAME");
+
+    l[i]->AddEntry(rf_hist_mean,"Mean moderation distance","l");
+    rf_hist_mean->SetLineColor(2);
+    rf_hist_mean->SetLineWidth(2);
+    rf_hist_mean->Draw("SAME");
+
+    l[i]->SetMargin(0.4);
+    l[i]->Draw();
+
+    i++;
+
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+    c[i]->Draw();
+    // c[i]->SetLeftMargin(0.1);
+    // c[i]->SetRightMargin(0.05);
+    
+    //Pad 1
+    c[i]->cd(0);
+    p[i][0] = new TPad(Form("p_%d_0", i), Form("p_%d_0", i), 0., 0.35, 1., 1.);
+    p[i][0]->SetFillColor(kWhite);
+    p[i][0]->SetBottomMargin(0.00001);
+    p[i][0]->SetRightMargin(0.05);
+    p[i][0]->SetBorderMode(0);
+    p[i][0]->Draw();
+    p[i][0]->cd();
+
+    // Y Axis
+    transfer_func_FIMG_noRF->GetYaxis()->SetTitle("Energy (in eV)");
+    transfer_func_FIMG_noRF->GetYaxis()->SetLabelSize(0.05);
+    transfer_func_FIMG_noRF->GetYaxis()->SetTitleSize(0.06);
+    transfer_func_FIMG_noRF->GetYaxis()->SetTitleOffset(0.65);
+    // X Axis
+    transfer_func_FIMG_noRF->GetXaxis()->SetLabelOffset(999);
+    transfer_func_FIMG_noRF->GetXaxis()->SetLabelSize(0);
+    
+    transfer_func_FIMG_noRF->SetTitle("Transfer Function - FIMG");
+    transfer_func_FIMG_noRF->SetLineWidth(2);
+    transfer_func_FIMG_noRF->Draw(); //"HISTE"
+    transfer_func_FIMG_noRF->SetStats(0);
+    gPad->SetLogx();
+    gPad->SetLogy();
+
+    l[i] = new TLegend(0.45,0.7,0.85,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i]->AddEntry(transfer_func_FIMG_noRF,"Without Moderator Effects","l");
+
+    l[i]->AddEntry(transfer_func_mean_FIMG_5itr,"With Moderator Effects","l");
+    transfer_func_mean_FIMG_5itr->SetLineColor(2);
+    transfer_func_mean_FIMG_5itr->SetLineWidth(2);
+    transfer_func_mean_FIMG_5itr->Draw("SAME");
+
+    l[i]->SetMargin(0.4);
+    l[i]->Draw();
+
+    //Pad 2
+    c[i]->cd(0);
+    p[i][1] = new TPad(Form("p_%d_1", i), Form("p_%d_1", i), 0., 0., 1., 0.35);
+    p[i][1]->SetFillColor(kWhite);
+    p[i][1]->SetTopMargin(0.00001);
+    p[i][1]->SetBottomMargin(0.25);
+    p[i][1]->SetRightMargin(0.05);
+    p[i][1]->SetBorderMode(0);
+    p[i][1]->Draw();
+    p[i][1]->cd();
+
+    TH1D* residual_plot_FIMG = (TH1D*)(transfer_func_mean_FIMG_5itr->Clone("residual_plot_FIMG"));
+    residual_plot_FIMG->Add(transfer_func_FIMG_noRF, -1);
+    residual_plot_FIMG->Divide(transfer_func_FIMG_noRF);
+    residual_plot_FIMG->Scale(100., "nosw2");
+    residual_plot_FIMG->SetTitle("");
+
+    // X Axis
+    residual_plot_FIMG->GetXaxis()->SetTitle("ToF (in ns)");
+    residual_plot_FIMG->GetXaxis()->SetTitleSize(0.1);
+    residual_plot_FIMG->GetXaxis()->SetLabelOffset(0.01);
+    residual_plot_FIMG->GetXaxis()->SetTitleOffset(0.85); //decrease to move up
+    residual_plot_FIMG->GetXaxis()->SetLabelSize(0.07);
+    // Y Axis
+    residual_plot_FIMG->GetYaxis()->SetTitle("\% Difference");
+    residual_plot_FIMG->GetYaxis()->SetTitleSize(0.1);
+    residual_plot_FIMG->GetYaxis()->SetTitleOffset(0.38);
+    residual_plot_FIMG->GetYaxis()->SetLabelSize(0.07);
+    residual_plot_FIMG->Draw();
+    gPad->SetLogx();
+}
+
+void transfer_function(){
+
+    
+
+    // calculate_transfer_function();
 
     // store_hist();
     plot_hists();

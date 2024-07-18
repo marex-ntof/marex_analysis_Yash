@@ -70,6 +70,9 @@ Int_t plot_index = 0;
 
 void plot_norm_counts_plots(TH1D* norm_count_plot_1, const char* date_1, TH1D* norm_count_plot_2, const char* date_2, const char* plot_title, const char* output_file_name){
 
+    gStyle->SetCanvasDefW(800); //600
+    gStyle->SetCanvasDefH(400); //500 
+
     c[plot_index] = new TCanvas(Form("c%d", plot_index)," ");
     c[plot_index]->cd();
     c[plot_index]->Draw();
