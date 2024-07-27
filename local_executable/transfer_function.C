@@ -273,7 +273,7 @@ void plot_hists(){
     gPad->SetLogx();
     gPad->SetLogy();
 
-    l[i] = new TLegend(0.45,0.7,0.85,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i] = new TLegend(0.45,0.65,0.85,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
     l[i]->AddEntry(transfer_func_PTBC_noRF,"Without Moderator Effects","l");
 
     l[i]->AddEntry(transfer_func_mean_PTBC_5itr,"With Moderator Effects","l");
@@ -380,7 +380,7 @@ void plot_hists(){
     gPad->SetLogx();
     gPad->SetLogy();
 
-    l[i] = new TLegend(0.45,0.7,0.85,0.8); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i] = new TLegend(0.45,0.65,0.85,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
     l[i]->AddEntry(transfer_func_FIMG_noRF,"Without Moderator Effects","l");
 
     l[i]->AddEntry(transfer_func_mean_FIMG_5itr,"With Moderator Effects","l");

@@ -350,77 +350,6 @@ void determine_alpha_cut(Int_t det_num, TH2D* tof_amp_hist, TH1D* projection_his
     return;
 }
 
-void combine_all_cuts(){
-
-    fill_fit_ranges();
-
-    //Calculating TOF (x) bin edges FOR CUTS
-    Int_t Num_decades = 6;
-    Int_t num_bins_tof_cuts = bins_per_decade_cuts * Num_decades;
-    Double_t bin_edges_tof_cuts[num_bins_tof_cuts+1];
-    Double_t step_tof_cuts = ((Double_t) 1.0/(Double_t) bins_per_decade_cuts);
-    for(Int_t i = 0; i < num_bins_tof_cuts+1; i++)
-    {
-        Double_t base = 10.;
-        Double_t exponent = (step_tof_cuts * (Double_t) i) + 2.;
-        bin_edges_tof_cuts[i] = (Double_t) std::pow(base, exponent);
-    }
-
-    for (Int_t i = 0; i < 6; i++)
-    {
-        // using no filter runs to determine detector cuts
-        PTBC_tof_amp_hists[i] = retrive_TH2D_Histograms("../rootFiles/cutoffAnalysis_PTBC_none.root", Form("PTBC_tof_amp_det%i", i+2));
-
-        //Determining alphas cuts
-        projection_hists[i] = (TH1D*)PTBC_tof_amp_hists[i]->ProjectionY(Form("profile_fission_alphas_det%i", i+2), 5001, 6000);
-        alphas_fits_total[i] = new TF1(Form("alphas_total_fit_det%i", i+2), "expo(0)+gaus(2)", total_fit_ranges[i][0], total_fit_ranges[i][1]);
-        determine_alpha_cut(i+2, PTBC_tof_amp_hists[i], projection_hists[i], alphas_fits_total[i]);
-        // plot_alpha_cuts(i+2, projection_hists[i], alphas_fits_total[i]);
-        
-        //Determining gamma flash cuts
-        det_cut_hists[i] = new TH1D(Form("PTBC_cuts_det%i", i+2), Form("ToF-Amp cut Hist - PTBC Det %i - No Target", i+2), num_bins_tof_cuts, bin_edges_tof_cuts);
-        determine_gamma_flash_cuts(i+2, det_cut_hists[i]);
-        // plot_det_cuts(i+2, PTBC_tof_amp_hists[i], det_cut_hists[i], "No Target");
-
-        convert_hist_to_TCutG(i+2, det_cut_hists[i]);
-    }
-}
-
-void determine_skew_kurt(Int_t det_num, TH2D* tof_amp_hist){
-
-    TH2D* PTBC_tof_amp_hist_forCuts;
-
-    PTBC_tof_amp_hist_forCuts = (TH2D*)tof_amp_hist->Rebin2D((Int_t) 1000/bins_per_decade_cuts, 5, Form("tof_amp_forCuts_det%i", det_num));
-
-    Int_t skew_kurt_index = 0;
-    for (Int_t i = 5; i <= 10; i++) 
-    {
-        std::string projection_name = "profile_forCuts_bin_" + std::to_string(i);
-        TH1D* proj_hist = (TH1D*)PTBC_tof_amp_hist_forCuts->ProjectionY(projection_name.c_str(),i, i);
-        proj_hist->GetXaxis()->SetRangeUser(0., 10000.);
-        TF1 *gaus_fit_total = new TF1("gaus_fit_total", "gaus", 0, 10000);
-        // gaus_fit_total->SetParameters(par);
-        proj_hist->Fit(gaus_fit_total, "0R");
-
-        Double_t mean_val = gaus_fit_total->GetParameter(1);
-        Double_t std_dev = gaus_fit_total->GetParameter(2);
-
-        Double_t x_val = PTBC_tof_amp_hist_forCuts->GetXaxis()->GetBinCenter(i);
-        Double_t y_val_skew = calculate_skewness(proj_hist, mean_val, std_dev);
-        Double_t y_val_kurt = calculate_kurtosis(proj_hist, mean_val, std_dev);
-
-        // cout << "(x_val, skew, kurt) = " << x_val << ", " << y_val_skew << ", " << y_val_kurt << endl;
-
-        //Calculating the skewness and kurtosis
-        det_cuts_skewness[det_num-2]->SetPoint(skew_kurt_index, x_val, y_val_skew);
-        det_cuts_kurtosis[det_num-2]->SetPoint(skew_kurt_index, x_val, y_val_kurt);
-
-        // cout << "X point skew = " << det_cuts_skewness[det_num-2]->GetPointX(skew_kurt_index) << endl;
-        // cout << "Y point skew = " << det_cuts_skewness[det_num-2]->GetPointY(skew_kurt_index) << endl;
-        skew_kurt_index++;
-    }
-}
-
 void plot_alpha_cuts(Int_t det_num, TH1D* projection_hist, TF1* total_fit) {
 
     //Plotting
@@ -484,6 +413,79 @@ void plot_alpha_cuts(Int_t det_num, TH1D* projection_hist, TF1* total_fit) {
     alphas_plot_index++;
 
     return;
+}
+
+void determine_all_cuts(bool gamma_flash_cut){
+
+    fill_fit_ranges();
+
+    //Calculating TOF (x) bin edges FOR CUTS
+    Int_t Num_decades = 6;
+    Int_t num_bins_tof_cuts = bins_per_decade_cuts * Num_decades;
+    Double_t bin_edges_tof_cuts[num_bins_tof_cuts+1];
+    Double_t step_tof_cuts = ((Double_t) 1.0/(Double_t) bins_per_decade_cuts);
+    for(Int_t i = 0; i < num_bins_tof_cuts+1; i++)
+    {
+        Double_t base = 10.;
+        Double_t exponent = (step_tof_cuts * (Double_t) i) + 2.;
+        bin_edges_tof_cuts[i] = (Double_t) std::pow(base, exponent);
+    }
+
+    for (Int_t i = 0; i < 6; i++)
+    {
+        // using no filter runs to determine detector cuts
+        PTBC_tof_amp_hists[i] = retrive_TH2D_Histograms("../rootFiles/cutoffAnalysis_PTBC_none.root", Form("PTBC_tof_amp_det%i", i+2));
+        
+        //Determining alphas cuts
+        projection_hists[i] = (TH1D*)PTBC_tof_amp_hists[i]->ProjectionY(Form("profile_fission_alphas_det%i", i+2), 5001, 6000);
+        alphas_fits_total[i] = new TF1(Form("alphas_total_fit_det%i", i+2), "expo(0)+gaus(2)", total_fit_ranges[i][0], total_fit_ranges[i][1]);
+        determine_alpha_cut(i+2, PTBC_tof_amp_hists[i], projection_hists[i], alphas_fits_total[i]);
+        // plot_alpha_cuts(i+2, projection_hists[i], alphas_fits_total[i]);
+
+        if(gamma_flash_cut)
+        {
+            //Determining gamma flash cuts
+            det_cut_hists[i] = new TH1D(Form("PTBC_cuts_det%i", i+2), Form("ToF-Amp cut Hist - PTBC Det %i - No Target", i+2), num_bins_tof_cuts, bin_edges_tof_cuts);
+            determine_gamma_flash_cuts(i+2, det_cut_hists[i]);
+            // plot_det_cuts(i+2, PTBC_tof_amp_hists[i], det_cut_hists[i], "No Target");
+            convert_hist_to_TCutG(i+2, det_cut_hists[i]);
+        }
+    }
+}
+
+void determine_skew_kurt(Int_t det_num, TH2D* tof_amp_hist){
+
+    TH2D* PTBC_tof_amp_hist_forCuts;
+
+    PTBC_tof_amp_hist_forCuts = (TH2D*)tof_amp_hist->Rebin2D((Int_t) 1000/bins_per_decade_cuts, 5, Form("tof_amp_forCuts_det%i", det_num));
+
+    Int_t skew_kurt_index = 0;
+    for (Int_t i = 5; i <= 10; i++) 
+    {
+        std::string projection_name = "profile_forCuts_bin_" + std::to_string(i);
+        TH1D* proj_hist = (TH1D*)PTBC_tof_amp_hist_forCuts->ProjectionY(projection_name.c_str(),i, i);
+        proj_hist->GetXaxis()->SetRangeUser(0., 10000.);
+        TF1 *gaus_fit_total = new TF1("gaus_fit_total", "gaus", 0, 10000);
+        // gaus_fit_total->SetParameters(par);
+        proj_hist->Fit(gaus_fit_total, "0R");
+
+        Double_t mean_val = gaus_fit_total->GetParameter(1);
+        Double_t std_dev = gaus_fit_total->GetParameter(2);
+
+        Double_t x_val = PTBC_tof_amp_hist_forCuts->GetXaxis()->GetBinCenter(i);
+        Double_t y_val_skew = calculate_skewness(proj_hist, mean_val, std_dev);
+        Double_t y_val_kurt = calculate_kurtosis(proj_hist, mean_val, std_dev);
+
+        // cout << "(x_val, skew, kurt) = " << x_val << ", " << y_val_skew << ", " << y_val_kurt << endl;
+
+        //Calculating the skewness and kurtosis
+        det_cuts_skewness[det_num-2]->SetPoint(skew_kurt_index, x_val, y_val_skew);
+        det_cuts_kurtosis[det_num-2]->SetPoint(skew_kurt_index, x_val, y_val_kurt);
+
+        // cout << "X point skew = " << det_cuts_skewness[det_num-2]->GetPointX(skew_kurt_index) << endl;
+        // cout << "Y point skew = " << det_cuts_skewness[det_num-2]->GetPointY(skew_kurt_index) << endl;
+        skew_kurt_index++;
+    }
 }
 
 void plot_det_cuts(Int_t det_num, TH2D* tof_amp_hist, TCutG* det_cut) {
@@ -556,7 +558,107 @@ void plot_skew_kurt(Int_t det_num){
     // rightAxis->SetLineColor(kRed);
     // rightAxis->SetLabelColor(kRed);
     // rightAxis->Draw("SAME");
+}
 
+void plot_ringing_bin_fits(){
+
+    TH2D* tof_amp_hist = retrive_TH2D_Histograms("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det2");
+    tof_amp_hist->Rebin2D((Int_t) 1000/bins_per_decade_cuts, 5);
+    Int_t num_tof_bins = tof_amp_hist->GetNbinsX();
+    
+    TH1D* amp_projections[6];
+    TF1* projection_fits[6];
+    TPad* proj_hist_pads[6];
+    TLegend* proj_legends[6];
+
+    for (Int_t i = 5; i <= 10; i++)
+    {
+        
+        std::string projection_name = "profile_bin_" + std::to_string(i);
+        amp_projections[i-5] = (TH1D*)tof_amp_hist->ProjectionY(projection_name.c_str(),i, i);
+
+        projection_fits[i-5] = new TF1(Form("projection_fit_%i", i), "gaus", 0, 10000);
+        // gaus_fit_total->SetParameters(par);
+        amp_projections[i-5]->Fit(projection_fits[i-5], "0R");
+    }
+
+    //Plotting
+    SetMArEXStyle();
+    gStyle->SetCanvasDefW(1000); //600
+    gStyle->SetCanvasDefH(2000); //500 
+
+    TCanvas* ringing_fits_c = new TCanvas("ringing_fits_c", " ");
+    ringing_fits_c->cd();
+    ringing_fits_c->Draw();
+
+    proj_hist_pads[0] = new TPad("proj_hist_pad_0", "proj_hist_pad_0", 0., 0.67, 0.5, 1.);
+    proj_hist_pads[0]->SetBottomMargin(0.001);
+    
+    proj_hist_pads[1] = new TPad("proj_hist_pad_1", "proj_hist_pad_1", 0.5, 0.67, 1., 1.);
+    proj_hist_pads[1]->SetBottomMargin(0.001);
+
+    proj_hist_pads[2] = new TPad("proj_hist_pad_2", "proj_hist_pad_2", 0., 0.345, 0.5, 0.67);
+    proj_hist_pads[2]->SetTopMargin(0.001);
+    proj_hist_pads[2]->SetBottomMargin(0.001);
+
+    proj_hist_pads[3] = new TPad("proj_hist_pad_3", "proj_hist_pad_3", 0.5, 0.345, 1., 0.67);
+    proj_hist_pads[3]->SetTopMargin(0.001);
+    proj_hist_pads[3]->SetBottomMargin(0.001);
+
+    proj_hist_pads[4] = new TPad("proj_hist_pad_4", "proj_hist_pad_4", 0., 0., 0.5, 0.345);
+    proj_hist_pads[4]->SetTopMargin(0.001);
+
+    proj_hist_pads[5] = new TPad("proj_hist_pad_5", "proj_hist_pad_5", 0.5, 0., 1., 0.345);
+    proj_hist_pads[5]->SetTopMargin(0.001);
+
+    //Top Margin
+    Double_t top_margin = 0.05;
+    proj_hist_pads[0]->SetTopMargin(top_margin);
+    proj_hist_pads[1]->SetTopMargin(top_margin);
+
+    //Bottom Margin
+    Double_t bottom_margin = 0.13;
+    proj_hist_pads[4]->SetBottomMargin(bottom_margin);
+    proj_hist_pads[5]->SetBottomMargin(bottom_margin);
+
+    for (Int_t i = 0; i < 6; i++){
+
+        ringing_fits_c->cd(0);
+        proj_hist_pads[i]->SetFillColor(kWhite);
+        proj_hist_pads[i]->SetBorderMode(0);
+        proj_hist_pads[i]->SetRightMargin(0.06);
+        proj_hist_pads[i]->SetLeftMargin(0.15);
+        proj_hist_pads[i]->Draw();
+        proj_hist_pads[i]->cd();
+
+        amp_projections[i]->SetTitle("");
+        amp_projections[i]->GetXaxis()->SetTitle("Amplitude (a.u.)");
+        amp_projections[i]->GetXaxis()->SetRangeUser(0., 10000.);
+        amp_projections[i]->GetXaxis()->SetLabelSize(0.05);
+        amp_projections[i]->GetXaxis()->SetTitleSize(0.05);
+        amp_projections[i]->GetXaxis()->SetMaxDigits(3);
+
+        amp_projections[i]->GetYaxis()->SetTitle("Number of Events");
+        amp_projections[i]->GetYaxis()->SetLabelSize(0.05);
+        amp_projections[i]->GetYaxis()->SetTitleSize(0.05);
+        // amp_projections[i]->GetYaxis()->SetMaxDigits(3);
+        amp_projections[i]->Draw();
+
+        // Proj plot
+        projection_fits[i]->SetLineColor(2);
+        projection_fits[i]->Draw("SAME");
+
+        proj_legends[i] = new TLegend(0.65, 0.60, 0.85, 0.80);
+        proj_legends[i]->SetHeader(Form("Bin %i", i+5),"C");
+        proj_legends[i]->AddEntry(amp_projections[i], " Data", "l");
+        proj_legends[i]->AddEntry(projection_fits[i], " Gaussian Fit", "l");
+        proj_legends[i]->Draw();
+        TLegendEntry *header = (TLegendEntry*)proj_legends[i]->GetListOfPrimitives()->First();
+        // header->SetTextAlign(22);
+        // header->SetTextColor(2);
+        header->SetTextFont(62);
+        // header->SetTextSize(.09);
+    }
 }
 
 void StoreCutHists(){
@@ -581,22 +683,25 @@ void StoreCutHists(){
 
 void cutoffFitter_PTBC() {
 
-    // combine_all_cuts(); // Will recompute all the cuts
+    // determine_all_cuts(false); // Will recompute all the cuts
+
+    plot_ringing_bin_fits();
     
     // StoreCutHists(); // Will store the cuts in a root file
 
-    for (Int_t i = 0; i < 1; i++)
+    for (Int_t i = 0; i < 6; i++)
     {
-        tof_amp_hists_for_plots[i] = retrive_TH2D_Histograms(Form("../rootFiles/cutoffAnalysis_PTBC_%s.root", target_name.c_str()), Form("PTBC_tof_amp_det%i", i+2));
+        // cout << "Alpha cut for Det " << i+2 << " is " << det_alphas_cuts[i] << endl;
+        // tof_amp_hists_for_plots[i] = retrive_TH2D_Histograms(Form("../rootFiles/cutoffAnalysis_PTBC_%s.root", target_name.c_str()), Form("PTBC_tof_amp_det%i", i+2));
         // cut_hists_for_plots[i] = retrive_TH1D_Histograms("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
         // det_cuts_for_plots[i] = retrive_TCutG("../inputFiles/PTBC_cuts.root", Form("tof_amp_cut_det%i", i+2));
 
         // plot_det_cuts(i+2, tof_amp_hists_for_plots[i], det_cuts[i]);
 
-        det_cuts_skewness[i] = new TGraph();
-        det_cuts_kurtosis[i] = new TGraph();
-        determine_skew_kurt(i+2, tof_amp_hists_for_plots[i]);
-        plot_skew_kurt(i+2);
+        // det_cuts_skewness[i] = new TGraph();
+        // det_cuts_kurtosis[i] = new TGraph();
+        // determine_skew_kurt(i+2, tof_amp_hists_for_plots[i]);
+        // plot_skew_kurt(i+2);
     }
     
 }

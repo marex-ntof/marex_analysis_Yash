@@ -38,7 +38,7 @@ TCutG* cut[num_cuts];
 Int_t cutCounter = 0;
 
 TH2D* PTBC_tof_amp_hists[6];
-TH1D* PTBC_tof_amp_cuts[6];
+TCutG* PTBC_tof_amp_cuts[6];
 
 // TH2D* PTBC_tof_amp_hist_det2 = 0;
 // TH2D* PTBC_tof_amp_hist_det3 = 0;
@@ -179,6 +179,14 @@ TH2D* GetHist2D(const char* file_name, const char* hist_name) {
     // return histClone;
 }
 
+TCutG* retrive_TCutG(const char *file_name, const char *cut_name){
+    
+    TFile* root_file = TFile::Open(file_name, "READ");
+    TCutG* tcutg_new = (TCutG*)root_file->Get(cut_name);
+
+    return tcutg_new;
+}
+
 void retriveCuts(const char *file_name, const char *cut_name){
     TFile *hist_file = TFile::Open(file_name, "READ");
     if (!hist_file || hist_file->IsZombie()) {
@@ -190,24 +198,92 @@ void retriveCuts(const char *file_name, const char *cut_name){
     cutCounter++;
 }
 
-void hist2DPlots() {
+void plot_PTBC_ringing(){
 
-    // fillCutGraph_PTBC();
-    // fillCutGraph_FIMG();
+    TH2D* tof_amp_hist = GetHist2D("../rootFiles/cutoffAnalysis_PTBC_none.root", "PTBC_tof_amp_det2");
 
-    // retriveHistograms("../rootFiles/pkup.root", "delT_PTBC_beam_intensity_hist");
-    // retriveHistograms("../rootFiles/pkup.root", "delT_FIMG_beam_intensity_hist");
+    //Plotting
+    SetMArEXStyle();
+    // gStyle->SetOptStat(1110);
+    gStyle->SetPalette(57);
+    gStyle->SetCanvasDefW(1200); //600
+    gStyle->SetCanvasDefH(500); //500 
+
+    TCanvas *ringing_c = new TCanvas("ringing_c"," ");
+    ringing_c->cd();
+    ringing_c->Draw();
+
+    ringing_c->cd(0);
+    TPad* ringing_pad_1 = new TPad("ringing_pad_1", "ringing_pad_1", 0., 0., 0.5, 1.);
+    ringing_pad_1->SetFillColor(kWhite);
+    ringing_pad_1->SetBorderMode(0);
+    ringing_pad_1->SetTopMargin(0.07);
+    ringing_pad_1->SetBottomMargin(0.1);
+    ringing_pad_1->SetLeftMargin(0.1);
+    ringing_pad_1->SetRightMargin(0.11);
+    ringing_pad_1->Draw();
+    ringing_pad_1->cd();
+
+    tof_amp_hist->SetTitle("");
+    // X Axis
+    tof_amp_hist->GetXaxis()->SetLabelSize(0.04);
+    tof_amp_hist->GetXaxis()->SetTitleSize(0.04);
+    tof_amp_hist->GetXaxis()->SetTitleOffset(1.1);
+    tof_amp_hist->GetXaxis()->SetTitle("TOF (in ns)");
+    tof_amp_hist->GetXaxis()->SetRangeUser(630.957344480193, 10000.0);
+    // Y Axis
+    tof_amp_hist->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    tof_amp_hist->GetYaxis()->SetRangeUser(0., 10000.0);
+    tof_amp_hist->GetYaxis()->SetMaxDigits(4);
+    tof_amp_hist->Draw("COLZ");
+    gPad->SetLogx();
+    gPad->SetLogz();
+
+    /////////////////
+
+    ringing_c->cd(0);
+    TPad* ringing_pad_2 = new TPad("ringing_pad_2", "ringing_pad_2", 0.5, 0., 1., 1.);
+    ringing_pad_2->SetFillColor(kWhite);
+    ringing_pad_2->SetBorderMode(0);
+    ringing_pad_2->SetTopMargin(0.07);
+    ringing_pad_2->SetBottomMargin(0.1);
+    ringing_pad_2->SetLeftMargin(0.1);
+    ringing_pad_2->SetRightMargin(0.11);
+    ringing_pad_2->Draw();
+    ringing_pad_2->cd();
+
+    // TH2D* tof_amp_hist_rebin = (TH2D*)(tof_amp_hist->Clone("tof_amp_hist_rebin"));
+    TH2D* tof_amp_hist_rebin = (TH2D*)tof_amp_hist->Rebin2D(200, 5, "tof_amp_hist_rebin");
+    tof_amp_hist_rebin->SetTitle("");
+    // X Axis
+    tof_amp_hist_rebin->GetXaxis()->SetLabelSize(0.04);
+    tof_amp_hist_rebin->GetXaxis()->SetTitleSize(0.04);
+    tof_amp_hist_rebin->GetXaxis()->SetTitleOffset(1.1);
+    tof_amp_hist_rebin->GetXaxis()->SetTitle("TOF (in ns)");
+    tof_amp_hist_rebin->GetXaxis()->SetRangeUser(630.957344480193, 10000.0);
+    // Y Axis
+    tof_amp_hist_rebin->GetYaxis()->SetTitle("Amplitude (a.u.)");
+    tof_amp_hist_rebin->GetYaxis()->SetRangeUser(0., 10000.0);
+    tof_amp_hist_rebin->GetYaxis()->SetMaxDigits(4);
+    tof_amp_hist_rebin->Draw("COLZ");
+    gPad->SetLogx();
+    gPad->SetLogz();
+}
+
+void plot_det_cuts_ptbc(){
 
     for (Int_t i = 0; i < 6; i++)
     {
-        PTBC_tof_amp_hists[i] = GetHist2D("../rootFiles/cutoffAnalysis_PTBC_al5.root", Form("PTBC_tof_amp_fIn_det%i", i+2));
-        PTBC_tof_amp_cuts[i] = GetHist1D("../rootFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
+        PTBC_tof_amp_hists[i] = GetHist2D("../rootFiles/cutoffAnalysis_PTBC_none.root", Form("PTBC_tof_amp_det%i", i+2));
+        PTBC_tof_amp_cuts[i] = retrive_TCutG("../inputFiles/PTBC_cuts.root", Form("tof_amp_cut_det%i", i+2));
     }
 
     //Plotting
     SetMArEXStyle();
     // gStyle->SetOptStat(1110);
     gStyle->SetPalette(57);
+    gStyle->SetCanvasDefW(1000); //600
+    gStyle->SetCanvasDefH(500); //500 
 
     TCanvas *c[6];
 
@@ -217,7 +293,22 @@ void hist2DPlots() {
     {
         c[i] = new TCanvas(Form("c%d", i)," ");
         c[i]->cd();
+        c[i]->SetBorderMode(0);
+        c[i]->SetTopMargin(0.1);
+        c[i]->SetBottomMargin(0.1);
+        c[i]->SetLeftMargin(0.1);
+        c[i]->SetRightMargin(0.09);
+        
+        PTBC_tof_amp_hists[i]->SetTitle(Form("Detector %i", i+2));
+        // X Axis
+        PTBC_tof_amp_hists[i]->GetXaxis()->SetLabelSize(0.04);
+        PTBC_tof_amp_hists[i]->GetXaxis()->SetTitleSize(0.04);
+        PTBC_tof_amp_hists[i]->GetXaxis()->SetTitleOffset(1.1);
         PTBC_tof_amp_hists[i]->GetXaxis()->SetTitle("TOF (in ns)");
+        // Y Axis
+        PTBC_tof_amp_hists[i]->GetYaxis()->SetLabelSize(0.04);
+        PTBC_tof_amp_hists[i]->GetYaxis()->SetTitleSize(0.04);
+        PTBC_tof_amp_hists[i]->GetYaxis()->SetTitleOffset(1.2);
         PTBC_tof_amp_hists[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
         // PTBC_tof_amp_hists[i]->GetXaxis()->SetRangeUser(3e2,2e3);
         PTBC_tof_amp_hists[i]->Draw("COLZ");
@@ -227,7 +318,23 @@ void hist2DPlots() {
         PTBC_tof_amp_cuts[i]->SetLineColor(2);
         PTBC_tof_amp_cuts[i]->SetLineWidth(2);
         PTBC_tof_amp_cuts[i]->Draw("SAME");
+        c[i]->Print(Form("/home/yash/Thesis/marex/figures/bkgd_plots/tof_amp_hist_cut_det%i.png", i+2));
     }
+}
+
+void hist2DPlots() {
+
+    // plot_PTBC_ringing();
+
+    plot_det_cuts_ptbc();
+
+    // fillCutGraph_PTBC();
+    // fillCutGraph_FIMG();
+
+    // retriveHistograms("../rootFiles/pkup.root", "delT_PTBC_beam_intensity_hist");
+    // retriveHistograms("../rootFiles/pkup.root", "delT_FIMG_beam_intensity_hist");
+
+    
 
     // c[i] = new TCanvas(Form("c%d", i)," ");
     // c[i]->cd();

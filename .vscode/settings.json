@@ -62,6 +62,7 @@
         "cutoffFitter.C": "cpp",
         "fimgCutsAna.C": "cpp",
         "cutoffFitter_PTBC.C": "cpp",
-        "cutoffFitter_PTBC_lin.C": "cpp"
+        "cutoffFitter_PTBC_lin.C": "cpp",
+        "detectorAna.C": "cpp"
     }
 }
