@@ -685,18 +685,18 @@ void cutoffFitter_PTBC() {
 
     // determine_all_cuts(false); // Will recompute all the cuts
 
-    plot_ringing_bin_fits();
+    // plot_ringing_bin_fits();
     
     // StoreCutHists(); // Will store the cuts in a root file
 
     for (Int_t i = 0; i < 6; i++)
     {
         // cout << "Alpha cut for Det " << i+2 << " is " << det_alphas_cuts[i] << endl;
-        // tof_amp_hists_for_plots[i] = retrive_TH2D_Histograms(Form("../rootFiles/cutoffAnalysis_PTBC_%s.root", target_name.c_str()), Form("PTBC_tof_amp_det%i", i+2));
-        // cut_hists_for_plots[i] = retrive_TH1D_Histograms("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
-        // det_cuts_for_plots[i] = retrive_TCutG("../inputFiles/PTBC_cuts.root", Form("tof_amp_cut_det%i", i+2));
+        tof_amp_hists_for_plots[i] = retrive_TH2D_Histograms(Form("../rootFiles/cutoffAnalysis_PTBC_%s.root", target_name.c_str()), Form("PTBC_tof_amp_det%i", i+2));
+        cut_hists_for_plots[i] = retrive_TH1D_Histograms("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
+        det_cuts_for_plots[i] = retrive_TCutG("../inputFiles/PTBC_cuts.root", Form("tof_amp_cut_det%i", i+2));
 
-        // plot_det_cuts(i+2, tof_amp_hists_for_plots[i], det_cuts[i]);
+        plot_det_cuts(i+2, tof_amp_hists_for_plots[i], det_cuts_for_plots[i]);
 
         // det_cuts_skewness[i] = new TGraph();
         // det_cuts_kurtosis[i] = new TGraph();
