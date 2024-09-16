@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 c_data_path = '../evalData/C_tot_xsec.txt'
 h_data_path = '../evalData/JENDL_H_tot_xsec.txt'
 ar_t = 10 #cm
-cf_t = 0.04 #cm
+cf_t = 0.4 #cm
 bins_per_decade = 50
 ar_vary_t = 1 #cm
 cf_vary_t = 0.01 #cm
@@ -19,7 +19,9 @@ n_value_ar = ar_t * ((ar_bottle_pressure)/(8.31446261815324 * ar_bottle_temp * 1
 n_value_ar_more = (ar_t+1) * ((ar_bottle_pressure)/(8.31446261815324 * ar_bottle_temp * 1e6)) * (6.02214076e23) * (1e-24)
 n_value_ar_less = (ar_t-1) * ((ar_bottle_pressure)/(8.31446261815324 * ar_bottle_temp * 1e6)) * (6.02214076e23) * (1e-24)
 
-cf_density = 1.93 #g/cm3
+n_value_ar_out = ar_t * ((1e5)/(8.31446261815324 * ar_bottle_temp * 1e6)) * (6.02214076e23) * (1e-24)
+
+cf_density = 1.55 #1.93 #g/cm3
 #2.267 - c density
 n_value_c = cf_t * cf_density * 0.9 * (6.02214076e23) * (1e-24) / (12.011)
 n_value_c_more = (cf_t+cf_vary_t) * cf_density * 0.9 * (6.02214076e23) * (1e-24) / (12.011)
@@ -214,11 +216,11 @@ def different_trans_ar_c():
     calc_trans(ar_xsec_hist, n_value_ar_more, trans_more_ar)
     calc_trans(ar_xsec_hist, n_value_ar_less, trans_less_ar)
 
-    # num_bins = xsec_hist_1.GetXaxis().GetNbins()
+    # num_bins = xsec_hist_1.GetXaxis().GetNbins()n_value_ar_out
     for i in range(0,num_bins):
         numa = math.exp(- n_value_ar * ar_xsec_hist.GetBinContent(i+1)) * math.exp(- n_value_c * c_xsec_hist.GetBinContent(i+1)) * math.exp(- n_value_h * h_xsec_hist.GetBinContent(i+1))
-        denom_1 = math.exp(- n_value_c_more * c_xsec_hist.GetBinContent(i+1)) * math.exp(- n_value_h_more * h_xsec_hist.GetBinContent(i+1))
-        denom_2 = math.exp(- n_value_c_less * c_xsec_hist.GetBinContent(i+1)) * math.exp(- n_value_h_less * h_xsec_hist.GetBinContent(i+1))
+        denom_1 = math.exp(- n_value_ar_out * ar_xsec_hist.GetBinContent(i+1)) * math.exp(- n_value_c_more * c_xsec_hist.GetBinContent(i+1)) * math.exp(- n_value_h_more * h_xsec_hist.GetBinContent(i+1))
+        denom_2 = math.exp(- n_value_ar_out * ar_xsec_hist.GetBinContent(i+1)) * math.exp(- n_value_c_less * c_xsec_hist.GetBinContent(i+1)) * math.exp(- n_value_h_less * h_xsec_hist.GetBinContent(i+1))
         trans_more_cf.append(numa/denom_1)
         trans_less_cf.append(numa/denom_2)
 
@@ -277,7 +279,7 @@ def cf_trans():
     plt.plot(energy_bin_centers[2:], trans_cf[2:], linestyle = '-', color='black', label=f'Transmission - {cf_t}cm CF')
     plt.fill_between(energy_bin_centers[2:], trans_cf_less[2:], trans_cf_more[2:], alpha=0.2, color='red', label=f'Varrying CF {cf_vary_t}cm')
     plt.xlim(1e-1,1e2)
-    plt.ylim(0.2,0.4)
+    plt.ylim(0.35,0.45)
     plt.xscale('log')
     plt.xlabel('Incident Energy (keV)')
     plt.ylabel('Transmission')
@@ -285,8 +287,8 @@ def cf_trans():
     plt.show()
 
 def main():
-    varrying_ar_c_thickness()
-    # different_trans_ar_c()
+    # varrying_ar_c_thickness()
+    different_trans_ar_c()
     # cf_trans()
 
 if __name__ == "__main__":

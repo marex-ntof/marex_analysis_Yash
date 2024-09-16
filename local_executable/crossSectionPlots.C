@@ -250,6 +250,8 @@ void jendl_argon(Double_t n, Int_t bpd){
     }
 }
 
+
+////// Do not use for transmission calculation
 TH1D* retriveHistogramsChangeBPD(const char *fname, const char *hist_name, Int_t bpd_old, Int_t bpd_new){
 
     // if(bpd_old < bpd_new) {

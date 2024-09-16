@@ -386,16 +386,16 @@ void calc_trans(const char *fname, Int_t num_bins_e, Double_t bin_edges_e[]){
 
     cout << "Extracting Histograms " << endl;
     energy_hist_target_in[0] = (TH1D*)hist_file->Get("energy_hist_target_in_thecut");
-    energy_hist_target_in[1] = (TH1D*)hist_file->Get("energy_hist_target_in_10more");
-    energy_hist_target_in[2] = (TH1D*)hist_file->Get("energy_hist_target_in_20more");
-    energy_hist_target_in[3] = (TH1D*)hist_file->Get("energy_hist_target_in_10less");
-    energy_hist_target_in[4] = (TH1D*)hist_file->Get("energy_hist_target_in_20less");
+    energy_hist_target_in[1] = (TH1D*)hist_file->Get("energy_hist_target_in_20more");
+    energy_hist_target_in[2] = (TH1D*)hist_file->Get("energy_hist_target_in_50more");
+    energy_hist_target_in[3] = (TH1D*)hist_file->Get("energy_hist_target_in_20less");
+    energy_hist_target_in[4] = (TH1D*)hist_file->Get("energy_hist_target_in_50less");
 
     energy_hist_target_out[0] = (TH1D*)hist_file->Get("energy_hist_target_out_thecut");
-    energy_hist_target_out[1] = (TH1D*)hist_file->Get("energy_hist_target_out_10more");
-    energy_hist_target_out[2] = (TH1D*)hist_file->Get("energy_hist_target_out_20more");
-    energy_hist_target_out[3] = (TH1D*)hist_file->Get("energy_hist_target_out_10less");
-    energy_hist_target_out[4] = (TH1D*)hist_file->Get("energy_hist_target_out_20less");
+    energy_hist_target_out[1] = (TH1D*)hist_file->Get("energy_hist_target_out_20more");
+    energy_hist_target_out[2] = (TH1D*)hist_file->Get("energy_hist_target_out_50more");
+    energy_hist_target_out[3] = (TH1D*)hist_file->Get("energy_hist_target_out_20less");
+    energy_hist_target_out[4] = (TH1D*)hist_file->Get("energy_hist_target_out_50less");
 
     cout << "Extracting Norm Factors " << endl;
     std::vector<Double_t> *norm_factors_temp;
@@ -405,10 +405,10 @@ void calc_trans(const char *fname, Int_t num_bins_e, Double_t bin_edges_e[]){
 
     //transmission histogram
     transmission_hist[0] = new TH1D("transmission_hist_thecut","Transmission Hist - The Cut",num_bins_e,bin_edges_e);
-    transmission_hist[1] = new TH1D("transmission_hist_10more","Transmission Hist - 10%% More",num_bins_e,bin_edges_e);
-    transmission_hist[2] = new TH1D("transmission_hist_20more","Transmission Hist - 20%% More",num_bins_e,bin_edges_e);
-    transmission_hist[3] = new TH1D("transmission_hist_10less","Transmission Hist - 10%% Less",num_bins_e,bin_edges_e);
-    transmission_hist[4] = new TH1D("transmission_hist_20less","Transmission Hist - 20%% Less",num_bins_e,bin_edges_e);
+    transmission_hist[1] = new TH1D("transmission_hist_20more","Transmission Hist - 20%% More",num_bins_e,bin_edges_e);
+    transmission_hist[2] = new TH1D("transmission_hist_50more","Transmission Hist - 50%% More",num_bins_e,bin_edges_e);
+    transmission_hist[3] = new TH1D("transmission_hist_20less","Transmission Hist - 20%% Less",num_bins_e,bin_edges_e);
+    transmission_hist[4] = new TH1D("transmission_hist_50less","Transmission Hist - 50%% Less",num_bins_e,bin_edges_e);
     
     //Transmission
     for (Int_t i = 0; i < 5; i++)
@@ -467,8 +467,8 @@ void ptbcCutsAna(){
     gStyle->SetStatH(0.1);
     gStyle->SetStatW(0.17);
 
-    TCanvas *c[1];
-    TLegend *l[1];
+    TCanvas *c[2];
+    TLegend *l[2];
 
     int i = 0;
 
@@ -489,19 +489,19 @@ void ptbcCutsAna(){
 
     transmission_hist[1]->SetLineColor(3);
     transmission_hist[1]->Draw("SAME");
-    l[i]->AddEntry(transmission_hist[1],"Cut 10%% More","l");
+    l[i]->AddEntry(transmission_hist[1],"Cut 20%% More","l");
 
     transmission_hist[2]->SetLineColor(4);
     transmission_hist[2]->Draw("SAME");
-    l[i]->AddEntry(transmission_hist[2],"Cut 20%% More","l");
+    l[i]->AddEntry(transmission_hist[2],"Cut 50%% More","l");
 
     transmission_hist[3]->SetLineColor(6);
     transmission_hist[3]->Draw("SAME");
-    l[i]->AddEntry(transmission_hist[3],"Cut 10%% Less","l");
+    l[i]->AddEntry(transmission_hist[3],"Cut 20%% Less","l");
 
     transmission_hist[4]->SetLineColor(7);
     transmission_hist[4]->Draw("SAME");
-    l[i]->AddEntry(transmission_hist[4],"Cut 20%% Less","l");
+    l[i]->AddEntry(transmission_hist[4],"Cut 50%% Less","l");
 
     if (fillENDF){
         l[i]->AddEntry(endf_trans_hist,"ENDF","l");
@@ -513,4 +513,8 @@ void ptbcCutsAna(){
 
     l[i]->SetMargin(0.4);
     l[i]->Draw();
+
+    i++;
+
+    
 }  
