@@ -84,7 +84,7 @@ TH1D* norm_counts_ArgonFull_oct22_FIMG = 0;
 // TH1D* day_night_emptyTank_oct15_FIMG = 0;
 // TH1D* day_night_Argon_oct22_FIMG = 0;
 
-Int_t bins_per_decade = 100;
+Int_t bins_per_decade = 50;
 
 // Function to convert hhmmss format to seconds
 Int_t timeToSeconds(const std::string& timeStr) {

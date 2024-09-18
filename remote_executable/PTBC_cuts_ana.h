@@ -1,9 +1,9 @@
 /**
- * @file detectorAna.h
+ * @file PTBC_cuts_ana.h
  * @author Yashwanth Bezawada [ysbezawada@ucdavis.edu]
  * @brief 
  * @version 0.1
- * @date 2023-11-13
+ * @date 2024-09-06
  */
 
 #include <TROOT.h>
@@ -29,8 +29,8 @@
 #include "tools.h"
 
 //////// Run variables
-const std::string target_name("cf_bottle_rotBack"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, al5_c_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
-const std::string target_out_name("none_ts"); //none, none_ts, ar_bottle
+const std::string target_name("bi1"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, bi1p2_ts, al5_c_ts, cf_bottle, cf_bottle_rot, cf_bottle_rotBack, ar_bottle_full
+const std::string target_out_name("none"); //none, none_ts, ar_bottle
 // const std::string mode("run");
 // bi1, al3, al5, al8 - none
 
@@ -40,21 +40,13 @@ TFile *outputRootFile = 0;
 TH1D* PTBC_tof_amp_cuts[6];
 
 TH1D* transfer_function_PTBC = 0;
-TH1D* transfer_function_FIMG = 0;
 
-TH1D* energy_hist_target_in_PTB = 0;
-TH1D* energy_hist_target_in_FIMG = 0;
-TH1D* energy_hist_target_out_PTB = 0;
-TH1D* energy_hist_target_out_FIMG = 0;
-
-TH1D* tof_hist_target_in_PTB = 0;
-TH1D* tof_hist_target_in_FIMG = 0;
-TH1D* tof_hist_target_out_PTB = 0;
-TH1D* tof_hist_target_out_FIMG = 0;
+TH1D* energy_hist_target_in[5];
+TH1D* energy_hist_target_out[5];
 
 std::vector<Double_t> norm_factors;
 
-Int_t bins_per_decade = 1000;
+Int_t bins_per_decade = 20;
 
 ////////////////////////
 //// vectors to store run numbers
@@ -163,34 +155,9 @@ void fillRuns(){
         }
     }
 
-    // // Al 5 cm filter
-    // cout << "Setting up Al (5 cm) filter run list" << endl;
-    // // filter_in_runs.reserve( c_ta_f_al5_t_out.size() + c_out_f_al5_t_out.size() + c_pb_f_al5_t_out.size() + c_c_f_al5_t_out.size() + c_au_f_al5_t_out.size() ); //
-    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_ta_f_al5_t_out.begin(), c_ta_f_al5_t_out.end() );
-    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_out_f_al5_t_out.begin(), c_out_f_al5_t_out.end() );
-    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_pb_f_al5_t_out.begin(), c_pb_f_al5_t_out.end() );
-    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_c_f_al5_t_out.begin(), c_c_f_al5_t_out.end() );
-    // f_al5_t_out_runs.insert( f_al5_t_out_runs.end(), c_au_f_al5_t_out.begin(), c_au_f_al5_t_out.end() );
-
     cout << "Setting up filter out run list" << endl;
-    // filter_out_runs.reserve( c_au_f_out_t_out.size() + c_atic_f_out_t_out.size() + c_out_f_out_t_out.size() + c_pb_f_out_t_out.size() + c_ta_f_out_t_out.size() + c_c_f_out_t_out.size() );
-    // f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_au_f_out_t_out.begin(), c_au_f_out_t_out.end() );
-    // f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_atic_f_out_t_out.begin(), c_atic_f_out_t_out.end() );
     f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_out_f_out_t_out.begin(), c_out_f_out_t_out.end() );
     f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_pb_f_out_t_out.begin(), c_pb_f_out_t_out.end() );
     f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_ta_f_out_t_out.begin(), c_ta_f_out_t_out.end() );
     f_out_t_out_runs.insert( f_out_t_out_runs.end(), c_c_f_out_t_out.begin(), c_c_f_out_t_out.end() );
 }
-
-// Double_t get_rf_length_mean(Double_t n_energy){ // energy in eV;
-//     Int_t e_bin_num = rf_hist->GetXaxis()->FindBin(n_energy);
-//     std::string projection_name = "profile_" + std::to_string(n_energy);
-//     TH1D* projection = (TH1D*)rf_hist->ProjectionY(
-//         projection_name.c_str(),
-//         e_bin_num, e_bin_num
-//     );
-    
-//     Double_t rf_length = projection->GetMean(1) * 0.01; //converting to m
-    
-//     return rf_length; //in m
-// }
