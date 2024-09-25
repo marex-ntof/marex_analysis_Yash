@@ -394,7 +394,7 @@ void calc_xsec(const char *fname, Int_t num_bins_e, Double_t bin_edges_e[]){
 
     //Target In Hists
     energy_hist_target_in_PTBC_new = new TH1D("energy_hist_target_in_PTBC_new","Energy Hist Target In - PTBC", num_bins_e, bin_edges_e);
-    energy_hist_target_in_FIMG_new = new TH1D("energy_hist_target_in_FIMG_new","Energy Hist Target In - FIMG", num_bins_e, bin_edges_e);\
+    energy_hist_target_in_FIMG_new = new TH1D("energy_hist_target_in_FIMG_new","Energy Hist Target In - FIMG", num_bins_e, bin_edges_e);
     //Target Out Hists
     energy_hist_target_out_PTBC_new = new TH1D("energy_hist_target_out_PTBC_new","Energy Hist Target Out - PTBC", num_bins_e, bin_edges_e);
     energy_hist_target_out_FIMG_new = new TH1D("energy_hist_target_out_FIMG_new","Energy Hist Target Out - FIMG", num_bins_e, bin_edges_e);
@@ -489,6 +489,172 @@ void calc_xsec(const char *fname, Int_t num_bins_e, Double_t bin_edges_e[]){
     cout << "Total Protons Target Out = " << norm_factors[1] << endl;
 }
 
+void plot_hists(){
+    //Plotting
+    SetMArEXStyle();
+
+    gStyle->SetStatX(0.27);
+    gStyle->SetStatY(0.9);
+    gStyle->SetStatH(0.1);
+    gStyle->SetStatW(0.17);
+
+    TCanvas *c[4];
+    TLegend *l[4];
+
+    int i = 0;
+
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+
+    l[i] = new TLegend(0.77,0.7,0.86,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i]->AddEntry(transmission_hist_e_PTBC,"PTBC","l");
+    
+    transmission_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
+    transmission_hist_e_PTBC->GetYaxis()->SetTitle("Transmission");
+    transmission_hist_e_PTBC->SetTitle(Form("Transmission Histogram - %s", filter_name_title.c_str()));
+    transmission_hist_e_PTBC->SetLineWidth(1);
+    transmission_hist_e_PTBC->GetXaxis()->SetRangeUser(1e-1,1e8);
+    transmission_hist_e_PTBC->Draw(); //"HISTE"
+    transmission_hist_e_PTBC->SetStats(0);
+    // transmission_hist_e_PTBC->SetMarkerStyle(6);
+    // transmission_hist_e_PTBC->SetMarkerSize(0.5);
+    // gPad->SetGrid();
+    gPad->SetLogx();
+    // gStyle->SetPalette(57);
+
+    l[i]->AddEntry(transmission_hist_e_FIMG,"FIMG","l");
+    transmission_hist_e_FIMG->SetLineColor(6);
+    transmission_hist_e_FIMG->SetLineWidth(1);
+    transmission_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-1,1e6);
+    transmission_hist_e_FIMG->Draw("SAME");
+
+    if (fillENDF){
+        l[i]->AddEntry(endf_trans_hist,"ENDF","l");
+        endf_trans_hist->SetLineColor(2);
+        endf_trans_hist->SetLineWidth(2);
+        endf_trans_hist->GetXaxis()->SetRangeUser(1e-1,1e8);
+        endf_trans_hist->Draw("SAME");
+    }
+
+    if (fillJENDL)
+    {
+        l[i]->AddEntry(jendl_trans_hist,"JENDL-5","l");
+        jendl_trans_hist->SetLineColor(1);
+        jendl_trans_hist->SetLineWidth(2);
+        // jendl_trans_hist->GetXaxis()->SetRangeUser(1e-2,2e7);
+        jendl_trans_hist->Draw("SAME");
+    }
+
+    // auto endf_xsec_graph = new TGraph();
+    // auto jendl_xsec_graph = new TGraph();
+
+    // if (fillENDF){
+    //     auto endf_trans_graph = new TGraph();
+    //     for (Int_t i = 0; i < endf_e.size(); i++)
+    //     {
+    //         endf_trans_graph->SetPoint(i+1, endf_e.at(i), endf_trans.at(i));
+    //     }
+    //     l[i]->AddEntry(endf_trans_graph,"ENDF","l");
+    //     endf_trans_graph->SetLineColor(2);
+    //     endf_trans_graph->SetLineWidth(1);
+    //     // endf_trans_graph->GetXaxis()->SetRangeUser(1e-2,2e7);
+    //     endf_trans_graph->Draw("SAME");
+    // }
+
+    // if (fillJENDL)
+    // {
+    //     auto jendl_trans_graph = new TGraph();
+    //     for (Int_t i = 0; i < jendl_e.size(); i++)
+    //     {
+    //         jendl_trans_graph->SetPoint(i+1, jendl_e.at(i), jendl_trans.at(i));
+    //     }
+    //     l[i]->AddEntry(jendl_trans_graph,"JENDL-5","l");
+    //     jendl_trans_graph->SetLineColor(1);
+    //     jendl_trans_graph->SetLineWidth(1);
+    //     // jendl_trans_graph->GetXaxis()->SetRangeUser(1e-2,2e7);
+    //     jendl_trans_graph->Draw("SAME");
+    // }
+    
+
+    l[i]->SetMargin(0.4);
+    l[i]->Draw();
+    // c[i]->Print(Form("../plots/h_trans_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
+
+    i++;
+
+    c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->cd();
+
+    l[i] = new TLegend(0.77,0.7,0.86,0.85);
+    l[i]->AddEntry(cross_section_hist_e_PTBC,"PTBC","l");
+
+    cross_section_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
+    cross_section_hist_e_PTBC->GetYaxis()->SetTitle("Cross Section (in barns)");
+    cross_section_hist_e_PTBC->SetTitle(Form("Cross Section Histogram - %s", filter_name_title.c_str()));
+    cross_section_hist_e_PTBC->SetLineWidth(1);
+    cross_section_hist_e_PTBC->GetXaxis()->SetRangeUser(1e-1,1e8);
+    cross_section_hist_e_PTBC->Draw(); //"HISTE"
+    cross_section_hist_e_PTBC->SetStats(0);
+    // cross_section_hist_e_PTBC->SetMarkerStyle(6);
+    // cross_section_hist_e_PTBC->SetMarkerSize(0.5);
+    // gPad->SetGrid();
+    gPad->SetLogx();
+    // gStyle->SetPalette(57);
+
+    l[i]->AddEntry(cross_section_hist_e_FIMG,"FIMG","l");
+    cross_section_hist_e_FIMG->SetLineColor(6);
+    cross_section_hist_e_FIMG->SetLineWidth(1);
+    cross_section_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-1,1e6);
+    cross_section_hist_e_FIMG->Draw("SAME");
+
+    if (fillENDF){
+        l[i]->AddEntry(endf_xsec_hist,"ENDF","l");
+        endf_xsec_hist->SetLineColor(2);
+        endf_xsec_hist->SetLineWidth(2);
+        endf_xsec_hist->GetXaxis()->SetRangeUser(1e-1,1e8);
+        endf_xsec_hist->Draw("SAME");
+    }
+
+    if (fillJENDL)
+    {
+        l[i]->AddEntry(jendl_xsec_hist,"JENDL-5","l");
+        jendl_xsec_hist->SetLineColor(1);
+        jendl_xsec_hist->SetLineWidth(2);
+        // jendl_xsec_hist->GetXaxis()->SetRange(1e-2,2e7);
+        jendl_xsec_hist->Draw("SAME");
+    }
+
+    l[i]->SetMargin(0.4);
+    l[i]->Draw();
+    // c[i]->Print(Form("../plots/h_xsec_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
+} 
+
+void store_hists(){
+    
+    TFile *f = new TFile(Form("../rootFiles/trans_xsec_hists_%s_%ibpd.root", filter_name.c_str(), bins_per_decade),"recreate");
+
+    transmission_hist_e_PTBC->Write();
+    transmission_hist_e_FIMG->Write();
+    cross_section_hist_e_PTBC->Write();
+    cross_section_hist_e_FIMG->Write();
+
+    if (fillENDF)
+    {
+        endf_trans_hist->Write();
+        endf_xsec_hist->Write();
+    }
+
+    if (fillJENDL)
+    {
+        jendl_trans_hist->Write();
+        jendl_xsec_hist->Write();
+    }
+    
+    f->Close();
+
+    std::cout << Form("Created output file 'trans_xsec_hists_%s_%ibpd.root'", filter_name.c_str(), bins_per_decade) << std::endl;
+}
+
 void crossSectionPlots(){
 
     fillNumDensityMap();
@@ -561,139 +727,14 @@ void crossSectionPlots(){
         }  
 
     }
-    
-    //Plotting
-    SetMArEXStyle();
 
-    gStyle->SetStatX(0.27);
-    gStyle->SetStatY(0.9);
-    gStyle->SetStatH(0.1);
-    gStyle->SetStatW(0.17);
-
-    TCanvas *c[4];
-    TLegend *l[4];
-
-    int i = 0;
-
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-
-    l[i] = new TLegend(0.77,0.7,0.86,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
-    l[i]->AddEntry(transmission_hist_e_PTBC,"PTBC","l");
-    
-    transmission_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
-    transmission_hist_e_PTBC->GetYaxis()->SetTitle("Transmission");
-    transmission_hist_e_PTBC->SetTitle(Form("Transmission Histogram - %s", filter_name_title.c_str()));
-    transmission_hist_e_PTBC->SetLineWidth(2);
-    transmission_hist_e_PTBC->Draw(); //"HISTE"
-    transmission_hist_e_PTBC->SetStats(0);
-    // transmission_hist_e_PTBC->SetMarkerStyle(6);
-    // transmission_hist_e_PTBC->SetMarkerSize(0.5);
-    // gPad->SetGrid();
-    gPad->SetLogx();
-    // gStyle->SetPalette(57);
-
-    l[i]->AddEntry(transmission_hist_e_FIMG,"FIMG","l");
-    transmission_hist_e_FIMG->SetLineColor(6);
-    transmission_hist_e_FIMG->SetLineWidth(1);
-    // transmission_hist_e_FIMG->GetXaxis()->SetRangeUser(1e-2,1e3);
-    transmission_hist_e_FIMG->Draw("SAME");
-
-    if (fillENDF){
-        l[i]->AddEntry(endf_trans_hist,"ENDF","l");
-        endf_trans_hist->SetLineColor(2);
-        endf_trans_hist->SetLineWidth(2);
-        // endf_trans_hist->GetXaxis()->SetRange(1e-2,2e7);
-        endf_trans_hist->Draw("SAME");
-    }
-
-    if (fillJENDL)
+    if (storeHists)
     {
-        l[i]->AddEntry(jendl_trans_hist,"JENDL-5","l");
-        jendl_trans_hist->SetLineColor(1);
-        jendl_trans_hist->SetLineWidth(2);
-        // jendl_trans_hist->GetXaxis()->SetRange(1e-2,2e7);
-        jendl_trans_hist->Draw("SAME");
+        store_hists();
     }
-
-    // auto endf_xsec_graph = new TGraph();
-    // auto jendl_xsec_graph = new TGraph();
-
-    // if (fillENDF){
-    //     auto endf_trans_graph = new TGraph();
-    //     for (Int_t i = 0; i < endf_e.size(); i++)
-    //     {
-    //         endf_trans_graph->SetPoint(i+1, endf_e.at(i), endf_trans.at(i));
-    //     }
-    //     l[i]->AddEntry(endf_trans_graph,"ENDF","l");
-    //     endf_trans_graph->SetLineColor(2);
-    //     endf_trans_graph->SetLineWidth(1);
-    //     // endf_trans_graph->GetXaxis()->SetRange(1e-2,2e7);
-    //     endf_trans_graph->Draw("SAME");
-    // }
-
-    // if (fillJENDL)
-    // {
-    //     auto jendl_trans_graph = new TGraph();
-    //     for (Int_t i = 0; i < jendl_e.size(); i++)
-    //     {
-    //         jendl_trans_graph->SetPoint(i+1, jendl_e.at(i), jendl_trans.at(i));
-    //     }
-    //     l[i]->AddEntry(jendl_trans_graph,"JENDL-5","l");
-    //     jendl_trans_graph->SetLineColor(1);
-    //     jendl_trans_graph->SetLineWidth(1);
-    //     // jendl_trans_graph->GetXaxis()->SetRange(1e-2,2e7);
-    //     jendl_trans_graph->Draw("SAME");
-    // }
     
-
-    l[i]->SetMargin(0.4);
-    l[i]->Draw();
-    // c[i]->Print(Form("../plots/h_trans_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
-
-    i++;
-
-    c[i] = new TCanvas(Form("c%d", i)," ");
-    c[i]->cd();
-
-    l[i] = new TLegend(0.77,0.7,0.86,0.85);
-    l[i]->AddEntry(cross_section_hist_e_PTBC,"PTBC","l");
-
-    cross_section_hist_e_PTBC->GetXaxis()->SetTitle("Energy (in eV)");
-    cross_section_hist_e_PTBC->GetYaxis()->SetTitle("Cross Section (in barns)");
-    cross_section_hist_e_PTBC->SetTitle(Form("Cross Section Histogram - %s", filter_name_title.c_str()));
-    cross_section_hist_e_PTBC->SetLineWidth(2);
-    cross_section_hist_e_PTBC->Draw(); //"HISTE"
-    cross_section_hist_e_PTBC->SetStats(0);
-    // cross_section_hist_e_PTBC->SetMarkerStyle(6);
-    // cross_section_hist_e_PTBC->SetMarkerSize(0.5);
-    // gPad->SetGrid();
-    gPad->SetLogx();
-    // gStyle->SetPalette(57);
-
-    l[i]->AddEntry(cross_section_hist_e_FIMG,"FIMG","l");
-    cross_section_hist_e_FIMG->SetLineColor(6);
-    cross_section_hist_e_FIMG->SetLineWidth(1);
-    cross_section_hist_e_FIMG->Draw("SAME");
-
-    if (fillENDF){
-        l[i]->AddEntry(endf_xsec_hist,"ENDF","l");
-        endf_xsec_hist->SetLineColor(2);
-        endf_xsec_hist->SetLineWidth(2);
-        // endf_xsec_hist->GetXaxis()->SetRange(1e-2,2e7);
-        endf_xsec_hist->Draw("SAME");
-    }
-
-    if (fillJENDL)
+    if (plotHists)
     {
-        l[i]->AddEntry(jendl_xsec_hist,"JENDL-5","l");
-        jendl_xsec_hist->SetLineColor(1);
-        jendl_xsec_hist->SetLineWidth(2);
-        // jendl_xsec_hist->GetXaxis()->SetRange(1e-2,2e7);
-        jendl_xsec_hist->Draw("SAME");
+        plot_hists();
     }
-
-    l[i]->SetMargin(0.4);
-    l[i]->Draw();
-    // c[i]->Print(Form("../plots/h_xsec_e_%s_%iBPD.png", filter_name.c_str(), bins_per_decade));
 }

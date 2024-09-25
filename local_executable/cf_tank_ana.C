@@ -48,6 +48,8 @@ const Double_t flight_path_length_FIMG = 183.5 - 0.41; //m
 const Double_t neutron_mass = 939.56542052; //in MeV
 const Double_t speed_of_light = 299792458.0; //in m/s
 
+const Double_t cf_density = 1.55; //g/cc
+
 Int_t FindDecadePower(Double_t num){
     Int_t decadePower = 0;
     Double_t value = num;
@@ -110,6 +112,55 @@ void exclude_first_last_bins(TH1D* hist_to_change){
             }
         }
     }
+}
+
+Double_t get_xsec_val(Double_t min_e, Double_t max_e, const char *eval_file_name){
+
+    std::ifstream inputFile(Form("../evalData/%s", eval_file_name));
+
+    if (!inputFile.is_open()) {
+        std::cerr << "Failed to open the file.\n";
+    }
+
+    //Extracting the data from the text file
+    Double_t val1, val2; //val1 -> Energy (eV); val2 -> Cross Section (barns)
+    std::string line;
+    Double_t line_count = 0;
+
+    // std::vector<Double_t> endf_e;
+    // std::vector<Double_t> endf_xsec;
+    Double_t xsec_val = 0;
+    Int_t num_vals = 0;
+
+    while (std::getline(inputFile, line)) {
+
+        line_count++;
+
+        if (line_count == 1)
+        {
+            continue;
+        }
+
+        std::istringstream iss(line);
+
+        if (iss >> val1 >> val2) {
+            if (val1 < min_e)
+            {
+                continue;
+            }
+            if (val1 >= max_e)
+            {
+                break;
+            }
+            xsec_val += val2;
+            num_vals += 1;
+        } else {
+            std::cerr << "Invalid data format.\n";
+        }
+    }
+
+    xsec_val = xsec_val/static_cast<Double_t>(num_vals);
+    return xsec_val;
 }
 
 TH1D* retriveHistogramsChangeBPD(const char *fname, const char *hist_name, const char *hist_name_new, Int_t bpd_old, Int_t bpd_new){
@@ -235,8 +286,28 @@ void calc_trans_1ev_10kev(){
     cout << "transmission of CF tank - rotated back = " << trans_values[2] << " +/- " << trans_values_errors[2];
     cout << "; range = " << trans_values[2]-trans_values_errors[2] << " - " << trans_values[2]+trans_values_errors[2] << endl;
 
-    cout << "percent diff, CF tank and rotated 90 deg = " << ((trans_values[0] - trans_values[1])/trans_values[0])*100 << endl;
-    cout << "percent diff, CF tank and rotated back = " << ((trans_values[2] - trans_values[0])/trans_values[0])*100 << endl;
+    cout << "percent diff, CF tank and rotated 90 deg = " << ((trans_values[0] - trans_values[1])/trans_values[0])*100 << "%" << endl;
+    Double_t percent_diff_xsec = ((trans_values[2] - trans_values[0])/trans_values[0])*100;
+    cout << "percent diff, CF tank and rotated back = " << percent_diff_xsec << "%" << endl;
+
+    Double_t xsec_val_c = get_xsec_val(1., 10000., "C_tot_xsec.txt");
+    Double_t xsec_val_h = get_xsec_val(1., 10000., "JENDL_H_tot_xsec.txt");
+
+    Double_t c_const = cf_density * 0.9 * (6.02214076e23) * (1e-24) / (12.011);
+    Double_t h_const = cf_density * 0.1 * (6.02214076e23) * (1e-24) / (1.008);
+    Double_t cf_const = c_const*xsec_val_c + h_const*xsec_val_h;
+    Double_t cf_t = - std::log(trans_values[0]) / cf_const;
+
+    cout << "" << endl;
+    cout << "Possible CF thickness = " << cf_t << " cm" << endl;
+    cout << "Transmission value if 1% thickness change = " << std::exp( - (cf_t+cf_t*0.01)*cf_const) << " - " << std::exp( - (cf_t-cf_t*0.01)*cf_const) << endl;
+    cout << "Transmission value if 2% thickness change = " << std::exp( - (cf_t+cf_t*0.02)*cf_const) << " - " << std::exp( - (cf_t-cf_t*0.02)*cf_const) << endl;
+    cout << "Transmission value if 5% thickness change = " << std::exp( - (cf_t+cf_t*0.05)*cf_const) << " - " << std::exp( - (cf_t-cf_t*0.05)*cf_const) << endl;
+    cout << "percent more = " << ((trans_values[0] - std::exp( - (cf_t+cf_t*0.01)*cf_const))/trans_values[0])*100 << "%" << endl;
+
+    Double_t percent_more_t = (- 1 - std::log(trans_values[0] - (trans_values[0]*percent_diff_xsec)/100)/(cf_const*cf_t))*100;
+    cout << "percent more thickness = " << percent_more_t << "%" << endl;
+    cout << "delta thickness = " << cf_t*percent_more_t/100 << "cm" << endl;
 }
 
 void plotting(){
@@ -247,6 +318,10 @@ void plotting(){
     gStyle->SetStatY(0.9);
     gStyle->SetStatH(0.1);
     gStyle->SetStatW(0.17);
+    gStyle->SetPadRightMargin(0.05);
+
+    gStyle->SetCanvasDefW(800); //600
+    gStyle->SetCanvasDefH(400); //500
 
     TCanvas *c[4];
     TLegend *l[4];

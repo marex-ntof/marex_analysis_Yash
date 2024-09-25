@@ -65,6 +65,8 @@
         "cutoffFitter_PTBC_lin.C": "cpp",
         "detectorAna.C": "cpp",
         "ptbcCutsAna.C": "cpp",
-        "cf_tank_ana.C": "cpp"
+        "cf_tank_ana.C": "cpp",
+        "plot_ar_results.C": "cpp",
+        "ar_tank_ana.C": "cpp"
     }
 }
