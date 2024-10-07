@@ -464,6 +464,7 @@ void calc_xsec(const char *fname, Int_t num_bins_e, Double_t bin_edges_e[]){
             cross_section_hist_e_PTBC->SetBinContent(i+1, cross_section_PTBC);
             cross_section_hist_e_PTBC->SetBinError(i+1, bin_unc_PTBC);
         }
+    
 
         //FIMG
         Double_t trans_bin_content_FIMG = transmission_hist_e_FIMG->GetBinContent(i+1);
