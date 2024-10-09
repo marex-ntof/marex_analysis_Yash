@@ -1112,6 +1112,43 @@ void fill_bkgd_sys(bool plot_sys){
     }
 }
 
+Double_t calc_avg_xsec_evaluations(TH1D* xsec_hist, Int_t min_bin, Int_t max_bin){
+
+    Double_t sum_xsec = 0;
+    for (Int_t i = min_bin; i < max_bin+1; i++)
+    {
+        sum_xsec += xsec_hist->GetBinContent(i);
+    }
+    Double_t xsec_vec = sum_xsec/(max_bin-min_bin+1);
+    return xsec_vec;
+}
+
+std::vector<Double_t> calc_avg_xsec_det(TH1D* xsec_hist, TH1D* sys_hist, Int_t min_bin, Int_t max_bin){
+
+    Double_t sum_xsec = 0;
+    Double_t sum_xsec_stat_err = 0;
+    Double_t sum_xsec_sys_err_up = 0;
+    Double_t sum_xsec_sys_err_low = 0;
+
+    for (Int_t i = min_bin; i < max_bin+1; i++)
+    {
+        sum_xsec += xsec_hist->GetBinContent(20+i);
+        sum_xsec_stat_err += xsec_hist->GetBinError(20+i) * xsec_hist->GetBinError(20+i);
+        Double_t sys_err_up = sys_hist->GetBinError(i) + sys_hist->GetBinContent(i) - xsec_hist->GetBinContent(20+i);
+        sum_xsec_sys_err_up += sys_err_up * sys_err_up;
+        Double_t sys_err_low = sys_hist->GetBinError(i) - sys_hist->GetBinContent(i) + xsec_hist->GetBinContent(20+i);
+        sum_xsec_sys_err_low += sys_err_low * sys_err_low;
+    }
+
+    std::vector<Double_t> xsec_vec;
+    xsec_vec.push_back(sum_xsec/(max_bin-min_bin+1));
+    xsec_vec.push_back(std::sqrt(sum_xsec_stat_err)/(max_bin-min_bin+1));
+    xsec_vec.push_back(std::sqrt(sum_xsec_sys_err_up)/(max_bin-min_bin+1));
+    xsec_vec.push_back(std::sqrt(sum_xsec_sys_err_low)/(max_bin-min_bin+1));
+
+    return xsec_vec;
+}
+
 void combine_sys(bool plot_hists){
       
     trans_combined_sys_hist_ptbc = (TH1D*)trans_bkgd_hist_ptbc->Clone("trans_combined_sys_hist_ptbc");
@@ -1178,6 +1215,16 @@ void combine_sys(bool plot_hists){
         xsec_combined_sys_hist_fimg->SetBinContent(i, xsec_val + (xsec_tot_err_up - xsec_tot_err_low)/2);
         xsec_combined_sys_hist_fimg->SetBinError(i, (xsec_tot_err_up + xsec_tot_err_low)/2);
     }
+
+    Double_t avg_xsec_endf = calc_avg_xsec_evaluations(endf_xsec_hist, 61, 80);
+    Double_t avg_xsec_jendl = calc_avg_xsec_evaluations(jendl_xsec_hist, 61, 80);
+    std::vector<Double_t> avg_xsec_ptbc = calc_avg_xsec_det(cross_section_hist_e_PTBC, xsec_combined_sys_hist_ptbc, 41, 60);
+    std::vector<Double_t> avg_xsec_fimg = calc_avg_xsec_det(cross_section_hist_e_FIMG, xsec_combined_sys_hist_fimg, 41, 60);
+
+    cout << "Avg xsec 10eV - 100eV fimg = " << avg_xsec_fimg.at(0) << " +- " << avg_xsec_fimg.at(1) << " +" << avg_xsec_fimg.at(2) << " -" << avg_xsec_fimg.at(3) << endl;
+    cout << "Avg xsec 10eV - 100eV ptbc = " << avg_xsec_ptbc.at(0) << " +- " << avg_xsec_ptbc.at(1) << " +" << avg_xsec_ptbc.at(2) << " -" << avg_xsec_ptbc.at(3) << endl;
+    cout << "Avg xsec 10eV - 100eV endf = " << avg_xsec_endf << endl;
+    cout << "Avg xsec 10eV - 100eV jendl = " << avg_xsec_jendl << endl;
 
     if (plot_hists)
     {
@@ -1247,7 +1294,7 @@ void combine_sys(bool plot_hists){
         l_tot[0]->AddEntry(jendl_xsec_hist,"JENDL-5","l");
         l_tot[0]->Draw();
 
-        c_tot[0]->Print("../plots/results_plots/xsec_ar_tank_ptbc.png");
+        // c_tot[0]->Print("../plots/results_plots/xsec_ar_tank_ptbc.png");
 
         //canvas - 2 - FIMG - xsec
         c_tot[1] = new TCanvas("c_tot_1"," ");
@@ -1302,7 +1349,7 @@ void combine_sys(bool plot_hists){
         l_tot[1]->AddEntry(jendl_xsec_hist,"JENDL-5","l");
         l_tot[1]->Draw("same");
 
-        c_tot[1]->Print("../plots/results_plots/xsec_ar_tank_fimg.png");
+        // c_tot[1]->Print("../plots/results_plots/xsec_ar_tank_fimg.png");
 
         ////////////////////// transmission
 
@@ -1358,7 +1405,7 @@ void combine_sys(bool plot_hists){
         l_tot[2]->AddEntry(jendl_trans_hist,"JENDL-5","l");
         l_tot[2]->Draw();
 
-        c_tot[2]->Print("../plots/results_plots/transmission_ar_tank_ptbc.png");
+        // c_tot[2]->Print("../plots/results_plots/transmission_ar_tank_ptbc.png");
 
         //canvas - 4 - FIMG - trans
         c_tot[3] = new TCanvas("c_tot_3"," ");
@@ -1413,7 +1460,7 @@ void combine_sys(bool plot_hists){
         l_tot[3]->AddEntry(jendl_trans_hist,"JENDL-5","l");
         l_tot[3]->Draw("same");
 
-        c_tot[3]->Print("../plots/results_plots/transmission_ar_tank_fimg.png");
+        // c_tot[3]->Print("../plots/results_plots/transmission_ar_tank_fimg.png");
     }
      
 }

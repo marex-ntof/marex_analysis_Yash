@@ -367,8 +367,10 @@ void plot_alpha_cuts(Int_t det_num, TH1D* projection_hist, TF1* total_fit) {
 
     projection_hist->GetXaxis()->SetTitle("Amplitude (a.u.)");
     projection_hist->GetYaxis()->SetTitle("Number of Events");
-    projection_hist->SetTitle(Form("Num Events vs Amp within 10^{7} - 10^{8} ToF - Det %i", det_num));
+    // projection_hist->SetTitle(Form("Num Events vs Amp within 10^{7} - 10^{8} ToF - Det %i", det_num));
+    projection_hist->SetTitle("");
     projection_hist->GetXaxis()->SetRangeUser(400, 3500);
+    projection_hist->SetLineWidth(1);
     projection_hist->Draw();
     alphas_legend[alphas_plot_index]->AddEntry(projection_hist,"Data","l");
 
@@ -403,7 +405,7 @@ void plot_alpha_cuts(Int_t det_num, TH1D* projection_hist, TF1* total_fit) {
     total_fit_plot->SetParameter(3, mean);
     total_fit_plot->SetParameter(4, sigma);
     total_fit_plot->SetLineColor(1);
-    total_fit_plot->SetLineWidth(3); 
+    total_fit_plot->SetLineWidth(2); 
     total_fit_plot->Draw("SAME");
     alphas_legend[alphas_plot_index]->AddEntry(total_fit_plot,"Global Fit","l");
 
@@ -431,16 +433,17 @@ void determine_all_cuts(bool gamma_flash_cut){
         bin_edges_tof_cuts[i] = (Double_t) std::pow(base, exponent);
     }
 
-    for (Int_t i = 0; i < 6; i++)
+    for (Int_t i = 0; i < 1; i++)
     {
         // using no filter runs to determine detector cuts
         PTBC_tof_amp_hists[i] = retrive_TH2D_Histograms("../rootFiles/cutoffAnalysis_PTBC_none.root", Form("PTBC_tof_amp_det%i", i+2));
         
         //Determining alphas cuts
         projection_hists[i] = (TH1D*)PTBC_tof_amp_hists[i]->ProjectionY(Form("profile_fission_alphas_det%i", i+2), 5001, 6000);
+        projection_hists[i]->Sumw2();
         alphas_fits_total[i] = new TF1(Form("alphas_total_fit_det%i", i+2), "expo(0)+gaus(2)", total_fit_ranges[i][0], total_fit_ranges[i][1]);
         determine_alpha_cut(i+2, PTBC_tof_amp_hists[i], projection_hists[i], alphas_fits_total[i]);
-        // plot_alpha_cuts(i+2, projection_hists[i], alphas_fits_total[i]);
+        plot_alpha_cuts(i+2, projection_hists[i], alphas_fits_total[i]);
 
         if(gamma_flash_cut)
         {
@@ -683,7 +686,7 @@ void StoreCutHists(){
 
 void cutoffFitter_PTBC() {
 
-    // determine_all_cuts(false); // Will recompute all the cuts
+    determine_all_cuts(false); // Will recompute all the cuts
 
     // plot_ringing_bin_fits();
     
@@ -696,7 +699,7 @@ void cutoffFitter_PTBC() {
         cut_hists_for_plots[i] = retrive_TH1D_Histograms("../inputFiles/PTBC_cuts.root", Form("PTBC_cuts_det%i", i+2));
         det_cuts_for_plots[i] = retrive_TCutG("../inputFiles/PTBC_cuts.root", Form("tof_amp_cut_det%i", i+2));
 
-        plot_det_cuts(i+2, tof_amp_hists_for_plots[i], det_cuts_for_plots[i]);
+        // plot_det_cuts(i+2, tof_amp_hists_for_plots[i], det_cuts_for_plots[i]);
 
         // det_cuts_skewness[i] = new TGraph();
         // det_cuts_kurtosis[i] = new TGraph();
