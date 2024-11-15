@@ -126,20 +126,24 @@ void compute_residuals(TH1D* dn_hist){
 
 void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* plot_title_1, const char* output_file_name){
 
-    gStyle->SetCanvasDefW(800); //600
-    gStyle->SetCanvasDefH(400); //500 
+    gStyle->SetCanvasDefW(1000); //600
+    gStyle->SetCanvasDefH(500); //500 
+    gStyle->SetPadRightMargin(0.04);
+    gStyle->SetPadLeftMargin(0.08);
 
     dn_canvas[dn_plot_index] = new TCanvas(Form("dn_canvas_%d", dn_plot_index)," ");
     dn_canvas[dn_plot_index]->cd();
     dn_canvas[dn_plot_index]->Draw();
 
-    gStyle->SetTitleH(0.1);
+    gStyle->SetTitleH(0.12); //0.1
+    gStyle->SetTitleOffset(0.3);
 
     // Pad 1
     dn_canvas[dn_plot_index]->cd(0);
     dn_pads[dn_plot_index][0] = new TPad(Form("dn_pads_0_%d", dn_plot_index), Form("dn_pads_0_%d", dn_plot_index), 0., 0.65, 1., 1.);
     dn_pads[dn_plot_index][0]->SetFillColor(kWhite);
     dn_pads[dn_plot_index][0]->SetBottomMargin(0.00001);
+    dn_pads[dn_plot_index][0]->SetTopMargin(0.15); //0.1
     dn_pads[dn_plot_index][0]->SetBorderMode(0);
     dn_pads[dn_plot_index][0]->Draw();
     dn_pads[dn_plot_index][0]->cd();
@@ -148,16 +152,18 @@ void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* 
     dn_hist->GetXaxis()->SetLabelSize(0);
     dn_hist->GetXaxis()->SetTitle("");
     // Y-Axis
-    dn_hist->GetYaxis()->SetTitle("Normalized Counts");
-    dn_hist->GetYaxis()->SetLabelSize(0.07);
-    dn_hist->GetYaxis()->SetTitleSize(0.09);
-    dn_hist->GetYaxis()->SetTitleOffset(0.4);
+    dn_hist->GetYaxis()->SetTitle("Norm. Counts"); //alized
+    dn_hist->GetYaxis()->SetLabelSize(0.11); //0.07
+    dn_hist->GetYaxis()->SetTitleSize(0.11); //0.09
+    dn_hist->GetYaxis()->SetTitleOffset(0.3); //0.4
+    dn_hist->GetYaxis()->SetNdivisions(6);
+
     // Setting the y axis range
     Double_t y_range_min = dn_fits[dn_plot_index]->GetParameter(0) - 0.3e-12; //0.3e-12
     Double_t y_range_max = dn_fits[dn_plot_index]->GetParameter(0) + 0.3e-12; //0.3e-12
     dn_hist->SetMaximum(y_range_max);
     dn_hist->SetMinimum(y_range_min);
-    TGaxis::SetExponentOffset(-0.06, -0.8, "y"); // X and Y offset for Y axis
+    // TGaxis::SetExponentOffset(-0.07, -0.08, "y"); // X and Y offset for Y axis
     dn_hist->SetTitle(plot_title_1);
     dn_hist->SetLineWidth(2);
     dn_hist->SetLineColor(2);
@@ -172,7 +178,7 @@ void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* 
     dn_fit_lines[dn_plot_index]->SetLineStyle(9);
     dn_fit_lines[dn_plot_index]->Draw("SAME");
 
-    dn_legends[dn_plot_index] = new TLegend(0.75, 0.60, 0.85, 0.80);
+    dn_legends[dn_plot_index] = new TLegend(0.80, 0.55, 0.90, 0.83);
     dn_legends[dn_plot_index]->AddEntry(dn_hist, " data", "l");
     dn_legends[dn_plot_index]->AddEntry(dn_fit_lines[dn_plot_index], " fit", "l");
     dn_legends[dn_plot_index]->Draw();
@@ -182,7 +188,7 @@ void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* 
     dn_pads[dn_plot_index][1] = new TPad(Form("dn_pads_1_%d", dn_plot_index), Form("dn_pads_1_%d", dn_plot_index), 0., 0.3, 1., 0.65);
     dn_pads[dn_plot_index][1]->SetFillColor(kWhite);
     dn_pads[dn_plot_index][1]->SetTopMargin(0.00001);
-    dn_pads[dn_plot_index][1]->SetBottomMargin(0.15);
+    dn_pads[dn_plot_index][1]->SetBottomMargin(0.2); //0.2
     dn_pads[dn_plot_index][1]->SetBorderMode(0);
     dn_pads[dn_plot_index][1]->Draw();
     dn_pads[dn_plot_index][1]->cd();
@@ -190,14 +196,15 @@ void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* 
     resi_hist->SetTitle("");
     // X-Axis
     resi_hist->GetXaxis()->SetTitle("Seconds in a day");
-    resi_hist->GetXaxis()->SetTitleOffset(0.75);
-    resi_hist->GetXaxis()->SetLabelSize(0.07);
-    resi_hist->GetXaxis()->SetTitleSize(0.09);
+    resi_hist->GetXaxis()->SetTitleOffset(0.85); //0.75   // 
+    resi_hist->GetXaxis()->SetLabelSize(0.11); //0.07   // 
+    resi_hist->GetXaxis()->SetTitleSize(0.11); //0.09   // 
     // Y-Axis
-    resi_hist->GetYaxis()->SetTitle("(data - fit) / #sigma data");
-    resi_hist->GetYaxis()->SetLabelSize(0.07);
-    resi_hist->GetYaxis()->SetTitleSize(0.09);
-    resi_hist->GetYaxis()->SetTitleOffset(0.4);
+    resi_hist->GetYaxis()->SetTitle("Pull value"); //(data - fit) / #sigma data
+    resi_hist->GetYaxis()->SetLabelSize(0.11); //0.07 //
+    resi_hist->GetYaxis()->SetTitleSize(0.11); //0.09 //0.11
+    resi_hist->GetYaxis()->SetTitleOffset(0.3); //0.40 //
+    resi_hist->GetYaxis()->SetNdivisions(6);
     resi_hist->SetLineColor(2);
     resi_hist->SetLineWidth(2);
     // resi_hist->GetYaxis()->SetRangeUser(-2e-12, 2e-12); // -0.3e-12, 0.3e-12
@@ -210,21 +217,23 @@ void plot_dn_plots(TH1D* dn_hist, TH1D* resi_hist, TH1D* pull_hist, const char* 
     dn_canvas[dn_plot_index]->cd(0);
     dn_pads[dn_plot_index][2] = new TPad(Form("dn_pads_2_%d", dn_plot_index), Form("dn_pads_2_%d", dn_plot_index), 0., 0., 1., 0.3);
     dn_pads[dn_plot_index][2]->SetFillColor(kWhite);
-    dn_pads[dn_plot_index][2]->SetBottomMargin(0.2);
+    dn_pads[dn_plot_index][2]->SetTopMargin(0.15);
+    dn_pads[dn_plot_index][2]->SetBottomMargin(0.25);
     dn_pads[dn_plot_index][2]->SetBorderMode(0);
     dn_pads[dn_plot_index][2]->Draw();
     dn_pads[dn_plot_index][2]->cd();
     // X-Axis
-    pull_hist->GetXaxis()->SetTitle("(data - fit) / #sigma data");
-    pull_hist->GetXaxis()->SetTitleSize(0.1);
+    pull_hist->GetXaxis()->SetTitle("Pull value"); //(data - fit) / #sigma data
+    pull_hist->GetXaxis()->SetTitleSize(0.12); //0.10
+    pull_hist->GetXaxis()->SetTitleOffset(0.8); //0.80
+    pull_hist->GetXaxis()->SetLabelSize(0.12); //0.09
     // pull_hist->GetXaxis()->SetLabelOffset(0.01);
-    pull_hist->GetXaxis()->SetTitleOffset(0.8);
-    pull_hist->GetXaxis()->SetLabelSize(0.09);
     // Y-Axis
     pull_hist->GetYaxis()->SetTitle("Counts");
-    pull_hist->GetYaxis()->SetTitleSize(0.1);
-    pull_hist->GetYaxis()->SetTitleOffset(0.36);
-    pull_hist->GetYaxis()->SetLabelSize(0.09);
+    pull_hist->GetYaxis()->SetTitleSize(0.12); //0.1
+    pull_hist->GetYaxis()->SetTitleOffset(0.27); //0.36
+    pull_hist->GetYaxis()->SetLabelSize(0.12);
+    pull_hist->GetYaxis()->SetNdivisions(4);
 
     pull_hist->SetTitle("Pull Distribution");
     pull_hist->SetLineColor(2);
@@ -325,21 +334,21 @@ void pull_distributions(){
     compute_residuals(day_night_EmptyArgon_FIMG);
 
     dn_plot_index = 0;
-    plot_dn_plots(day_night_filterOut_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Filter Out - PTBC", "dn_variation_filterOut_PTBC");
-    plot_dn_plots(day_night_Bi_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Bi (1cm) - PTBC", "dn_variation_bi_PTBC");
-    plot_dn_plots(day_night_Al5_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Al (5cm) - PTBC", "dn_variation_al5_PTBC");
-    plot_dn_plots(day_night_emptyTS_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty (TS) - PTBC", "dn_variation_emptyTS_PTBC");
-    plot_dn_plots(day_night_emptyTank_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Tank - PTBC", "dn_variation_emptyTank_PTBC");
-    plot_dn_plots(day_night_Argon_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Argon Tank - PTBC", "dn_variation_argon_PTBC");
-    plot_dn_plots(day_night_EmptyArgon_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Argon - PTBC", "dn_variation_emptyArgon_PTBC");
+    plot_dn_plots(day_night_filterOut_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Filter Out - Fission Chamber", "dn_variation_filterOut_PTBC");
+    plot_dn_plots(day_night_Bi_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Bi (1cm) - Fission Chamber", "dn_variation_bi_PTBC");
+    plot_dn_plots(day_night_Al5_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Al (5cm) - Fission Chamber", "dn_variation_al5_PTBC");
+    plot_dn_plots(day_night_emptyTS_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Empty (TS) - Fission Chamber", "dn_variation_emptyTS_PTBC");
+    plot_dn_plots(day_night_emptyTank_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Empty Tank - Fission Chamber", "dn_variation_emptyTank_PTBC");
+    plot_dn_plots(day_night_Argon_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Argon Tank - Fission Chamber", "dn_variation_argon_PTBC");
+    plot_dn_plots(day_night_EmptyArgon_PTBC, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Empty Argon - Fission Chamber", "dn_variation_emptyArgon_PTBC");
     
-    plot_dn_plots(day_night_filterOut_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Filter Out - FIMG", "dn_variation_filterOut_FIMG");
-    plot_dn_plots(day_night_Bi_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Bi (1cm) - FIMG", "dn_variation_bi_FIMG");
-    plot_dn_plots(day_night_Al5_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Al (5cm) - FIMG", "dn_variation_al5_FIMG");
-    plot_dn_plots(day_night_emptyTS_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty (TS) - FIMG", "dn_variation_emptyTS_FIMG");
-    plot_dn_plots(day_night_emptyTank_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Tank - FIMG", "dn_variation_emptyTank_FIMG");
-    plot_dn_plots(day_night_Argon_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Argon Tank - FIMG", "dn_variation_argon_FIMG");
-    plot_dn_plots(day_night_EmptyArgon_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation in Counts - Empty Argon - FIMG", "dn_variation_emptyArgon_FIMG");
+    plot_dn_plots(day_night_filterOut_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Filter Out - Micromegas", "dn_variation_filterOut_FIMG");
+    plot_dn_plots(day_night_Bi_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Bi (1cm) - Micromegas", "dn_variation_bi_FIMG");
+    plot_dn_plots(day_night_Al5_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Al (5cm) - Micromegas", "dn_variation_al5_FIMG");
+    plot_dn_plots(day_night_emptyTS_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Empty (TS) - Micromegas", "dn_variation_emptyTS_FIMG");
+    plot_dn_plots(day_night_emptyTank_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Empty Tank - Micromegas", "dn_variation_emptyTank_FIMG");
+    plot_dn_plots(day_night_Argon_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Argon Tank - Micromegas", "dn_variation_argon_FIMG");
+    plot_dn_plots(day_night_EmptyArgon_FIMG, dn_resi_plots[dn_plot_index], dn_pull_plots[dn_plot_index], "Day-Night Variation - Empty Argon - Micromegas", "dn_variation_emptyArgon_FIMG");
 
     return;
 }

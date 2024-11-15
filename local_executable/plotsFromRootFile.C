@@ -183,8 +183,8 @@ void plot_subtraction_plots(TH1D* hist_1, const char* x_label, const char* legen
     gStyle->SetStatH(0.1);
     gStyle->SetStatW(0.17);
 
-    gStyle->SetCanvasDefW(800); //600
-    gStyle->SetCanvasDefH(400); //500
+    gStyle->SetCanvasDefW(1000); //600
+    gStyle->SetCanvasDefH(500); //500
     gStyle->SetPadRightMargin(0.05);
 
     TCanvas *canv = new TCanvas(Form("c%d", plot_index)," ");
@@ -201,19 +201,20 @@ void plot_subtraction_plots(TH1D* hist_1, const char* x_label, const char* legen
     hist_1->GetYaxis()->SetTitle(x_label);
     hist_1->GetYaxis()->SetLabelSize(0.08);
     hist_1->GetYaxis()->SetTitleSize(0.08);
-    hist_1->GetYaxis()->SetTitleOffset(0.5);
+    hist_1->GetYaxis()->SetTitleOffset(0.50);
     // X Axis
     hist_1->GetXaxis()->SetLabelOffset(999);
     hist_1->GetXaxis()->SetLabelSize(0);
     hist_1->SetTitle(plot_title);
     hist_1->SetLineWidth(1);
+    // hist_1->GetXaxis()->SetRangeUser(1e-1, max_e);
     hist_1->Draw();
     hist_1->SetStats(0);
     gPad->SetGrid();
     gPad->SetLogx();
     // gPad->SetLogy();
 
-    hist_2->SetLineWidth(2);
+    hist_2->SetLineWidth(1);
     hist_2->SetLineColor(2);
     // hist_2->GetXaxis()->SetRangeUser(1e-1, max_e);
     hist_2->Draw("][SAME");
@@ -250,9 +251,9 @@ void plot_subtraction_plots(TH1D* hist_1, const char* x_label, const char* legen
     subtraction_plot->Draw();
     // gPad->SetGrid();
     gPad->SetLogx();
-    // canv->Print(output_file_name);
-
     zero_line->Draw("SAME");
+
+    canv->Print(output_file_name);
 
     plot_index++;
     return;
@@ -291,6 +292,16 @@ void plot_transmission_station_effects(){
 
     TH1D* subtraction_hist_ptbc = subtractHists(trans_hist_al5_ptbc, trans_hist_al5_ts_ptbc);
     TH1D* subtraction_hist_fimg = subtractHists(trans_hist_al5_fimg, trans_hist_al5_ts_fimg);
+
+    trans_hist_al5_ptbc->GetYaxis()->SetRangeUser(-0.1, 1.1);
+    trans_hist_al5_fimg->GetYaxis()->SetRangeUser(-0.1, 1.1);
+    trans_hist_al5_ts_ptbc->GetYaxis()->SetRangeUser(-0.1, 1.1);
+    trans_hist_al5_ts_fimg->GetYaxis()->SetRangeUser(-0.1, 1.1);
+
+    trans_hist_al5_ptbc->GetXaxis()->SetRangeUser(1e-1, 1e8);
+    trans_hist_al5_fimg->GetXaxis()->SetRangeUser(1e-1, 1e6);
+    trans_hist_al5_ts_ptbc->GetXaxis()->SetRangeUser(1e-1, 1e8);
+    trans_hist_al5_ts_fimg->GetXaxis()->SetRangeUser(1e-1, 1e6);
 
     Double_t trans_legend_coord[4] = {0.15,0.1,0.5,0.3};
 
@@ -335,10 +346,10 @@ void plot_al5_plots(){
     Double_t trans_legend_coord[4] = {0.2,0.1,0.35,0.3};
     Double_t xsec_legend_coord[4] = {0.2,0.55,0.35,0.75};
 
-    plot_subtraction_plots(trans_hist_al5_fimg, "Transmission", "5 cm Al", endf_trans_hist, "ENDF", trans_subtraction_hist_fimg, "Transmission - Al 5cm - Micromegas", "../plots/results_plots/trans_al5_fimg_50bpd.png", trans_legend_coord, 1e6);
-    plot_subtraction_plots(trans_hist_al5_ptbc, "Transmission", "5 cm Al", endf_trans_hist, "ENDF", trans_subtraction_hist_ptbc, "Transmission - Al 5cm - Fission Chamber", "../plots/results_plots/trans_al5_ptbc_50bpd.png", trans_legend_coord, 1e8);
-    plot_subtraction_plots(xsec_hist_al5_fimg, "Cross Section", "5 cm Al", endf_xsec_hist, "ENDF", xsec_subtraction_hist_fimg, "Cross Section - Al 5cm - Micromegas", "../plots/results_plots/xsec_al5_fimg_50bpd.png", xsec_legend_coord, 1e6);
-    plot_subtraction_plots(xsec_hist_al5_ptbc, "Cross Section", "5 cm Al", endf_xsec_hist, "ENDF", xsec_subtraction_hist_ptbc, "Cross Section - Al 5cm - Fission Chamber", "../plots/results_plots/xsec_al5_ptbc_50bpd.png", xsec_legend_coord, 1e8);
+    plot_subtraction_plots(trans_hist_al5_fimg, "Transmission", "5 cm Al", endf_trans_hist, "ENDF-VIII", trans_subtraction_hist_fimg, "Transmission - Al 5cm - Micromegas", "../plots/results_plots/trans_al5_fimg_50bpd.png", trans_legend_coord, 1e6);
+    plot_subtraction_plots(trans_hist_al5_ptbc, "Transmission", "5 cm Al", endf_trans_hist, "ENDF-VIII", trans_subtraction_hist_ptbc, "Transmission - Al 5cm - Fission Chamber", "../plots/results_plots/trans_al5_ptbc_50bpd.png", trans_legend_coord, 1e8);
+    plot_subtraction_plots(xsec_hist_al5_fimg, "Cross Section", "5 cm Al", endf_xsec_hist, "ENDF-VIII", xsec_subtraction_hist_fimg, "Cross Section - Al 5cm - Micromegas", "../plots/results_plots/xsec_al5_fimg_50bpd.png", xsec_legend_coord, 1e6);
+    plot_subtraction_plots(xsec_hist_al5_ptbc, "Cross Section", "5 cm Al", endf_xsec_hist, "ENDF-VIII", xsec_subtraction_hist_ptbc, "Cross Section - Al 5cm - Fission Chamber", "../plots/results_plots/xsec_al5_ptbc_50bpd.png", xsec_legend_coord, 1e8);
 
     std::vector<Double_t> avg_xsec_fimg = calculate_avg_xsec(xsec_hist_al5_fimg, 151, 250, false);
     std::vector<Double_t> avg_xsec_ptbc = calculate_avg_xsec(xsec_hist_al5_ptbc, 151, 250, false);
@@ -387,17 +398,110 @@ void plot_bi1_plots(){
     Double_t trans_legend_coord[4] = {0.15,0.1,0.3,0.3};
     Double_t xsec_legend_coord[4] = {0.15,0.55,0.3,0.75};
 
-    plot_subtraction_plots(trans_hist_bi1_fimg, "Transmission", "1 cm Bi", endf_trans_hist, "ENDF", trans_subtraction_hist_fimg, "Transmission - Bi 1cm - Micromegas", "../plots/results_plots/trans_bi1_fimg_20bpd.png", trans_legend_coord, 1e6);
-    plot_subtraction_plots(trans_hist_bi1_ptbc, "Transmission", "1 cm Bi", endf_trans_hist, "ENDF", trans_subtraction_hist_ptbc, "Transmission - Bi 1cm - Fission Chamber", "../plots/results_plots/trans_bi1_ptbc_20bpd.png", trans_legend_coord, 1e8);
-    plot_subtraction_plots(xsec_hist_bi1_fimg, "Cross Section", "1 cm Bi", endf_xsec_hist, "ENDF", xsec_subtraction_hist_fimg, "Cross Section - Bi 1cm - Micromegas", "../plots/results_plots/xsec_bi1_fimg_20bpd.png", xsec_legend_coord, 1e6);
-    plot_subtraction_plots(xsec_hist_bi1_ptbc, "Cross Section", "1 cm Bi", endf_xsec_hist, "ENDF", xsec_subtraction_hist_ptbc, "Cross Section - Bi 1cm - Fission Chamber", "../plots/results_plots/xsec_bi1_ptbc_20bpd.png", xsec_legend_coord, 1e8);
+    plot_subtraction_plots(trans_hist_bi1_fimg, "Transmission", "1 cm Bi", endf_trans_hist, "ENDF-VIII", trans_subtraction_hist_fimg, "Transmission - Bi 1cm - Micromegas", "../plots/results_plots/trans_bi1_fimg_20bpd.png", trans_legend_coord, 1e6);
+    plot_subtraction_plots(trans_hist_bi1_ptbc, "Transmission", "1 cm Bi", endf_trans_hist, "ENDF-VIII", trans_subtraction_hist_ptbc, "Transmission - Bi 1cm - Fission Chamber", "../plots/results_plots/trans_bi1_ptbc_20bpd.png", trans_legend_coord, 1e8);
+    plot_subtraction_plots(xsec_hist_bi1_fimg, "Cross Section", "1 cm Bi", endf_xsec_hist, "ENDF-VIII", xsec_subtraction_hist_fimg, "Cross Section - Bi 1cm - Micromegas", "../plots/results_plots/xsec_bi1_fimg_20bpd.png", xsec_legend_coord, 1e6);
+    plot_subtraction_plots(xsec_hist_bi1_ptbc, "Cross Section", "1 cm Bi", endf_xsec_hist, "ENDF-VIII", xsec_subtraction_hist_ptbc, "Cross Section - Bi 1cm - Fission Chamber", "../plots/results_plots/xsec_bi1_ptbc_20bpd.png", xsec_legend_coord, 1e8);
+    
+}
+
+Double_t calc_avg_xsec_evaluations(TH1D* xsec_hist, Int_t min_bin, Int_t max_bin){
+
+    Double_t sum_xsec = 0;
+    for (Int_t i = min_bin; i < max_bin+1; i++)
+    {
+        sum_xsec += xsec_hist->GetBinContent(i);
+    }
+    Double_t xsec_vec = sum_xsec/(max_bin-min_bin+1);
+    return xsec_vec;
+}
+
+std::vector<Double_t> calc_avg_xsec_det(TH1D* xsec_hist, TH1D* sys_hist, Int_t min_bin, Int_t max_bin){
+
+    Double_t sum_xsec = 0;
+    Double_t sum_xsec_stat_err = 0;
+    Double_t sum_xsec_sys_err_up = 0;
+    Double_t sum_xsec_sys_err_low = 0;
+
+    for (Int_t i = min_bin; i < max_bin+1; i++)
+    {
+        sum_xsec += xsec_hist->GetBinContent(20+i);
+        sum_xsec_stat_err += xsec_hist->GetBinError(20+i) * xsec_hist->GetBinError(20+i);
+        Double_t sys_err_up = sys_hist->GetBinError(i) + sys_hist->GetBinContent(i) - xsec_hist->GetBinContent(20+i);
+        sum_xsec_sys_err_up += sys_err_up * sys_err_up;
+        Double_t sys_err_low = sys_hist->GetBinError(i) - sys_hist->GetBinContent(i) + xsec_hist->GetBinContent(20+i);
+        sum_xsec_sys_err_low += sys_err_low * sys_err_low;
+    }
+
+    std::vector<Double_t> xsec_vec;
+    xsec_vec.push_back(sum_xsec/(max_bin-min_bin+1));
+    xsec_vec.push_back(std::sqrt(sum_xsec_stat_err)/(max_bin-min_bin+1));
+    xsec_vec.push_back(std::sqrt(sum_xsec_sys_err_up)/(max_bin-min_bin+1));
+    xsec_vec.push_back(std::sqrt(sum_xsec_sys_err_low)/(max_bin-min_bin+1));
+
+    return xsec_vec;
+}
+
+void plot_c1p2_plots(){
+
+    TH1D* trans_hist_c1p2_ts_ptbc = Get_1D_hist("../rootFiles/trans_xsec_hists_c1p2_ts_20bpd.root", "transmission_hist_e_PTBC");
+    TH1D* trans_hist_c1p2_ts_fimg = Get_1D_hist("../rootFiles/trans_xsec_hists_c1p2_ts_20bpd.root", "transmission_hist_e_FIMG");
+    TH1D* xsec_hist_c1p2_ts_ptbc = Get_1D_hist("../rootFiles/trans_xsec_hists_c1p2_ts_20bpd.root", "cross_section_hist_e_PTBC");
+    TH1D* xsec_hist_c1p2_ts_fimg = Get_1D_hist("../rootFiles/trans_xsec_hists_c1p2_ts_20bpd.root", "cross_section_hist_e_FIMG");
+    TH1D* endf_trans_hist = Get_1D_hist("../rootFiles/trans_xsec_hists_c1p2_ts_20bpd.root", "endf_trans_hist");
+    TH1D* endf_xsec_hist = Get_1D_hist("../rootFiles/trans_xsec_hists_c1p2_ts_20bpd.root", "endf_xsec_hist");
+
+    TH1D* trans_subtraction_hist_ptbc = subtractHists_theoryEval(trans_hist_c1p2_ts_ptbc, endf_trans_hist);
+    TH1D* trans_subtraction_hist_fimg = subtractHists_theoryEval(trans_hist_c1p2_ts_fimg, endf_trans_hist);
+    TH1D* xsec_subtraction_hist_ptbc = subtractHists_theoryEval(xsec_hist_c1p2_ts_ptbc, endf_xsec_hist);
+    TH1D* xsec_subtraction_hist_fimg = subtractHists_theoryEval(xsec_hist_c1p2_ts_fimg, endf_xsec_hist);
+
+    trans_hist_c1p2_ts_fimg->GetXaxis()->SetRangeUser(1e-1, 1e6);
+    trans_hist_c1p2_ts_ptbc->GetXaxis()->SetRangeUser(1e-1, 1e8);
+    xsec_hist_c1p2_ts_fimg->GetXaxis()->SetRangeUser(1e-1, 1e6);
+    xsec_hist_c1p2_ts_ptbc->GetXaxis()->SetRangeUser(1e-1, 1e8);
+
+    trans_subtraction_hist_ptbc->GetXaxis()->SetRangeUser(1e-1, 1e8);
+    trans_subtraction_hist_fimg->GetXaxis()->SetRangeUser(1e-1, 1e6);
+    xsec_subtraction_hist_ptbc->GetXaxis()->SetRangeUser(1e-1, 1e8);
+    xsec_subtraction_hist_fimg->GetXaxis()->SetRangeUser(1e-1, 1e6);
+
+    trans_hist_c1p2_ts_ptbc->GetYaxis()->SetRangeUser(0.42,1.05);
+    trans_hist_c1p2_ts_fimg->GetYaxis()->SetRangeUser(0.42,0.95);
+    xsec_hist_c1p2_ts_ptbc->GetYaxis()->SetRangeUser(-0.6,7.1);
+    xsec_hist_c1p2_ts_fimg->GetYaxis()->SetRangeUser(0.1,7.1);
+
+    trans_subtraction_hist_ptbc->GetYaxis()->SetRangeUser(-0.19,0.19);
+    trans_subtraction_hist_fimg->GetYaxis()->SetRangeUser(-0.19,0.19);
+    xsec_subtraction_hist_ptbc->GetYaxis()->SetRangeUser(-1.9,1.9);
+    xsec_subtraction_hist_fimg->GetYaxis()->SetRangeUser(-1.9,1.9);
+
+    Double_t xsec_legend_coord[4] = {0.2,0.1,0.35,0.3};
+    Double_t trans_legend_coord[4] = {0.2,0.55,0.35,0.75};
+
+    plot_subtraction_plots(trans_hist_c1p2_ts_fimg, "Transmission", "1.2cm C", endf_trans_hist, "ENDF-VIII", trans_subtraction_hist_fimg, "Transmission - C 1.2cm - Micromegas", "../plots/results_plots/trans_c1p2_ts_fimg_20bpd.png", trans_legend_coord, 1e6);
+    plot_subtraction_plots(trans_hist_c1p2_ts_ptbc, "Transmission", "1.2cm C", endf_trans_hist, "ENDF-VIII", trans_subtraction_hist_ptbc, "Transmission - C 1.2cm - Fission Chamber", "../plots/results_plots/trans_c1p2_ts_ptbc_20bpd.png", trans_legend_coord, 1e8);
+    plot_subtraction_plots(xsec_hist_c1p2_ts_fimg, "Cross Section", "1.2cm C", endf_xsec_hist, "ENDF-VIII", xsec_subtraction_hist_fimg, "Cross Section - C 1.2cm - Micromegas", "../plots/results_plots/xsec_c1p2_ts_fimg_20bpd.png", xsec_legend_coord, 1e6);
+    plot_subtraction_plots(xsec_hist_c1p2_ts_ptbc, "Cross Section", "1.2cm C", endf_xsec_hist, "ENDF-VIII", xsec_subtraction_hist_ptbc, "Cross Section - C 1.2cm - Fission Chamber", "../plots/results_plots/xsec_c1p2_ts_ptbc_20bpd.png", xsec_legend_coord, 1e8);
+    
+    // std::vector<Double_t> avg_xsec_endf = calculate_avg_xsec(endf_xsec_hist, 151, 250, true);
+
+    std::vector<Double_t> avg_xsec_fimg = calculate_avg_xsec(xsec_hist_c1p2_ts_fimg, 61, 100, false);
+    std::vector<Double_t> avg_xsec_ptbc = calculate_avg_xsec(xsec_hist_c1p2_ts_ptbc, 61, 100, false);
+    std::vector<Double_t> avg_xsec_endf = calculate_avg_xsec(endf_xsec_hist, 61, 100, true);
+
+    cout << "Avg xsec 10eV - 1keV fimg = " << avg_xsec_fimg.at(0) << " +- " << avg_xsec_fimg.at(1) << endl;
+    cout << "Avg xsec 10eV - 1keV ptbc = " << avg_xsec_ptbc.at(0) << " +- " << avg_xsec_ptbc.at(1) << endl;
+    cout << "Avg xsec 10eV - 1keV endf = " << avg_xsec_endf.at(0) << " +- " << avg_xsec_endf.at(1) << endl;
     
 }
 
 void plotsFromRootFile() {
 
+    // plot_c1p2_plots();
     plot_al5_plots();
     // plot_bi1_plots();
+    // plot_transmission_station_effects();
 
     // Int_t newBPD = 50;
     // Int_t oldBPD = 100;

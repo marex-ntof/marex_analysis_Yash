@@ -322,11 +322,68 @@ void plot_det_cuts_ptbc(){
     }
 }
 
+void plot_det_cuts_fimg(){
+
+    TH2D* FIMG_tof_amp_hists[2];
+    TCutG* FIMG_tof_amp_cuts[2];
+
+    for (Int_t i = 0; i < 2; i++)
+    {
+        FIMG_tof_amp_hists[i] = GetHist2D("../rootFiles/cutoffAnalysis_FIMG_ar_bottle_full.root", Form("FIMG_tof_amp_dedi_det%i", i+1));
+        FIMG_tof_amp_cuts[i] = retrive_TCutG("../rootFiles/cutoffAnalysis_FIMG_ar_bottle_full.root", Form("FIMG_my_tof_amp_cut_dedi_det%i", i+1));
+    }
+
+    //Plotting
+    SetMArEXStyle();
+    // gStyle->SetOptStat(1110);
+    gStyle->SetPalette(57);
+    gStyle->SetCanvasDefW(1000); //600
+    gStyle->SetCanvasDefH(500); //500
+
+
+    TCanvas *c[2];
+
+    for (Int_t i = 0; i < 2; i++)
+    {
+        c[i] = new TCanvas(Form("c%d", i)," ");
+        c[i]->cd();
+        c[i]->SetBorderMode(0);
+        c[i]->SetTopMargin(0.1);
+        c[i]->SetBottomMargin(0.1);
+        c[i]->SetLeftMargin(0.1);
+        c[i]->SetRightMargin(0.09);
+        
+        FIMG_tof_amp_hists[i]->SetTitle(Form("Detector %i - Micromegas", i+1));
+        // X Axis
+        FIMG_tof_amp_hists[i]->GetXaxis()->SetLabelSize(0.04);
+        FIMG_tof_amp_hists[i]->GetXaxis()->SetTitleSize(0.04);
+        FIMG_tof_amp_hists[i]->GetXaxis()->SetTitleOffset(1.1);
+        FIMG_tof_amp_hists[i]->GetXaxis()->SetTitle("TOF (in ns)");
+        // Y Axis
+        FIMG_tof_amp_hists[i]->GetYaxis()->SetLabelSize(0.04);
+        FIMG_tof_amp_hists[i]->GetYaxis()->SetTitleSize(0.04);
+        FIMG_tof_amp_hists[i]->GetYaxis()->SetTitleOffset(1.2);
+        FIMG_tof_amp_hists[i]->GetYaxis()->SetTitle("Amplitude (a.u.)");
+        FIMG_tof_amp_hists[i]->GetYaxis()->SetRangeUser(0,5100);
+        FIMG_tof_amp_hists[i]->SetStats(0);
+        FIMG_tof_amp_hists[i]->Draw("COLZ");
+        gPad->SetLogx();
+        gPad->SetLogz();
+
+        FIMG_tof_amp_cuts[i]->SetLineColor(2);
+        FIMG_tof_amp_cuts[i]->SetLineWidth(2);
+        FIMG_tof_amp_cuts[i]->Draw("SAME");
+        c[i]->Print(Form("/home/yash/Thesis/ntofAnalysis/figures/bkgd_plots/tof_amp_hist_cut_det%i_fimg.png", i+1));
+    }
+}
+
 void hist2DPlots() {
 
     // plot_PTBC_ringing();
 
-    plot_det_cuts_ptbc();
+    // plot_det_cuts_ptbc();
+
+    // plot_det_cuts_fimg();
 
     // fillCutGraph_PTBC();
     // fillCutGraph_FIMG();

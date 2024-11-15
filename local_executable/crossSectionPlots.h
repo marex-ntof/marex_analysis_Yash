@@ -33,14 +33,14 @@
 
 //////// Run variables
 // std::string mode = "run"; //"run", "test"
-const std::string filter_name("bi1"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, al5_c_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, ar_bottle_full
-const std::string filter_name_title("Bi (1 cm)");
-Int_t bins_per_decade = 50;
+const std::string filter_name("ar_bottle_full"); //bi1, al3, al5, al8, c1p2_ts, al5_ts, al5_c_ts, bi1p2_ts, cf_bottle, cf_bottle_rot, ar_bottle_full
+const std::string filter_name_title("Argon Tank");
+Int_t bins_per_decade = 20;
 //Bi (1 cm), Target Bi (1.2 cm), Al (3 cm), Al (5 cm), Al (5 cm) Transmission Station, Al (8 cm), Target C (1.2 cm), Empty Tank, Empty Tank Rotated
 //Argon Tank, Al (5 cm) & C (1.2 cm)
 
 bool fillENDF = true;
-bool fillJENDL = false;
+bool fillJENDL = true;
 bool storeHists = true;
 bool plotHists = false;
 // const std::string root_file_name("rootFiles/crossSectionAna_al_8cm.root"); //Al_tot_xsec.txt, Bi_tot_xsec.txt
@@ -99,7 +99,7 @@ const Double_t flight_path_length_PTBC = 182.65 - 0.41; //m
 const Double_t flight_path_length_FIMG = 183.5 - 0.41; //m
 const Double_t neutron_mass = 939.56542052; //in MeV
 const Double_t speed_of_light = 299792458.0; //in m/s
-Double_t ar_bottle_pressure = 197.385 * 1e5; // in Pa (SI unit)
+Double_t ar_bottle_pressure = (200 - 1.01325) * 1e5; // in Pa (SI unit)
 Double_t ar_bottle_temp = 293.0; // in Kelvin
 
 Double_t n_Bi_1cm = (1.0 /*cm*/) * (9.78 /*g/cm3*/) * (6.02214076e23 /*atoms/mole*/) * (1e-24 /*cm2/barn*/) / (208.9804 /*g/mole*/);

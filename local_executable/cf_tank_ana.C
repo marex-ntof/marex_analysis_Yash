@@ -320,8 +320,8 @@ void plotting(){
     gStyle->SetStatW(0.17);
     gStyle->SetPadRightMargin(0.05);
 
-    gStyle->SetCanvasDefW(800); //600
-    gStyle->SetCanvasDefH(400); //500
+    gStyle->SetCanvasDefW(1000); //600
+    gStyle->SetCanvasDefH(500); //500
 
     TCanvas *c[4];
     TLegend *l[4];
@@ -329,10 +329,23 @@ void plotting(){
     int i = 0;
 
     c[i] = new TCanvas(Form("c%d", i)," ");
+    c[i]->SetFillColor(kWhite);
+    c[i]->SetBottomMargin(0.15);
+    c[i]->SetTopMargin(0.1);
+    c[i]->SetBorderMode(0);
+    c[i]->Draw();
     c[i]->cd();
 
+    //X-axis
     transmission_hist_e_PTBC[2]->GetXaxis()->SetTitle("Energy (in eV)");
+    transmission_hist_e_PTBC[2]->GetXaxis()->SetTitleOffset(1.2); //increase to move down
+    transmission_hist_e_PTBC[2]->GetXaxis()->SetLabelSize(0.06);
+    transmission_hist_e_PTBC[2]->GetXaxis()->SetTitleSize(0.06);
+    //Y-axis
     transmission_hist_e_PTBC[2]->GetYaxis()->SetTitle("Transmission");
+    transmission_hist_e_PTBC[2]->GetYaxis()->SetLabelSize(0.05);
+    transmission_hist_e_PTBC[2]->GetYaxis()->SetTitleSize(0.06);
+    transmission_hist_e_PTBC[2]->GetYaxis()->SetTitleOffset(0.6);
     transmission_hist_e_PTBC[2]->SetTitle("Transmission Histogram - CF Tank");
     transmission_hist_e_PTBC[2]->SetLineColor(2);
     transmission_hist_e_PTBC[2]->SetLineWidth(2);
@@ -354,7 +367,7 @@ void plotting(){
     // transmission_hist_e_PTBC[1]->GetXaxis()->SetRangeUser(1e-2,1e3);
     transmission_hist_e_PTBC[1]->Draw("SAME");
 
-    l[i] = new TLegend(0.77,0.7,0.86,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
+    l[i] = new TLegend(0.15,0.65,0.55,0.85); //0.68,0.7,0.86,0.8       ;         0.72,0.8,0.90,0.9
     l[i]->AddEntry(transmission_hist_e_PTBC[0],"CF Tank","l");
     l[i]->AddEntry(transmission_hist_e_PTBC[1],"CF Tank - Rotated 90 deg","l");
     l[i]->AddEntry(transmission_hist_e_PTBC[2],"CF Tank - Rotated Back","l");
@@ -386,6 +399,6 @@ void cf_tank_ana(){
         fill_trans(energy_hist_target_in_PTBC[i], energy_hist_target_out_PTBC, transmission_hist_e_PTBC[i], trans_norm_factors[i]);
     }
 
-    calc_trans_1ev_10kev();
-    // plotting();
+    // calc_trans_1ev_10kev();
+    plotting();
 }

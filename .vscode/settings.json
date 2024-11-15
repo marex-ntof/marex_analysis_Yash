@@ -67,6 +67,8 @@
         "ptbcCutsAna.C": "cpp",
         "cf_tank_ana.C": "cpp",
         "plot_ar_results.C": "cpp",
-        "ar_tank_ana.C": "cpp"
+        "ar_tank_ana.C": "cpp",
+        "c1p2_ana.C": "cpp",
+        "pkup.C": "cpp"
     }
 }

@@ -692,7 +692,7 @@ void cutoffFitter_PTBC() {
     
     // StoreCutHists(); // Will store the cuts in a root file
 
-    for (Int_t i = 0; i < 6; i++)
+    for (Int_t i = 0; i < 1; i++)
     {
         // cout << "Alpha cut for Det " << i+2 << " is " << det_alphas_cuts[i] << endl;
         tof_amp_hists_for_plots[i] = retrive_TH2D_Histograms(Form("../rootFiles/cutoffAnalysis_PTBC_%s.root", target_name.c_str()), Form("PTBC_tof_amp_det%i", i+2));

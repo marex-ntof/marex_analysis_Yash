@@ -244,6 +244,53 @@ void fill_evaluation(TH1D* xsec_hist, Double_t min_e, Double_t max_e, const char
     }
 }
 
+std::vector<Double_t> min_max_uncertainty(TH1D* sys_hist, Int_t min_bin, Int_t max_bin){
+
+    Double_t min_unc = 0;
+    Double_t max_unc = 0;
+    for (Int_t i = min_bin; i < max_bin+1; i++)
+    {
+        Double_t bin_content = sys_hist->GetBinContent(i);
+        Double_t bin_error = sys_hist->GetBinError(i);
+        Double_t percent_unc = bin_error*100/bin_content;
+        // cout << "percent_unc = " << percent_unc << endl; 
+        if (i == min_bin)
+        {
+            min_unc = percent_unc;
+            max_unc = percent_unc;
+            continue;
+        }
+        if (percent_unc < min_unc)
+        {
+            min_unc = percent_unc;
+        }
+        if (percent_unc > max_unc)
+        {
+            max_unc = percent_unc;
+        }
+    }
+    std::vector<Double_t> unc_vec;
+    unc_vec.push_back(min_unc);
+    unc_vec.push_back(max_unc);
+    return unc_vec;
+}
+
+Double_t avg_xsec_uncertainty(TH1D* sys_hist, Int_t min_bin, Int_t max_bin){
+
+    Double_t bin_content = 0;
+    Double_t bin_error = 0;
+    for (Int_t i = min_bin; i < max_bin+1; i++)
+    {
+        bin_content += sys_hist->GetBinContent(i);
+        bin_error += sys_hist->GetBinError(i) * sys_hist->GetBinError(i);
+        
+    }
+    bin_content /= (max_bin-min_bin+1);
+    bin_error = std::sqrt(bin_error)/(max_bin-min_bin+1);
+    Double_t percent_unc = bin_error*100/bin_content;
+    return percent_unc;
+}
+
 void fill_cf_thickness_sys(bool plot_sys){
 
     trans_cft_hist_ptbc = (TH1D*)jendl_xsec_hist->Clone("trans_cft_hist_ptbc");
@@ -327,6 +374,38 @@ void fill_cf_thickness_sys(bool plot_sys){
         xsec_cft_hist_fimg->SetBinContent(i,xsec_bin_content);
         xsec_cft_hist_fimg->SetBinError(i,xsec_bin_err);
     }
+
+    // std::vector<Double_t> trans_unc_cft_ptbc_0p1_1_kev = min_max_uncertainty(trans_cft_hist_ptbc, 81, 100);
+    // std::vector<Double_t> trans_unc_cft_fimg_0p1_1_kev = min_max_uncertainty(trans_cft_hist_fimg, 81, 100);
+    // std::vector<Double_t> trans_unc_cft_ptbc_1_10_mev = min_max_uncertainty(trans_cft_hist_ptbc, 161, 180);
+    // std::vector<Double_t> trans_unc_cft_fimg_1_10_mev = min_max_uncertainty(trans_cft_hist_fimg, 161, 180);
+
+    // cout << "trans_unc_cft_ptbc_0p1_1_kev = " << trans_unc_cft_ptbc_0p1_1_kev.at(0) << ", " << trans_unc_cft_ptbc_0p1_1_kev.at(1) << endl;
+    // cout << "trans_unc_cft_fimg_0p1_1_kev = " << trans_unc_cft_fimg_0p1_1_kev.at(0) << ", " << trans_unc_cft_fimg_0p1_1_kev.at(1) << endl;
+    // cout << "trans_unc_cft_ptbc_1_10_mev = " << trans_unc_cft_ptbc_1_10_mev.at(0) << ", " << trans_unc_cft_ptbc_1_10_mev.at(1) << endl;
+    // cout << "trans_unc_cft_fimg_1_10_mev = " << trans_unc_cft_fimg_1_10_mev.at(0) << ", " << trans_unc_cft_fimg_1_10_mev.at(1) << endl;
+    // cout << "---------------" << endl;
+
+    // std::vector<Double_t> xsec_unc_ptbc_0p1_1_kev = min_max_uncertainty(xsec_cft_hist_ptbc, 81, 100);
+    // std::vector<Double_t> xsec_unc_fimg_0p1_1_kev = min_max_uncertainty(xsec_cft_hist_fimg, 81, 100);
+    // std::vector<Double_t> xsec_unc_ptbc_1_10_mev = min_max_uncertainty(xsec_cft_hist_ptbc, 161, 180);
+    // std::vector<Double_t> xsec_unc_fimg_1_10_mev = min_max_uncertainty(xsec_cft_hist_fimg, 161, 180);
+
+    // cout << "xsec_unc_ptbc_0p1_1_kev = " << xsec_unc_ptbc_0p1_1_kev.at(0) << ", " << xsec_unc_ptbc_0p1_1_kev.at(1) << endl;
+    // cout << "xsec_unc_fimg_0p1_1_kev = " << xsec_unc_fimg_0p1_1_kev.at(0) << ", " << xsec_unc_fimg_0p1_1_kev.at(1) << endl;
+    // cout << "xsec_unc_ptbc_1_10_mev = " << xsec_unc_ptbc_1_10_mev.at(0) << ", " << xsec_unc_ptbc_1_10_mev.at(1) << endl;
+    // cout << "xsec_unc_fimg_1_10_mev = " << xsec_unc_fimg_1_10_mev.at(0) << ", " << xsec_unc_fimg_1_10_mev.at(1) << endl;
+
+    Double_t xsec_unc_cft_ptbc_0p1_1_kev = avg_xsec_uncertainty(xsec_cft_hist_ptbc, 81, 100);
+    Double_t xsec_unc_cft_fimg_0p1_1_kev = avg_xsec_uncertainty(xsec_cft_hist_fimg, 81, 100);
+    Double_t xsec_unc_cft_ptbc_0p1_1_mev = avg_xsec_uncertainty(xsec_cft_hist_ptbc, 141, 160);
+    Double_t xsec_unc_cft_fimg_0p1_1_mev = avg_xsec_uncertainty(xsec_cft_hist_fimg, 141, 160);
+
+    cout << "xsec_unc_cft_ptbc_0p1_1_kev = " << xsec_unc_cft_ptbc_0p1_1_kev << endl;
+    cout << "xsec_unc_cft_fimg_0p1_1_kev = " << xsec_unc_cft_fimg_0p1_1_kev << endl;
+    cout << "xsec_unc_cft_ptbc_0p1_1_mev = " << xsec_unc_cft_ptbc_0p1_1_mev << endl;
+    cout << "xsec_unc_cft_fimg_0p1_1_mev = " << xsec_unc_cft_fimg_0p1_1_mev << endl;
+    cout << "---------------" << endl;
     
     if (plot_sys)
     {
@@ -336,7 +415,7 @@ void fill_cf_thickness_sys(bool plot_sys){
         gStyle->SetPadRightMargin(0.04);
         gStyle->SetTitleH(0.1);
         gStyle->SetTitleAlign(33);
-        gStyle->SetTitleX(.76);
+        gStyle->SetTitleX(.7);
         // gStyle->SetStats(0);
         
         ////////////////////// PTBC
@@ -363,7 +442,7 @@ void fill_cf_thickness_sys(bool plot_sys){
         trans_cft_hist_ptbc->GetYaxis()->SetLabelSize(0.09);
         trans_cft_hist_ptbc->GetYaxis()->SetTitleSize(0.09);
         trans_cft_hist_ptbc->GetYaxis()->SetTitleOffset(0.45);
-        trans_cft_hist_ptbc->SetFillColor(kRed);
+        trans_cft_hist_ptbc->SetFillColor(kCyan);
         // trans_cft_hist_ptbc->SetFillStyle(3001);
         trans_cft_hist_ptbc->GetXaxis()->SetRangeUser(1e-1,1e8);
         trans_cft_hist_ptbc->GetYaxis()->SetRangeUser(0.22,1.25);
@@ -402,7 +481,7 @@ void fill_cf_thickness_sys(bool plot_sys){
         xsec_cft_hist_ptbc->GetYaxis()->SetLabelSize(0.09);
         xsec_cft_hist_ptbc->GetYaxis()->SetTitleSize(0.09);
         xsec_cft_hist_ptbc->GetYaxis()->SetTitleOffset(0.45);
-        xsec_cft_hist_ptbc->SetFillColor(kRed);
+        xsec_cft_hist_ptbc->SetFillColor(kCyan);
         // xsec_cft_hist_ptbc->SetFillStyle(3001);
         xsec_cft_hist_ptbc->GetXaxis()->SetRangeUser(1e-1,1e8);
         xsec_cft_hist_ptbc->GetYaxis()->SetRangeUser(-4.8,23.);
@@ -443,7 +522,7 @@ void fill_cf_thickness_sys(bool plot_sys){
         trans_cft_hist_fimg->GetYaxis()->SetLabelSize(0.09);
         trans_cft_hist_fimg->GetYaxis()->SetTitleSize(0.09);
         trans_cft_hist_fimg->GetYaxis()->SetTitleOffset(0.45);
-        trans_cft_hist_fimg->SetFillColor(kRed);
+        trans_cft_hist_fimg->SetFillColor(kCyan);
         // trans_cft_hist_fimg->SetFillStyle(3001);
         trans_cft_hist_fimg->GetXaxis()->SetRangeUser(1e-1,1e6);
         trans_cft_hist_fimg->GetYaxis()->SetRangeUser(0.42,1.25);
@@ -482,7 +561,7 @@ void fill_cf_thickness_sys(bool plot_sys){
         xsec_cft_hist_fimg->GetYaxis()->SetLabelSize(0.09);
         xsec_cft_hist_fimg->GetYaxis()->SetTitleSize(0.09);
         xsec_cft_hist_fimg->GetYaxis()->SetTitleOffset(0.45);
-        xsec_cft_hist_fimg->SetFillColor(kRed);
+        xsec_cft_hist_fimg->SetFillColor(kCyan);
         // xsec_cft_hist_fimg->SetFillStyle(3001);
         xsec_cft_hist_fimg->GetXaxis()->SetRangeUser(1e-1,1e6);
         xsec_cft_hist_fimg->GetYaxis()->SetRangeUser(-4.8,19.);
@@ -547,13 +626,35 @@ void fill_ar_thickness_sys(bool plot_sys){
         xsec_art_hist_fimg->SetBinError(i,xsec_bin_err);
     }
 
+    // std::vector<Double_t> xsec_unc_art_ptbc_0p1_1_kev = min_max_uncertainty(xsec_art_hist_ptbc, 81, 100);
+    // std::vector<Double_t> xsec_unc_art_fimg_0p1_1_kev = min_max_uncertainty(xsec_art_hist_fimg, 81, 100);
+    // std::vector<Double_t> xsec_unc_art_ptbc_1_10_mev = min_max_uncertainty(xsec_art_hist_ptbc, 161, 180);
+    // std::vector<Double_t> xsec_unc_art_fimg_1_10_mev = min_max_uncertainty(xsec_art_hist_fimg, 161, 180);
+
+    // cout << "xsec_unc_art_ptbc_0p1_1_kev = " << xsec_unc_art_ptbc_0p1_1_kev.at(0) << ", " << xsec_unc_art_ptbc_0p1_1_kev.at(1) << endl;
+    // cout << "xsec_unc_art_fimg_0p1_1_kev = " << xsec_unc_art_fimg_0p1_1_kev.at(0) << ", " << xsec_unc_art_fimg_0p1_1_kev.at(1) << endl;
+    // cout << "xsec_unc_art_ptbc_1_10_mev = " << xsec_unc_art_ptbc_1_10_mev.at(0) << ", " << xsec_unc_art_ptbc_1_10_mev.at(1) << endl;
+    // cout << "xsec_unc_art_fimg_1_10_mev = " << xsec_unc_art_fimg_1_10_mev.at(0) << ", " << xsec_unc_art_fimg_1_10_mev.at(1) << endl;
+    // cout << "---------------" << endl;
+
+    Double_t xsec_unc_art_ptbc_0p1_1_kev = avg_xsec_uncertainty(xsec_art_hist_ptbc, 81, 100);
+    Double_t xsec_unc_art_fimg_0p1_1_kev = avg_xsec_uncertainty(xsec_art_hist_fimg, 81, 100);
+    Double_t xsec_unc_art_ptbc_0p1_1_mev = avg_xsec_uncertainty(xsec_art_hist_ptbc, 141, 160);
+    Double_t xsec_unc_art_fimg_0p1_1_mev = avg_xsec_uncertainty(xsec_art_hist_fimg, 141, 160);
+
+    cout << "xsec_unc_art_ptbc_0p1_1_kev = " << xsec_unc_art_ptbc_0p1_1_kev << endl;
+    cout << "xsec_unc_art_fimg_0p1_1_kev = " << xsec_unc_art_fimg_0p1_1_kev << endl;
+    cout << "xsec_unc_art_ptbc_0p1_1_mev = " << xsec_unc_art_ptbc_0p1_1_mev << endl;
+    cout << "xsec_unc_art_fimg_0p1_1_mev = " << xsec_unc_art_fimg_0p1_1_mev << endl;
+    cout << "---------------" << endl;
+
     if (plot_sys)
     {
         SetMArEXStyle();
         gStyle->SetPadRightMargin(0.04);
         // gStyle->SetPadBottomMargin(0.17);
-        gStyle->SetCanvasDefW(800); //600
-        gStyle->SetCanvasDefH(400); //500 
+        gStyle->SetCanvasDefW(1000); //600
+        gStyle->SetCanvasDefH(500); //500 
         // gStyle->SetTitleH(0.1);
         // gStyle->SetTitleAlign(33);
         // gStyle->SetTitleX(.76);
@@ -583,7 +684,7 @@ void fill_ar_thickness_sys(bool plot_sys){
         xsec_art_hist_ptbc->GetYaxis()->SetLabelSize(0.06);
         xsec_art_hist_ptbc->GetYaxis()->SetTitleSize(0.06);
         xsec_art_hist_ptbc->GetYaxis()->SetTitleOffset(0.55);
-        xsec_art_hist_ptbc->SetFillColor(kRed);
+        xsec_art_hist_ptbc->SetFillColor(kCyan);
         // xsec_art_hist_ptbc->SetFillStyle(3001);
         xsec_art_hist_ptbc->GetXaxis()->SetRangeUser(1e-1,1e8);
         xsec_art_hist_ptbc->GetYaxis()->SetRangeUser(-4.8,23.);
@@ -623,7 +724,7 @@ void fill_ar_thickness_sys(bool plot_sys){
         xsec_art_hist_fimg->GetYaxis()->SetLabelSize(0.06);
         xsec_art_hist_fimg->GetYaxis()->SetTitleSize(0.06);
         xsec_art_hist_fimg->GetYaxis()->SetTitleOffset(0.55);
-        xsec_art_hist_fimg->SetFillColor(kRed);
+        xsec_art_hist_fimg->SetFillColor(kCyan);
         // xsec_art_hist_fimg->SetFillStyle(3001);
         xsec_art_hist_fimg->GetXaxis()->SetRangeUser(1e-1,1e6);
         xsec_art_hist_fimg->GetYaxis()->SetRangeUser(-4.8,19.);
@@ -812,10 +913,10 @@ void fill_bkgd_sys(bool plot_sys){
 
     for (Int_t i = 1; i < num_bins_ptbc+1; i++)
     {
-        Double_t trans_bin_lim_low = transmission_hist_e_PTBC->GetBinContent(20+i) + bin_err_up_ptbc[i-1];
-        Double_t trans_bin_lim_up = transmission_hist_e_PTBC->GetBinContent(20+i) - bin_err_low_ptbc[i-1];
+        Double_t trans_bin_lim_up = transmission_hist_e_PTBC->GetBinContent(20+i) + bin_err_up_ptbc[i-1];
+        Double_t trans_bin_lim_low = transmission_hist_e_PTBC->GetBinContent(20+i) - bin_err_low_ptbc[i-1];
         Double_t trans_bin_content = (trans_bin_lim_low + trans_bin_lim_up)/2;
-        Double_t trans_bin_error = (trans_bin_lim_low - trans_bin_lim_up)/2;
+        Double_t trans_bin_error = (trans_bin_lim_up - trans_bin_lim_low)/2;
         trans_bkgd_hist_ptbc->SetBinContent(i, trans_bin_content);
         trans_bkgd_hist_ptbc->SetBinError(i, trans_bin_error);
 
@@ -916,10 +1017,10 @@ void fill_bkgd_sys(bool plot_sys){
 
     for (Int_t i = 1; i < num_bins_fimg+1; i++)
     {
-        Double_t trans_bin_lim_low = transmission_hist_e_FIMG->GetBinContent(20+i);
-        Double_t trans_bin_lim_up = transmission_hist_e_FIMG->GetBinContent(20+i) - bin_err_low_fimg[i-1];
+        Double_t trans_bin_lim_up = transmission_hist_e_FIMG->GetBinContent(20+i);
+        Double_t trans_bin_lim_low = transmission_hist_e_FIMG->GetBinContent(20+i) - bin_err_low_fimg[i-1];
         Double_t trans_bin_content = (trans_bin_lim_low + trans_bin_lim_up)/2;
-        Double_t trans_bin_error = (trans_bin_lim_low - trans_bin_lim_up)/2;
+        Double_t trans_bin_error = (trans_bin_lim_up - trans_bin_lim_low)/2;
         trans_bkgd_hist_fimg->SetBinContent(i, trans_bin_content);
         trans_bkgd_hist_fimg->SetBinError(i, trans_bin_error);
 
@@ -939,6 +1040,30 @@ void fill_bkgd_sys(bool plot_sys){
         xsec_bkgd_hist_fimg->SetBinError(i, xsec_bin_err);
     }
 
+    //0.1-1keV and 0.1-1MeV
+    // std::vector<Double_t> trans_unc_bkgd_ptbc_0p1_1_kev = min_max_uncertainty(trans_bkgd_hist_ptbc, 81, 100);
+    // std::vector<Double_t> trans_unc_bkgd_fimg_0p1_1_kev = min_max_uncertainty(trans_bkgd_hist_fimg, 81, 100);
+    // std::vector<Double_t> trans_unc_bkgd_ptbc_1_10_mev = min_max_uncertainty(trans_bkgd_hist_ptbc, 161, 180);
+    // std::vector<Double_t> trans_unc_bkgd_fimg_1_10_mev = min_max_uncertainty(trans_bkgd_hist_fimg, 161, 180);
+
+    // cout << "trans_unc_bkgd_ptbc_0p1_1_kev = " << trans_unc_bkgd_ptbc_0p1_1_kev.at(0) << ", " << trans_unc_bkgd_ptbc_0p1_1_kev.at(1) << endl;
+    // cout << "trans_unc_bkgd_fimg_0p1_1_kev = " << trans_unc_bkgd_fimg_0p1_1_kev.at(0) << ", " << trans_unc_bkgd_fimg_0p1_1_kev.at(1) << endl;
+    // cout << "trans_unc_bkgd_ptbc_1_10_mev = " << trans_unc_bkgd_ptbc_1_10_mev.at(0) << ", " << trans_unc_bkgd_ptbc_1_10_mev.at(1) << endl;
+    // cout << "trans_unc_bkgd_fimg_1_10_mev = " << trans_unc_bkgd_fimg_1_10_mev.at(0) << ", " << trans_unc_bkgd_fimg_1_10_mev.at(1) << endl;
+    // cout << "---------------" << endl;
+
+    Double_t xsec_unc_bkgd_ptbc_0p1_1_kev = avg_xsec_uncertainty(xsec_bkgd_hist_ptbc, 61, 80);
+    Double_t xsec_unc_bkgd_fimg_0p1_1_kev = avg_xsec_uncertainty(xsec_bkgd_hist_fimg, 61, 80);
+    Double_t xsec_unc_bkgd_ptbc_0p1_1_mev = avg_xsec_uncertainty(xsec_bkgd_hist_ptbc, 121, 140);
+    Double_t xsec_unc_bkgd_fimg_0p1_1_mev = avg_xsec_uncertainty(xsec_bkgd_hist_fimg, 121, 140);
+
+    cout << "xsec_unc_bkgd_ptbc_0p1_1_kev = " << xsec_unc_bkgd_ptbc_0p1_1_kev << endl;
+    cout << "xsec_unc_bkgd_fimg_0p1_1_kev = " << xsec_unc_bkgd_fimg_0p1_1_kev << endl;
+    cout << "xsec_unc_bkgd_ptbc_0p1_1_mev = " << xsec_unc_bkgd_ptbc_0p1_1_mev << endl;
+    cout << "xsec_unc_bkgd_fimg_0p1_1_mev = " << xsec_unc_bkgd_fimg_0p1_1_mev << endl;
+    cout << "---------------" << endl;
+
+
     if (plot_sys)
     {
         SetMArEXStyle();
@@ -947,7 +1072,7 @@ void fill_bkgd_sys(bool plot_sys){
         gStyle->SetPadRightMargin(0.04);
         gStyle->SetTitleH(0.1);
         gStyle->SetTitleAlign(33);
-        gStyle->SetTitleX(.76);
+        gStyle->SetTitleX(.7);
         // gStyle->SetStats(0);
         
         ////////////////////// PTBC
@@ -974,7 +1099,7 @@ void fill_bkgd_sys(bool plot_sys){
         trans_bkgd_hist_ptbc->GetYaxis()->SetLabelSize(0.09);
         trans_bkgd_hist_ptbc->GetYaxis()->SetTitleSize(0.09);
         trans_bkgd_hist_ptbc->GetYaxis()->SetTitleOffset(0.45);
-        trans_bkgd_hist_ptbc->SetFillColor(kRed);
+        trans_bkgd_hist_ptbc->SetFillColor(kCyan);
         // trans_bkgd_hist_ptbc->SetFillStyle(3001);
         trans_bkgd_hist_ptbc->GetXaxis()->SetRangeUser(1e-1,1e8);
         trans_bkgd_hist_ptbc->GetYaxis()->SetRangeUser(0.22,1.25);
@@ -1013,7 +1138,7 @@ void fill_bkgd_sys(bool plot_sys){
         xsec_bkgd_hist_ptbc->GetYaxis()->SetLabelSize(0.09);
         xsec_bkgd_hist_ptbc->GetYaxis()->SetTitleSize(0.09);
         xsec_bkgd_hist_ptbc->GetYaxis()->SetTitleOffset(0.45);
-        xsec_bkgd_hist_ptbc->SetFillColor(kRed);
+        xsec_bkgd_hist_ptbc->SetFillColor(kCyan);
         // xsec_bkgd_hist_ptbc->SetFillStyle(3001);
         xsec_bkgd_hist_ptbc->GetXaxis()->SetRangeUser(1e-1,1e8);
         xsec_bkgd_hist_ptbc->GetYaxis()->SetRangeUser(-4.8,23.);
@@ -1054,7 +1179,7 @@ void fill_bkgd_sys(bool plot_sys){
         trans_bkgd_hist_fimg->GetYaxis()->SetLabelSize(0.09);
         trans_bkgd_hist_fimg->GetYaxis()->SetTitleSize(0.09);
         trans_bkgd_hist_fimg->GetYaxis()->SetTitleOffset(0.45);
-        trans_bkgd_hist_fimg->SetFillColor(kRed);
+        trans_bkgd_hist_fimg->SetFillColor(kCyan);
         // trans_bkgd_hist_fimg->SetFillStyle(3001);
         trans_bkgd_hist_fimg->GetXaxis()->SetRangeUser(1e-1,1e6);
         trans_bkgd_hist_fimg->GetYaxis()->SetRangeUser(0.42,1.25);
@@ -1093,7 +1218,7 @@ void fill_bkgd_sys(bool plot_sys){
         xsec_bkgd_hist_fimg->GetYaxis()->SetLabelSize(0.09);
         xsec_bkgd_hist_fimg->GetYaxis()->SetTitleSize(0.09);
         xsec_bkgd_hist_fimg->GetYaxis()->SetTitleOffset(0.45);
-        xsec_bkgd_hist_fimg->SetFillColor(kRed);
+        xsec_bkgd_hist_fimg->SetFillColor(kCyan);
         // xsec_bkgd_hist_fimg->SetFillStyle(3001);
         xsec_bkgd_hist_fimg->GetXaxis()->SetRangeUser(1e-1,1e6);
         xsec_bkgd_hist_fimg->GetYaxis()->SetRangeUser(-4.8,19.);
@@ -1231,8 +1356,8 @@ void combine_sys(bool plot_hists){
         SetMArEXStyle();
         gStyle->SetPadRightMargin(0.04);
         // gStyle->SetPadBottomMargin(0.17);
-        gStyle->SetCanvasDefW(800); //600
-        gStyle->SetCanvasDefH(400); //500 
+        gStyle->SetCanvasDefW(1000); //600
+        gStyle->SetCanvasDefH(500); //500 
         // gStyle->SetTitleH(0.1);
         // gStyle->SetTitleAlign(33);
         // gStyle->SetTitleX(.76);
@@ -1290,11 +1415,11 @@ void combine_sys(bool plot_hists){
         l_tot[0] = new TLegend(0.15, 0.60, 0.45, 0.80);
         l_tot[0]->AddEntry(xsec_combined_sys_hist_ptbc, "Total systematic error", "f");
         l_tot[0]->AddEntry(cross_section_hist_e_PTBC, "Cross Section w/ stat errors", "l");
-        l_tot[0]->AddEntry(endf_xsec_hist,"ENDF","l");
+        l_tot[0]->AddEntry(endf_xsec_hist,"ENDF-VIII","l");
         l_tot[0]->AddEntry(jendl_xsec_hist,"JENDL-5","l");
         l_tot[0]->Draw();
 
-        // c_tot[0]->Print("../plots/results_plots/xsec_ar_tank_ptbc.png");
+        c_tot[0]->Print("../plots/results_plots/xsec_ar_tank_ptbc.png");
 
         //canvas - 2 - FIMG - xsec
         c_tot[1] = new TCanvas("c_tot_1"," ");
@@ -1345,11 +1470,11 @@ void combine_sys(bool plot_hists){
         l_tot[1] = new TLegend(0.15, 0.60, 0.45, 0.80);
         l_tot[1]->AddEntry(xsec_combined_sys_hist_fimg, "Total systematic error", "f");
         l_tot[1]->AddEntry(cross_section_hist_e_FIMG, "Cross section w/ stat errors", "l");
-        l_tot[1]->AddEntry(endf_xsec_hist,"ENDF","l");
+        l_tot[1]->AddEntry(endf_xsec_hist,"ENDF-VIII","l");
         l_tot[1]->AddEntry(jendl_xsec_hist,"JENDL-5","l");
         l_tot[1]->Draw("same");
 
-        // c_tot[1]->Print("../plots/results_plots/xsec_ar_tank_fimg.png");
+        c_tot[1]->Print("../plots/results_plots/xsec_ar_tank_fimg.png");
 
         ////////////////////// transmission
 
@@ -1401,11 +1526,11 @@ void combine_sys(bool plot_hists){
         l_tot[2] = new TLegend(0.15, 0.20, 0.45, 0.40);
         l_tot[2]->AddEntry(trans_combined_sys_hist_ptbc, "Total systematic error", "f");
         l_tot[2]->AddEntry(transmission_hist_e_PTBC, "Transmission w/ stat errors", "l");
-        l_tot[2]->AddEntry(endf_trans_hist,"ENDF","l");
+        l_tot[2]->AddEntry(endf_trans_hist,"ENDF-VIII","l");
         l_tot[2]->AddEntry(jendl_trans_hist,"JENDL-5","l");
         l_tot[2]->Draw();
 
-        // c_tot[2]->Print("../plots/results_plots/transmission_ar_tank_ptbc.png");
+        c_tot[2]->Print("../plots/results_plots/transmission_ar_tank_ptbc.png");
 
         //canvas - 4 - FIMG - trans
         c_tot[3] = new TCanvas("c_tot_3"," ");
@@ -1456,11 +1581,11 @@ void combine_sys(bool plot_hists){
         l_tot[3] = new TLegend(0.15, 0.20, 0.45, 0.40);
         l_tot[3]->AddEntry(trans_combined_sys_hist_fimg, "Total systematic error", "f");
         l_tot[3]->AddEntry(transmission_hist_e_FIMG, "Transmission w/ stat errors", "l");
-        l_tot[3]->AddEntry(endf_trans_hist,"ENDF","l");
+        l_tot[3]->AddEntry(endf_trans_hist,"ENDF-VIII","l");
         l_tot[3]->AddEntry(jendl_trans_hist,"JENDL-5","l");
         l_tot[3]->Draw("same");
 
-        // c_tot[3]->Print("../plots/results_plots/transmission_ar_tank_fimg.png");
+        c_tot[3]->Print("../plots/results_plots/transmission_ar_tank_fimg.png");
     }
      
 }

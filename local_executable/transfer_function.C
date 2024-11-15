@@ -249,7 +249,7 @@ void plot_hists(){
     
     //Pad 1
     c[i]->cd(0);
-    p[i][0] = new TPad(Form("p_%d_0", i), Form("p_%d_0", i), 0., 0.35, 1., 1.);
+    p[i][0] = new TPad(Form("p_%d_0", i), Form("p_%d_0", i), 0., 0.4, 1., 1.);
     p[i][0]->SetFillColor(kWhite);
     p[i][0]->SetBottomMargin(0.00001);
     p[i][0]->SetRightMargin(0.05);
@@ -259,16 +259,20 @@ void plot_hists(){
 
     // Y Axis
     transfer_func_PTBC_noRF->GetYaxis()->SetTitle("Energy (in eV)");
-    transfer_func_PTBC_noRF->GetYaxis()->SetLabelSize(0.05);
+    transfer_func_PTBC_noRF->GetYaxis()->SetLabelSize(0.07); //0.05
     transfer_func_PTBC_noRF->GetYaxis()->SetTitleSize(0.06);
     transfer_func_PTBC_noRF->GetYaxis()->SetTitleOffset(0.65);
+    transfer_func_PTBC_noRF->GetYaxis()->SetNdivisions(8);
+    transfer_func_PTBC_noRF->GetYaxis()->SetRangeUser(1.01e-2,5e8);
     // X Axis
     transfer_func_PTBC_noRF->GetXaxis()->SetLabelOffset(999);
     transfer_func_PTBC_noRF->GetXaxis()->SetLabelSize(0);
+    transfer_func_PTBC_noRF->GetXaxis()->SetRangeUser(9.9e2,1e8);
     
-    transfer_func_PTBC_noRF->SetTitle("Transfer Function - PTBC");
+    transfer_func_PTBC_noRF->SetTitle("Transfer Function - Fission Chamber");
     transfer_func_PTBC_noRF->SetLineWidth(2);
-    transfer_func_PTBC_noRF->Draw(); //"HISTE"
+    transfer_func_PTBC_noRF->SetLineColor(1);
+    transfer_func_PTBC_noRF->Draw("]["); //"HISTE"
     transfer_func_PTBC_noRF->SetStats(0);
     gPad->SetLogx();
     gPad->SetLogy();
@@ -279,17 +283,18 @@ void plot_hists(){
     l[i]->AddEntry(transfer_func_mean_PTBC_5itr,"With Moderator Effects","l");
     transfer_func_mean_PTBC_5itr->SetLineColor(6);
     transfer_func_mean_PTBC_5itr->SetLineWidth(2);
-    transfer_func_mean_PTBC_5itr->Draw("SAME");
+    transfer_func_mean_PTBC_5itr->GetXaxis()->SetRangeUser(9.9e2,1e8);
+    transfer_func_mean_PTBC_5itr->Draw("][SAME");
 
     l[i]->SetMargin(0.4);
     l[i]->Draw();
 
     //Pad 2
     c[i]->cd(0);
-    p[i][1] = new TPad(Form("p_%d_1", i), Form("p_%d_1", i), 0., 0., 1., 0.35);
+    p[i][1] = new TPad(Form("p_%d_1", i), Form("p_%d_1", i), 0., 0., 1., 0.4);
     p[i][1]->SetFillColor(kWhite);
     p[i][1]->SetTopMargin(0.00001);
-    p[i][1]->SetBottomMargin(0.25);
+    p[i][1]->SetBottomMargin(0.3);
     p[i][1]->SetRightMargin(0.05);
     p[i][1]->SetBorderMode(0);
     p[i][1]->Draw();
@@ -302,17 +307,20 @@ void plot_hists(){
     residual_plot_PTBC->SetTitle("");
 
     // X Axis
-    residual_plot_PTBC->GetXaxis()->SetTitle("ToF (in ns)");
-    residual_plot_PTBC->GetXaxis()->SetTitleSize(0.1);
+    residual_plot_PTBC->GetXaxis()->SetTitle("ToF (in ns)");    
+    residual_plot_PTBC->GetXaxis()->SetTitleSize(0.12);
     residual_plot_PTBC->GetXaxis()->SetLabelOffset(0.01);
-    residual_plot_PTBC->GetXaxis()->SetTitleOffset(0.85); //decrease to move up
-    residual_plot_PTBC->GetXaxis()->SetLabelSize(0.07);
+    residual_plot_PTBC->GetXaxis()->SetTitleOffset(1.13); //decrease to move up
+    residual_plot_PTBC->GetXaxis()->SetLabelSize(0.12);
+    residual_plot_PTBC->GetXaxis()->SetRangeUser(9.9e2,1e8);
     // Y Axis
     residual_plot_PTBC->GetYaxis()->SetTitle("\% Difference");
     residual_plot_PTBC->GetYaxis()->SetTitleSize(0.1);
     residual_plot_PTBC->GetYaxis()->SetTitleOffset(0.38);
-    residual_plot_PTBC->GetYaxis()->SetLabelSize(0.07);
-    residual_plot_PTBC->Draw();
+    residual_plot_PTBC->GetYaxis()->SetLabelSize(0.09);
+    residual_plot_PTBC->GetYaxis()->SetNdivisions(8);
+    residual_plot_PTBC->SetLineColor(4);
+    residual_plot_PTBC->Draw("][");
     gPad->SetLogx();
 
     i++;
@@ -356,7 +364,7 @@ void plot_hists(){
     
     //Pad 1
     c[i]->cd(0);
-    p[i][0] = new TPad(Form("p_%d_0", i), Form("p_%d_0", i), 0., 0.35, 1., 1.);
+    p[i][0] = new TPad(Form("p_%d_0", i), Form("p_%d_0", i), 0., 0.4, 1., 1.);
     p[i][0]->SetFillColor(kWhite);
     p[i][0]->SetBottomMargin(0.00001);
     p[i][0]->SetRightMargin(0.05);
@@ -366,16 +374,20 @@ void plot_hists(){
 
     // Y Axis
     transfer_func_FIMG_noRF->GetYaxis()->SetTitle("Energy (in eV)");
-    transfer_func_FIMG_noRF->GetYaxis()->SetLabelSize(0.05);
+    transfer_func_FIMG_noRF->GetYaxis()->SetLabelSize(0.07);
     transfer_func_FIMG_noRF->GetYaxis()->SetTitleSize(0.06);
     transfer_func_FIMG_noRF->GetYaxis()->SetTitleOffset(0.65);
+    transfer_func_FIMG_noRF->GetYaxis()->SetNdivisions(8);
+    transfer_func_FIMG_noRF->GetYaxis()->SetRangeUser(1.01e-2,5e8);
     // X Axis
     transfer_func_FIMG_noRF->GetXaxis()->SetLabelOffset(999);
     transfer_func_FIMG_noRF->GetXaxis()->SetLabelSize(0);
+    transfer_func_FIMG_noRF->GetXaxis()->SetRangeUser(9.9e2,1e8);
     
-    transfer_func_FIMG_noRF->SetTitle("Transfer Function - FIMG");
+    transfer_func_FIMG_noRF->SetTitle("Transfer Function - Micromegas");
     transfer_func_FIMG_noRF->SetLineWidth(2);
-    transfer_func_FIMG_noRF->Draw(); //"HISTE"
+    transfer_func_FIMG_noRF->SetLineColor(1);
+    transfer_func_FIMG_noRF->Draw("]["); //"HISTE"
     transfer_func_FIMG_noRF->SetStats(0);
     gPad->SetLogx();
     gPad->SetLogy();
@@ -386,17 +398,18 @@ void plot_hists(){
     l[i]->AddEntry(transfer_func_mean_FIMG_5itr,"With Moderator Effects","l");
     transfer_func_mean_FIMG_5itr->SetLineColor(2);
     transfer_func_mean_FIMG_5itr->SetLineWidth(2);
-    transfer_func_mean_FIMG_5itr->Draw("SAME");
+    transfer_func_mean_FIMG_5itr->GetXaxis()->SetRangeUser(9.9e2,1e8);
+    transfer_func_mean_FIMG_5itr->Draw("][SAME");
 
     l[i]->SetMargin(0.4);
     l[i]->Draw();
 
     //Pad 2
     c[i]->cd(0);
-    p[i][1] = new TPad(Form("p_%d_1", i), Form("p_%d_1", i), 0., 0., 1., 0.35);
+    p[i][1] = new TPad(Form("p_%d_1", i), Form("p_%d_1", i), 0., 0., 1., 0.4);
     p[i][1]->SetFillColor(kWhite);
     p[i][1]->SetTopMargin(0.00001);
-    p[i][1]->SetBottomMargin(0.25);
+    p[i][1]->SetBottomMargin(0.3);
     p[i][1]->SetRightMargin(0.05);
     p[i][1]->SetBorderMode(0);
     p[i][1]->Draw();
@@ -410,16 +423,19 @@ void plot_hists(){
 
     // X Axis
     residual_plot_FIMG->GetXaxis()->SetTitle("ToF (in ns)");
-    residual_plot_FIMG->GetXaxis()->SetTitleSize(0.1);
+    residual_plot_FIMG->GetXaxis()->SetTitleSize(0.12);
     residual_plot_FIMG->GetXaxis()->SetLabelOffset(0.01);
-    residual_plot_FIMG->GetXaxis()->SetTitleOffset(0.85); //decrease to move up
-    residual_plot_FIMG->GetXaxis()->SetLabelSize(0.07);
+    residual_plot_FIMG->GetXaxis()->SetTitleOffset(1.13); //decrease to move up
+    residual_plot_FIMG->GetXaxis()->SetLabelSize(0.12);
+    residual_plot_FIMG->GetXaxis()->SetRangeUser(9.9e2,1e8);
     // Y Axis
     residual_plot_FIMG->GetYaxis()->SetTitle("\% Difference");
     residual_plot_FIMG->GetYaxis()->SetTitleSize(0.1);
     residual_plot_FIMG->GetYaxis()->SetTitleOffset(0.38);
-    residual_plot_FIMG->GetYaxis()->SetLabelSize(0.07);
-    residual_plot_FIMG->Draw();
+    residual_plot_FIMG->GetYaxis()->SetLabelSize(0.09);
+    residual_plot_FIMG->GetYaxis()->SetNdivisions(8);
+    residual_plot_FIMG->SetLineColor(4);
+    residual_plot_FIMG->Draw("][");
     gPad->SetLogx();
 }
 
